@@ -1,12 +1,28 @@
 [package]
-name = "pt"
+name = "libpt"
 version = "0.1.0"
 edition = "2021"
+authors = ["Christoph J. Scherr <software@cscherr.de>"]
+license = "GPL3"
+description = "my personal multitool"
+readme = "README.md"
+homepage = "https://git.cscherr.de/PlexSheep/pt"
+repository = "https://git.cscherr.de/PlexSheep/pt"
+keywords = ["cli", "python", "scriptable", "pyo3", "library"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [lib]
+name = "libpt"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
 name = "pt"
-crate-type = ["cdylib"]
+path = "src/bin/mod.rs"
 
 [dependencies]
+clap = "4.3.11"
+env_logger = "0.10.0"
+log = { version = "0.4.19", features = ["max_level_debug", "release_max_level_info"] }
 pyo3 = "0.18.1"
