@@ -24,5 +24,7 @@ path = "src/bin/mod.rs"
 [dependencies]
 clap = "4.3.11"
 env_logger = "0.10.0"
-log = { version = "0.4.19", features = ["max_level_debug", "release_max_level_info"] }
+gag = "1.0.0"
+log = { version = "0.4.19", features = ["max_level_trace", "release_max_level_trace"] }
 pyo3 = "0.18.1"
+testing_logger = "0.1.1"

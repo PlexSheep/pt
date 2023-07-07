@@ -13,48 +13,79 @@
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use std::{fmt, str::FromStr};
+use std::{
+    fmt,
+    sync::atomic::{AtomicBool, Ordering},
+};
 
-use log::{debug, error, info, trace, warn};
-
-use env_logger;
+use env_logger::{Env, Target};
+use log::{debug, error, info, trace, warn, Level};
 
 use pyo3::prelude::*;
-//// CONSTANTS ///////////////////////////////////////////////////////////////////////////////////////
+//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
-const DEFAULT_LOG_LEVEL: log::Level = log::Level::Info;
+pub const DEFAULT_LOG_LEVEL: Level = Level::Info;
+/// Register your level to this ENVAR to override the used level
+pub const LOGGER_ENV_KEY: &'static str = "LIBPT_LOGLEVEL";
+
+//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
+static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Logger for [`libpt`](crate::libpt)
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
+///
+/// ### Setting a [`Level`](log::Level)
+///
+/// To set a [`Level`](log::Level), you need to set the ENVAR `LIBPT_LOGLEVEL` to either of
+///
+/// - `Trace`
+/// - `Debug`
+/// - `Info`
+/// - `Warn`
+/// - `Error`
 #[pyclass]
-pub struct Logger {
-    /// keeps track of if the logger was initialized
-    pub initialized: bool,
-}
+pub struct Logger {}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 impl Logger {
     /// ## create a `Logger`
-    pub fn new(level: log::Level) -> Self {
-        let mut l = Logger { initialized: false };
-        l.init(level);
+    ///
+    /// Creates a new uninitialized [`Logger`] object.
+    pub fn new() -> Self {
+        let l = Logger {};
         l
     }
-    pub fn init(&mut self, level: log::Level) {
+    /// ## initializes the logger
+    ///
+    /// Will enable the logger to be used.
+    pub fn init() {
         // only init if no init has been performed yet
-        if self.initialized {
-            self.warn("trying to reinitialize the logger, ignoring");
+        if INITIALIZED.load(Ordering::Relaxed) {
+            warn!("trying to reinitialize the logger, ignoring");
             return;
+        } else {
+            let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
+            env_logger::init_from_env(env);
+            INITIALIZED.store(true, Ordering::Relaxed);
         }
-        #[allow(unused_imports)]
-        use log::log_enabled;
-        // TODO check if level is valid!
-        std::env::set_var("RUST_LOG", level.as_str());
-        env_logger::init();
-        self.initialized = true;
+    }
+
+    /// ## initializes the logger to log to a target
+    ///
+    /// Will enable the logger to be used.
+    pub fn init_target(test: bool, target: Target) {
+        // only init if no init has been performed yet
+        if INITIALIZED.load(Ordering::Relaxed) {
+            warn!("trying to reinitialize the logger, ignoring");
+            return;
+        } else {
+            let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
+            env_logger::Builder::from_env(env).is_test(test).target(target).init();
+            INITIALIZED.store(true, Ordering::Relaxed);
+        }
     }
 
     /// ## logging at [`Level::Error`]
@@ -99,17 +130,14 @@ impl Logger {
 impl Logger {
     /// ## Python version of [`new()`](Logger::new)
     #[new]
-    pub fn py_new(level: String) -> PyResult<Self> {
-        Ok(Self::new(log::Level::from_str(level.as_str()).expect(
-            format!("could not get log level for '{}'", level).as_str(),
-        )))
+    pub fn py_new() -> PyResult<Self> {
+        Ok(Logger::new())
     }
     /// ## Python version of [`init()`](Logger::init)
     #[pyo3(name = "init")]
-    pub fn py_init(&mut self, level: String) {
-        Self::init(self, log::Level::from_str(level.as_str()).expect(
-            format!("could not get log level for '{}'", level).as_str(),
-        ))
+    #[staticmethod]
+    pub fn py_init() {
+        Self::init()
     }
     /// ## Python version of [`error()`](Logger::error)
     #[pyo3(name = "error")]
@@ -142,7 +170,11 @@ impl Logger {
 impl fmt::Debug for Logger {
     /// ## Debug representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Logger")
+        write!(
+            f,
+            "Logger: {{initialized: {}}} ",
+            INITIALIZED.load(Ordering::Relaxed)
+        )
     }
 }
 
