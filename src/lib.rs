@@ -35,7 +35,7 @@ use pyo3::prelude::*;
 ///
 /// Always returns `true` if you can execute it.
 #[pyfunction]
-pub fn libpt_loaded() -> bool {
+pub fn is_loaded() -> bool {
     true
 }
 
@@ -50,12 +50,13 @@ fn py_logger(py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ## Python module: root
 ///
 /// This function is the entry point of [`PyO3`](pyo3). This is where the main module is built.
 #[pymodule]
-fn libpt(py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(libpt_loaded, m)?)?;
+fn _libpt(py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(is_loaded, m)?)?;
 
     // load logger module
     py_logger(py, m)?;

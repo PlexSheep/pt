@@ -15,12 +15,10 @@
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
-    io::Write,
     sync::atomic::{AtomicBool, Ordering},
 };
 
 use env_logger::{
-    fmt::{Formatter, Style},
     Env, Target, WriteStyle,
 };
 use log::{debug, error, info, trace, warn, Level};
@@ -29,7 +27,7 @@ use pyo3::prelude::*;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::Info;
-/// Register your level to this ENVAR to override the used level
+/// Register your level to this environment variable to override the used level
 pub const LOGGER_ENV_KEY: &'static str = "LIBPT_LOGLEVEL";
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +41,8 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 ///
 /// ### Setting a [`Level`](log::Level)
 ///
-/// To set a [`Level`](log::Level), you need to set the ENVAR `LIBPT_LOGLEVEL` to either of
+/// To set a [`Level`](log::Level), you need to set the environment variable `LIBPT_LOGLEVEL` 
+/// to either of:
 ///
 /// - `Trace`
 /// - `Debug`
@@ -54,6 +53,7 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 pub struct Logger {}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
+/// ## Main implementation
 impl Logger {
     /// ## create a `Logger`
     ///
@@ -138,6 +138,7 @@ impl Logger {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ## Implementation of the python interface
 #[pymethods]
 impl Logger {
     /// ## Python version of [`new()`](Logger::new)
@@ -150,6 +151,12 @@ impl Logger {
     #[staticmethod]
     pub fn py_init() {
         Self::init()
+    }
+    /// ## Python version of [`init_specialized()`](Logger::init_specialized)
+    #[pyo3(name = "init_specialized")]
+    #[staticmethod]
+    pub fn py_init_specialized(color: bool) {
+        Self::init_specialized(false, color, Target::Stdout)
     }
     /// ## Python version of [`error()`](Logger::error)
     #[pyo3(name = "error")]

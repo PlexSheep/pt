@@ -5,7 +5,8 @@
 // IMPORTS /////////////////////////////////////////////////////////////////////////////////////////
 use libpt;
 
+/// ## check if libpt is loaded
 #[test]
-fn loaded_libpt() {
-    assert!(libpt::libpt_loaded())
+fn test_libpt_is_loaded() {
+    assert!(libpt::is_loaded())
 }

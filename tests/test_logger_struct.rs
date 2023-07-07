@@ -30,6 +30,7 @@ mod test_logger_struct {
 
     use regex::Regex;
 
+    /// ## setup that's needed before testing the logger struct
     fn setup() {
         // we don't want to log messages during our tests!
         Logger::init_specialized(false, false, env_logger::Target::Stdout);
@@ -45,6 +46,9 @@ mod test_logger_struct {
     /// - [`Logger::info`]
     /// - [`Logger::warn`]
     /// - [`Logger::error`]
+    ///
+    /// After those methods have Successfully been executed, their outputs gets stored in a single
+    /// [`String`] and a [`Regex`] checks if we have five correctly formatted messages.
     #[test]
     fn test_log_basic() {
         std::env::set_var(LOGGER_ENV_KEY, "Trace");
@@ -62,12 +66,15 @@ mod test_logger_struct {
         print!("{}", combined);
 
         // too long, so i split into two lines.
+        // this matches the format of the env_logger perfectly, but make sure that color is off,
+        // else the ANSI escape sequences break this test
         let regex = Regex::new(concat!(
             r"(?m)\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z ",
             r"(TRACE|DEBUG|INFO|WARN|ERROR) +libpt::logger\] MSG"
         ))
         .unwrap();
 
+        // we have 5 log levels, therefore we should have 5 captures
         assert_eq!(regex.captures_iter(&combined).count(), 5);
     }
 
