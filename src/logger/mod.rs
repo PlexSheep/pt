@@ -15,10 +15,14 @@
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
+    io::Write,
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use env_logger::{Env, Target};
+use env_logger::{
+    fmt::{Formatter, Style},
+    Env, Target, WriteStyle,
+};
 use log::{debug, error, info, trace, warn, Level};
 
 use pyo3::prelude::*;
@@ -76,14 +80,22 @@ impl Logger {
     /// ## initializes the logger to log to a target
     ///
     /// Will enable the logger to be used.
-    pub fn init_target(test: bool, target: Target) {
+    pub fn init_specialized(test: bool, color: bool, target: Target) {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
             return;
         } else {
             let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
-            env_logger::Builder::from_env(env).is_test(test).target(target).init();
+            env_logger::Builder::from_env(env)
+                .is_test(test)
+                .target(target)
+                .write_style(if color {
+                    WriteStyle::Auto
+                } else {
+                    WriteStyle::Never
+                })
+                .init();
             INITIALIZED.store(true, Ordering::Relaxed);
         }
     }

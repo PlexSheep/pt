@@ -5,8 +5,8 @@
 ///
 /// Source: [users.rust-lang.org](https://users.rust-lang.org/t/how-to-test-functions-that-use-
 /// println/67188/5)
-macro_rules! assert_stdout_eq {
-    ($test:expr, $expected:literal) => {{
+macro_rules! get_stdout_for {
+    ($test:expr) => {{
         use gag::BufferRedirect;
         use std::io::Read;
 
@@ -18,7 +18,7 @@ macro_rules! assert_stdout_eq {
         buf.read_to_string(&mut output).unwrap();
         drop(buf);
 
-        assert_eq!(&output, $expected);
+        output
     }};
 }
 
@@ -28,9 +28,12 @@ macro_rules! assert_stdout_eq {
 mod test_logger_struct {
     use libpt::logger::*;
 
+    use regex::Regex;
+
     fn setup() {
         // we don't want to log messages during our tests!
-        Logger::init_target(false, env_logger::Target::Stdout)
+        Logger::init_specialized(false, false, env_logger::Target::Stdout);
+        println!()
     }
 
     /// ## Tests for basic logging
@@ -43,27 +46,29 @@ mod test_logger_struct {
     /// - [`Logger::warn`]
     /// - [`Logger::error`]
     #[test]
-    #[ignore]
     fn test_log_basic() {
         std::env::set_var(LOGGER_ENV_KEY, "Trace");
         setup();
         let l = Logger::new();
-        l.error("HELP");
-        assert_stdout_eq!(l.trace("hello world"),   "\u{1b}[0m\u{1b}[38;5;8m[\u{1b}[0m2023-07-07T1\
-            8:59:03Z \u{1b}[0m\u{1b}[36mTRACE\u{1b}[0m libpt::logger\u{1b}[0m\u{1b}[38;5;8m]\u{1b}[\
-            0m hello world\n");
-        assert_stdout_eq!(l.debug("hello world"),   "\u{1b}[0m\u{1b}[38;5;8m[\u{1b} [0m2023-07-07T1\
-            8:59:03Z \u{1b}[0m\u{1b}[34mDEBUG\u{1b}[0m libpt::logger\u{1b}[0m\u{1b}[38;5;8m]\u{1b}[\
-            0m hello world\n");
-        assert_stdout_eq!(l.info("hello world"),   "\u{1b}[0m\u{1b}[38;5;8m[\u{1b} [0m2023-07-07T1\
-            8:59:03Z \u{1b}[0m\u{1b}[34mINFO\u{1b}[0m libpt::logger\u{1b}[0m\u{1b}[38;5;8m]\u{1b}[\
-            0m hello world\n");
-        assert_stdout_eq!(l.warn("hello world"),   "\u{1b}[0m\u{1b}[38;5;8m[\u{1b} [0m2023-07-07T1\
-            8:59:03Z \u{1b}[0m\u{1b}[34mWARN\u{1b}[0m libpt::logger\u{1b}[0m\u{1b}[38;5;8m]\u{1b}[\
-            0m hello world\n");
-        assert_stdout_eq!(l.error("hello world"),   "\u{1b}[0m\u{1b}[38;5;8m[\u{1b} [0m2023-07-07T1\
-            8:59:03Z \u{1b}[0m\u{1b}[34mERROR\u{1b}[0m libpt::logger\u{1b}[0m\u{1b}[38;5;8m]\u{1b}[\
-            0m hello world\n");
+        let trace_out = get_stdout_for!(l.trace("MSG"));
+        let debug_out = get_stdout_for!(l.debug("MSG"));
+        let info_out = get_stdout_for!(l.info("MSG"));
+        let warn_out = get_stdout_for!(l.warn("MSG"));
+        let error_out = get_stdout_for!(l.error("MSG"));
+        let combined = format!(
+            "{}{}{}{}{}",
+            trace_out, debug_out, info_out, warn_out, error_out
+        );
+        print!("{}", combined);
+
+        // too long, so i split into two lines.
+        let regex = Regex::new(concat!(
+            r"(?m)\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z ",
+            r"(TRACE|DEBUG|INFO|WARN|ERROR) +libpt::logger\] MSG"
+        ))
+        .unwrap();
+
+        assert_eq!(regex.captures_iter(&combined).count(), 5);
     }
 
     #[test]
