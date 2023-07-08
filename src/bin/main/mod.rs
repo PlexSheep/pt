@@ -11,11 +11,12 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::process::exit;
-
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use libpt::networking::monitoring::uptime;
 use libpt::logger;
 
+// we want the log macros in any case
+#[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 
 use env_logger;
@@ -26,8 +27,6 @@ mod args;
 use args::*;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
-/// Exit code: Bad command line argument
-const EXIT_BAD_ARG: i32 = 1;
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,27 +48,35 @@ fn main() {
 
     let cli = Cli::parse();
     // set up our logger to use the given verbosity
-    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
+    env_logger::Builder::new()
+        .filter_level(cli.verbose.log_level_filter())
+        .init();
 
     trace!("started the main function");
-    trace!("{:?}", cli);
+    trace!("{:?}", &cli);
 
-    match cli.command {
-        Commands::Net { command } => {
-            net(command)
-        }
+    match cli.clone().command {
+        Commands::Net { command } => net(&cli, command),
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ## Process `Net` subcommands
-fn net(command: NetCommands) {
+fn net(cli: &Cli, command: NetCommands) {
     match command {
-        NetCommands::Monitor(args) => {
-            dbg!(args);
+        NetCommands::Monitor {
+            repeat,
+            percentage_for_success,
+            additional_domains,
+        } => {
+            let status: uptime::UptimeStatus = uptime::check_status(
+                additional_domains,
+                percentage_for_success,
+            );
+            let _verbose = cli.verbose.log_level().is_some();
+            println!("{}", uptime::display_uptime_status(status));
+
         }
-        NetCommands::Discover(args) => {
-            dbg!(args);
-        }
+        NetCommands::Discover {} => {}
     }
 }

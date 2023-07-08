@@ -17,14 +17,18 @@
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use clap::{Args, Parser, Subcommand};
 
+use clap_num::number_range;
+
 use clap_verbosity_flag::Verbosity;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+/// short about section displayed in help
 const ABOUT_ROOT: &'static str = r##"
 Personal multi tool
 
     A collection of tools made for personal use
 "##;
+/// longer about section displayed in help, is combined with [the short help](ABOUT_ROOT)
 static LONG_ABOUT_ROOT: &'static str = r##"
 
     libpt is a personal general purpose library, offering this executable, a python module and a
@@ -33,7 +37,7 @@ static LONG_ABOUT_ROOT: &'static str = r##"
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Main struct for parsing CLI arguments
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, Parser)]
 #[command(
     author, 
     version, 
@@ -57,14 +61,7 @@ pub struct Cli {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#[derive(Debug, Args)]
-pub struct NetMonitorArgs {
-    #[clap(short)]
-    test: bool,
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#[derive(Debug, Args)]
+#[derive(Debug, Clone, Args)]
 pub struct NetDiscoverArgs {
     #[clap(short)]
     test: bool,
@@ -72,7 +69,7 @@ pub struct NetDiscoverArgs {
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
 /// # Top level commands
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum Commands {
     /// networking commands
@@ -83,14 +80,28 @@ pub enum Commands {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum NetCommands {
-    /// monitoring
-    Monitor(NetMonitorArgs),
-    ///
-    Discover(NetDiscoverArgs),
+    /// monitor your network
+    Monitor {
+        #[clap(short, long)]
+        repeat: bool,
+
+        #[clap(short, long, default_value_t = 100, value_parser=max100)]
+        percentage_for_success: u8,
+
+        #[arg(default_values_t = ["https://cloudflare.com".to_string()])]
+        additional_domains: Vec<String>,
+
+    },
+    /// discover hosts in your network
+    Discover {
+
+    }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -99,3 +110,7 @@ pub enum NetCommands {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+/// custom value parser, only allow 0 to 100
+fn max100(s: &str) -> Result<u8, String> {
+    number_range(s, 0, 100)
+}
