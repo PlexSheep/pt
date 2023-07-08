@@ -9,7 +9,7 @@ readme = "README.md"
 homepage = "https://git.cscherr.de/PlexSheep/pt"
 repository = "https://git.cscherr.de/PlexSheep/pt"
 keywords = ["cli", "python", "scriptable", "pyo3", "library"]
-categories = ["command-line-utilities"]
+categories = ["command-line-utilities", "development-tools", "development-tools::ffi"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
