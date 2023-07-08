@@ -28,6 +28,8 @@ pub mod common;
 pub mod bin;
 /// logger used by libpt
 pub mod logger;
+/// networking tools
+pub mod networking;
 use crate::logger::Logger;
 
 use pyo3::prelude::*;
