@@ -30,8 +30,7 @@ pub use crate::get_stdout_for;
 ///
 /// This is especially useful when testing loggers or other frontend CLI functions.
 ///
-/// Inspiration: [users.rust-lang.org](https://users.rust-lang.org/t/how-to-test-functions-that-use-
-/// println/67188/5)
+/// Inspiration: [users.rust-lang.org](https://users.rust-lang.org/t/how-to-test-functions-that-use-println/67188/5)
 #[macro_export]
 macro_rules! get_stdout_for {
     ($test:expr) => {{

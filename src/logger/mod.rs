@@ -1,14 +1,14 @@
 //! # A specialized Logger for [`libpt`](crate)
 //!
-//! For the library version, only the basic [`log`](crate::log) is used, so that it is possible for
-//! the end user to use the [`log`](crate::log) frontend they desire.
+//! For the library version, only the basic [`log`] is used, so that it is possible for
+//! the end user to use the [`log`] frontend they desire.
 //!
 //! I did however decide to create a [`Logger`] struct. This struct is mainly intended to be used
-//! with the python module of [`libpt`], but is still just as usable in other contexts.
+//! with the python module of [`libpt`](crate), but is still just as usable in other contexts.
 //!
 //! ## Technologies used for logging:
-//! - [`log`](crate::log): base logging crate
-//! - [`env_logger`](crate::env_logger): used for the executable
+//! - [`log`]: base logging crate
+//! - [`env_logger`]: used for the executable
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ pub const LOGGER_ENV_KEY: &'static str = "LIBPT_LOGLEVEL";
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
-/// ## Logger for [`libpt`](crate::libpt)
+/// ## Logger for [`libpt`](crate)
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
