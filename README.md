@@ -16,17 +16,25 @@ So what? I don't care. Besides, there is not enough names to name everything uni
 - [`maturin`](https://maturin.rs) - `pip install maturin`
 
 ## Compiling & Installing from source
-If you only want the rust library, you can simply build it with `cargo build`.
+If you only want the rust library, you can simply build it with `cargo build`. Add it to your
+project like any other local dependency.
+
 If you want to use the python variant too, you need to compile with maturing.
 
 - Install in `venv`: `maturin develop --release`
 - Install in system: `maturin build --release && pip install target/wheels/libpt-x.x.x-*`
 
 ## Installing from [crates.io](https://crates.io)
-`libpt` has not yet been packaged for [crates.io](https://crates.io).
+`libpt` has been packaged for [crates.io](https://crates.io/crates/libpt).
+
+You can add the library to your project with `cargo add libpt`.
 
 ## Installing from my personal package registry
-`libpt` has not yet been packaged for [git.cscherr.de](https://git.cscherr.de).
+`libpt` has been packaged for [git.cscherr.de](https://git.cscherr.de).
+
+You can add the registry to your `config.toml` and then `cargo add libpt`
+
+[Package](https://git.cscherr.de/PlexSheep/-/packages/cargo/libpt/)
 
 ## Testing
 Testing needs to be done separately for the rust and python parts:
