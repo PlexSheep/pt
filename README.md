@@ -13,6 +13,9 @@ So what? I don't care. Besides, there is not enough names to name everything uni
 # compiling
 TBD
 
+# installing
+TBD
+
 # Documentation
 TBD
 

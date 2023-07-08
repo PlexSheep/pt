@@ -22,6 +22,8 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+/// contains useful code, such as macros, for general use
+pub mod common;
 /// contains code specific to the executable
 pub mod bin;
 /// logger used by libpt

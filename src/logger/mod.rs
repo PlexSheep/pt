@@ -18,9 +18,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use env_logger::{
-    Env, Target, WriteStyle,
-};
+use env_logger::{Env, Target, WriteStyle};
 use log::{debug, error, info, trace, warn, Level};
 
 use pyo3::prelude::*;
@@ -41,7 +39,7 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 ///
 /// ### Setting a [`Level`](log::Level)
 ///
-/// To set a [`Level`](log::Level), you need to set the environment variable `LIBPT_LOGLEVEL` 
+/// To set a [`Level`](log::Level), you need to set the environment variable `LIBPT_LOGLEVEL`
 /// to either of:
 ///
 /// - `Trace`
@@ -72,7 +70,11 @@ impl Logger {
             return;
         } else {
             let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
-            env_logger::init_from_env(env);
+            let res = env_logger::Builder::from_env(env)
+                .try_init();
+            if res.is_err() {
+                eprintln!("could not init logger: {}", res.unwrap_err());
+            }
             INITIALIZED.store(true, Ordering::Relaxed);
         }
     }
@@ -83,11 +85,11 @@ impl Logger {
     pub fn init_specialized(test: bool, color: bool, target: Target) {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
-            warn!("trying to reinitialize the logger, ignoring");
+            eprintln!("trying to reinitialize the logger, ignoring");
             return;
         } else {
             let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
-            env_logger::Builder::from_env(env)
+            let res = env_logger::Builder::from_env(env)
                 .is_test(test)
                 .target(target)
                 .write_style(if color {
@@ -95,7 +97,10 @@ impl Logger {
                 } else {
                     WriteStyle::Never
                 })
-                .init();
+                .try_init();
+            if res.is_err() {
+                eprintln!("could not init logger: {}", res.unwrap_err());
+            }
             INITIALIZED.store(true, Ordering::Relaxed);
         }
     }
