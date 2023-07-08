@@ -45,6 +45,8 @@ Testing needs to be done separately for the rust and python parts:
 ## Documentation
 The documentation can be automatically generated with `cargo doc --open`.
 
+An up to date version of the Documentation can be found [here](https://docs.rs/libpt/)
+
 ## Mirrored
 The origin of this repository is [git.cscherr.de](https://git.cscherr.de/PlexSheep/pt)
 
