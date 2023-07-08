@@ -41,7 +41,6 @@ The documentation can be automatically generated with `cargo doc --open`.
 The origin of this repository is [git.cscherr.de](https://git.cscherr.de/PlexSheep/pt)
 
 It is mirrored to:
-- [GitHub](https://github.com/PlexSheep/pt)
 - [Codeberg](https://codeberg.org/PlexSheep/pt)
 
 
