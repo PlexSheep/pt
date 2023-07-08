@@ -1,0 +1,101 @@
+//! # args module
+//!
+//! The args module of pt is used to parse commandline arguments. For this, it makes use of
+//! [`clap`].
+
+//// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
+// we want docs
+#![warn(missing_docs)]
+#![warn(rustdoc::missing_crate_level_docs)]
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// we want Debug everywhere.
+#![warn(missing_debug_implementations)]
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// enable clippy's extra lints, the pedantic version
+#![warn(clippy::pedantic)]
+
+//// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use clap::{Args, Parser, Subcommand};
+
+use clap_verbosity_flag::Verbosity;
+
+//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+const ABOUT_ROOT: &'static str = r##"
+Personal multi tool
+
+    A collection of tools made for personal use
+"##;
+static LONG_ABOUT_ROOT: &'static str = r##"
+
+    libpt is a personal general purpose library, offering this executable, a python module and a
+    dynamic library.
+"##;
+
+//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
+/// ## Main struct for parsing CLI arguments
+#[derive(Debug, Parser)]
+#[command(
+    author, 
+    version, 
+    about = ABOUT_ROOT, 
+    long_about = format!("{}{}", ABOUT_ROOT ,LONG_ABOUT_ROOT),
+    help_template = 
+r#"libpt: {version}{about-section}Author:
+{author-with-newline}
+{usage-heading} {usage}{all-args}{tab}"#
+    )]
+pub struct Cli {
+    /// set a verbosity, multiple allowed (f.e. -vvv)
+    #[command(flatten)]
+    pub verbose: Verbosity,
+
+    /// choose a subcommand
+    ///
+    ///
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Args)]
+pub struct NetMonitorArgs {
+    #[clap(short)]
+    test: bool,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Args)]
+pub struct NetDiscoverArgs {
+    #[clap(short)]
+    test: bool,
+}
+
+//// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
+/// # Top level commands
+#[derive(Debug, Subcommand)]
+#[non_exhaustive]
+pub enum Commands {
+    /// networking commands
+    Net {
+        #[command(subcommand)]
+        command: NetCommands,
+    },
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Subcommand)]
+#[non_exhaustive]
+pub enum NetCommands {
+    /// monitoring
+    Monitor(NetMonitorArgs),
+    ///
+    Discover(NetDiscoverArgs),
+}
+
+//// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
+
+//// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
+
+//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
+
+//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////

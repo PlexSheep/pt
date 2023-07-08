@@ -1,12 +1,6 @@
-//! # very short description
+//! # Main executable of pt
 //!
-//! Short description
-//!
-//! Details
-//!
-//! ## Section 1
-//!
-//! ## Section 2
+//! This module contains all code specific to the executable version of [`libpt`]: `pt`.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -17,9 +11,23 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
+use std::process::exit;
+
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use libpt::logger;
+
+use log::{debug, error, info, trace, warn};
+
+use env_logger;
+
+use clap::Parser;
+
+mod args;
+use args::*;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+/// Exit code: Bad command line argument
+const EXIT_BAD_ARG: i32 = 1;
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,5 +42,34 @@
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+/// ## Main function of the `pt` binary
+fn main() {
+    #[cfg(debug_assertions)]
+    std::env::set_var(logger::LOGGER_ENV_KEY, "trace");
+
+    let cli = Cli::parse();
+    // set up our logger to use the given verbosity
+    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
+
+    trace!("started the main function");
+    trace!("{:?}", cli);
+
+    match cli.command {
+        Commands::Net { command } => {
+            net(command)
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ## Process `Net` subcommands
+fn net(command: NetCommands) {
+    match command {
+        NetCommands::Monitor(args) => {
+            dbg!(args);
+        }
+        NetCommands::Discover(args) => {
+            dbg!(args);
+        }
+    }
+}

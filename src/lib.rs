@@ -7,25 +7,21 @@
 //! - python module (with [`PyO3`](pyo3))
 //! - executable (as `pt`)
 //!
-//! For more info on the linkage types, please refer to the 
+//! For more info on the linkage types, please refer to the
 //! [rust reference](https://doc.rust-lang.org/reference/linkage.html).
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
 #![warn(missing_docs)]
 #![warn(rustdoc::missing_crate_level_docs)]
-
 // we want Debug everywhere. This is a library and there will be many bugs.
 #![warn(missing_debug_implementations)]
-
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 /// contains useful code, such as macros, for general use
 pub mod common;
-/// contains code specific to the executable
-pub mod bin;
 /// logger used by libpt
 pub mod logger;
 /// networking tools

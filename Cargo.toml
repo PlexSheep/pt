@@ -19,10 +19,11 @@ crate-type = ["cdylib", "rlib"]
 
 [[bin]]
 name = "pt"
-path = "src/bin/mod.rs"
+path = "src/bin/main/mod.rs"
 
 [dependencies]
-clap = "4.3.11"
+clap = { version = "4.3.11", features = ["derive"] }
+clap-verbosity-flag = "2.0.1"
 env_logger = "0.10.0"
 gag = "1.0.0"
 log = { version = "0.4.19", features = ["max_level_trace", "release_max_level_trace"] }
