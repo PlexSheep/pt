@@ -47,14 +47,14 @@ macro_rules! print_divider {
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-/// python interface for [`divider`], can also be used with rust
+/// python interface for [`divider!`], can also be used with rust
 #[pyfunction]
 pub fn divider() -> String {
     divider!()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// python interface for [`print_divider`], can also be used with rust
+/// python interface for [`print_divider!`], can also be used with rust
 #[pyfunction]
 pub fn print_divider() {
     print_divider!()

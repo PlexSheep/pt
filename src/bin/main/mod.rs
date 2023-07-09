@@ -47,7 +47,6 @@ pub fn main() {
         // set up our logger to use the given verbosity
         env_logger::Builder::new()
             .filter_module("libpt", cli.verbose.log_level_filter())
-            .format_target(false)
             .init();
     }
     else {
