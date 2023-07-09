@@ -30,8 +30,6 @@ use std::time::SystemTime;
 
 use pyo3::prelude::*;
 
-use signal_hook::consts::SIGINT;
-
 use crate::divider;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -289,17 +287,18 @@ pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, in
 /// `KeyboardInterrupt` exception.
 #[pyfunction]
 #[pyo3(name = "continuous_uptime_monitor")]
-pub unsafe fn py_continuous_uptime_monitor(
+pub fn py_continuous_uptime_monitor(
+    py: Python,
     success_ratio_target: u8,
     urls: Vec<String>,
     interval: u64,
-) {
+) -> PyResult<()>{
     // execute the function in a different thread
     let _th = std::thread::spawn(move || {
         continuous_uptime_monitor(success_ratio_target, urls, interval);
     });
-    // while we dont receive a SIGINT, just go on and check every once in a while
-    while pyo3::ffi::PyErr_CheckSignals() != SIGINT {
+    loop {
+        Python::check_signals(py)?;
         std::thread::sleep(std::time::Duration::from_millis(100))
     }
 }
