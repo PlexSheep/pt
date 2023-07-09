@@ -25,6 +25,11 @@ If you want to use the python variant too, you need to compile with maturing.
 - Install in `venv`: `maturin develop --release`
 - Install in system: `maturin build --release && pip install target/wheels/libpt-x.x.x-*`
 
+## Installing from [pypi](https://pypi.org)
+`libpt` has been packaged for [pypi.org](https://pypi.org/project/libpt/).
+
+You can install it with `pip install libpt`
+
 ## Installing from [crates.io](https://crates.io)
 `libpt` has been packaged for [crates.io](https://crates.io/crates/libpt).
 

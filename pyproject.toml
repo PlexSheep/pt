@@ -4,12 +4,19 @@ build-backend = "maturin"
 
 [project]
 name = "libpt"
+readme = "README.md"
 requires-python = ">=3.7"
+authors = [{ name = "Christoph J. Scherr", email = "software@cscherr.de" }]
+license = { file = "LICENSE" }
+keywords = ["pyo3"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+[project.urls]
+Homepage = "https://git.cscherr.de/PlexSheep/pt"
 
 
 [tool.maturin]
