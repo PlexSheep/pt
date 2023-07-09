@@ -3,10 +3,10 @@
 /// These tests will not go very in depth
 
 // IMPORTS /////////////////////////////////////////////////////////////////////////////////////////
-use libpt;
+use pt;
 
-/// ## check if libpt is loaded
+/// ## check if pt is loaded
 #[test]
-fn test_libpt_is_loaded() {
-    assert!(libpt::is_loaded())
+fn test_pt_is_loaded() {
+    assert!(pt::is_loaded())
 }

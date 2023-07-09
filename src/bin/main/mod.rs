@@ -1,6 +1,6 @@
 //! # Main executable of pt
 //!
-//! This module contains all code specific to the executable version of [`libpt`]: [`pt`](crate).
+//! This module contains all code specific to the executable version of [`pt`]: [`pt`](crate).
 //!
 //!
 
@@ -14,7 +14,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use libpt::networking::monitoring::uptime;
+use pt::networking::monitoring::uptime;
 
 // we want the log macros in any case
 #[allow(unused_imports)]
@@ -46,13 +46,13 @@ pub fn main() {
     if cli.log_meta {
         // set up our logger to use the given verbosity
         env_logger::Builder::new()
-            .filter_module("libpt", cli.verbose.log_level_filter())
+            .filter_module("pt", cli.verbose.log_level_filter())
             .init();
     }
     else {
         // set up our logger to use the given verbosity
         env_logger::Builder::new()
-            .filter_module("libpt", cli.verbose.log_level_filter())
+            .filter_module("pt", cli.verbose.log_level_filter())
             .format_level(false)
             .format_target(false)
             .format_timestamp(None)

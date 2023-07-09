@@ -14,7 +14,7 @@ categories = ["command-line-utilities", "development-tools", "development-tools:
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "libpt"
+name = "pt"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]

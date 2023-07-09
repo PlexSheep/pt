@@ -1,10 +1,10 @@
-//! # Tests for libpt::logger::Logger
+//! # Tests for pt::logger::Logger
 //!
 //! Note: the module uses a global variable to store if the thread has 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Tests for basic logging functionality
-use libpt::logger::*;
-use libpt::common::macros::get_stdout_for;
+use pt::logger::*;
+use pt::common::macros::get_stdout_for;
 
 use regex::Regex;
 
@@ -52,7 +52,7 @@ fn test_log_basic() {
     // else the ANSI escape sequences break this test
     let regex = Regex::new(concat!(
         r"(?m)\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z ",
-        r"(TRACE|DEBUG|INFO|WARN|ERROR) +libpt::logger\] MSG"
+        r"(TRACE|DEBUG|INFO|WARN|ERROR) +pt::logger\] MSG"
     ))
     .unwrap();
 
