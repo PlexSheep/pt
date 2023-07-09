@@ -82,7 +82,11 @@ impl Logger {
     /// ## initializes the logger to log to a target
     ///
     /// Will enable the logger to be used.
-    pub fn init_specialized(test: bool, color: bool, target: Target) {
+    pub fn init_specialized(show_module: bool, test: bool, color: bool, target: Option<Target>) {
+        let target = match target {
+            Some(t) => t,
+            None => Target::Stdout,
+        };
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             eprintln!("trying to reinitialize the logger, ignoring");
@@ -97,6 +101,7 @@ impl Logger {
                 } else {
                     WriteStyle::Never
                 })
+                .format_target(show_module)
                 .try_init();
             if res.is_err() {
                 eprintln!("could not init logger: {}", res.unwrap_err());
@@ -155,13 +160,13 @@ impl Logger {
     #[pyo3(name = "init")]
     #[staticmethod]
     pub fn py_init() {
-        Self::init()
+        Self::init_specialized(false, false, true, None)
     }
     /// ## Python version of [`init_specialized()`](Logger::init_specialized)
     #[pyo3(name = "init_specialized")]
     #[staticmethod]
     pub fn py_init_specialized(color: bool) {
-        Self::init_specialized(false, color, Target::Stdout)
+        Self::init_specialized(false, false, color, None)
     }
     /// ## Python version of [`error()`](Logger::error)
     #[pyo3(name = "error")]

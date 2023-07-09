@@ -14,7 +14,7 @@ use regex::Regex;
 fn setup() {
     // we don't want to log messages during our tests!
     std::env::set_var(LOGGER_ENV_KEY, "Trace");
-    Logger::init_specialized(false, false, env_logger::Target::Stdout);
+    Logger::init_specialized(true, false, false, None);
     println!()
 }
 
