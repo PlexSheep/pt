@@ -1,7 +1,7 @@
 //! # monitor your network uptime
 //!
 //! This method offers a way to monitor your networks/hosts uptime. This is achieved by making
-//! https requests to a given list of
+//! HTTPS requests to a given list of
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -14,7 +14,7 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::{fmt, str::FromStr};
+use std::{fmt, str::FromStr, time::Duration};
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 // we want the log macros in any case
@@ -22,6 +22,11 @@ use std::{fmt, str::FromStr};
 use log::{debug, error, info, trace, warn};
 
 use reqwest::{self, Url};
+
+use humantime::{format_duration, format_rfc3339};
+use std::time::SystemTime;
+
+use crate::divider;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +78,7 @@ impl UptimeStatus {
                 warn!("Invalid URL: '{}", s);
             }
         }
+        status.urls.dedup();
 
         status.check();
 
@@ -85,7 +91,11 @@ impl UptimeStatus {
     pub fn check(&mut self) {
         self.reachable = 0;
         self.urls.iter().for_each(|url| {
-            let response = reqwest::blocking::get(url.clone());
+            let client = reqwest::blocking::Client::builder()
+                .timeout(Duration::from_millis(2000))
+                .build()
+                .expect("could not build a client for https requests");
+            let response = client.get(url.clone()).send();
             if response.is_ok() {
                 self.reachable += 1
             }
@@ -117,9 +127,10 @@ impl UptimeStatus {
             return;
         }
         let ratio: f32 = (self.reachable as f32) / (self.urls.len() as f32) * 100f32;
-        debug!("calculated success_ratio: {}", ratio);
+        trace!("calculated success_ratio: {}", ratio);
         self.success_ratio = ratio.floor() as u8;
         self.success = self.success_ratio >= self.success_ratio_target;
+        trace!("calculated success as: {}", self.success)
     }
 }
 
@@ -160,5 +171,103 @@ impl fmt::Display for UptimeStatus {
 }
 
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
+/// ## Uptime monitor
+///
+/// This function continuously monitors the uptime of your host/network
+pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64) {
+    if urls.len() == 0 {
+        error!("No URLs provided. There is nothing to monitor.");
+        return;
+    }
+
+    let interval = std::time::Duration::from_millis(interval);
+    let mut last_downtime: Option<SystemTime> = None;
+    let mut last_uptime: Option<SystemTime> = None;
+    let mut status = UptimeStatus::new(success_ratio_target, &urls);
+    let mut last_was_up: bool = false;
+    let mut last_ratio: u8 = status.success_ratio;
+    loop {
+        if !status.success {
+            if last_was_up {
+                display_uptime_status("fail", last_uptime, last_downtime, &status)
+            }
+            last_downtime = Some(SystemTime::now());
+            last_was_up = false;
+        } else if status.success_ratio < 100 {
+            if status.success_ratio != last_ratio {
+                let msg = format!(
+                    "uptime check: not all urls are reachable ({}%)",
+                    status.success_ratio
+                );
+                display_uptime_status(&msg, last_uptime, last_downtime, &status)
+            }
+            last_uptime = Some(SystemTime::now());
+            last_was_up = true;
+        } else {
+            if !last_was_up {
+                display_uptime_status("success", last_uptime, last_downtime, &status)
+            }
+            last_uptime = Some(SystemTime::now());
+            last_was_up = true;
+        }
+
+        last_ratio = status.success_ratio;
+        std::thread::sleep(interval);
+        status.check();
+    }
+}
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+fn display_uptime_status(
+    msg: &str,
+    last_uptime: Option<SystemTime>,
+    last_downtime: Option<SystemTime>,
+    status: &UptimeStatus,
+) {
+    // I know it's weird that this has two spaces too much, but somehow just the tabs is missing
+    // two spaces.
+    info!("uptime check:      {}", msg);
+    info!(
+        "last uptime:       {}",
+        match_format_time(last_uptime)
+    );
+    info!(
+        "last downtime:     {}",
+        match_format_time(last_downtime)
+    );
+    info!(
+        "since downtime:    {}",
+        match_format_duration_since(last_downtime)
+    );
+    info!(
+        "since uptime:      {}",
+        match_format_duration_since(last_uptime)
+    );
+    debug!("\n{}", status);
+    info!("{}", divider!());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Returns "None" if the given [Option] is [None](Option::None). Otherwise, returns the time stamp
+/// formatted according to rfc3999.
+fn match_format_time(time: Option<SystemTime>) -> String {
+    match time {
+        Some(time) => format_rfc3339(time).to_string(),
+        None => String::from("None"),
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Returns "None" if the given [Option] is [None](Option::None). Otherwise, returns duration since
+/// that time in a human readable format.
+fn match_format_duration_since(time: Option<SystemTime>) -> String {
+    match time {
+        Some(time) => format_duration(
+            SystemTime::now()
+                .duration_since(time)
+                .expect("could not calculate elapsed time"),
+        )
+        .to_string(),
+        None => String::from("None"),
+    }
+}

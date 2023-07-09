@@ -47,10 +47,21 @@ fn main() {
     std::env::set_var(logger::LOGGER_ENV_KEY, "trace");
 
     let cli = Cli::parse();
-    // set up our logger to use the given verbosity
-    env_logger::Builder::new()
-        .filter_level(cli.verbose.log_level_filter())
-        .init();
+    if cli.log_meta {
+        // set up our logger to use the given verbosity
+        env_logger::Builder::new()
+            .filter_module("libpt", cli.verbose.log_level_filter())
+            .init();
+    }
+    else {
+        // set up our logger to use the given verbosity
+        env_logger::Builder::new()
+            .filter_module("libpt", cli.verbose.log_level_filter())
+            .format_level(false)
+            .format_target(false)
+            .format_timestamp(None)
+            .init();
+    }
 
     trace!("started the main function");
     trace!("{:?}", &cli);
@@ -84,12 +95,7 @@ fn net(cli: &Cli, command: NetCommands) {
             }
             let _verbose = cli.verbose.log_level().is_some();
             if repeat > 0 {
-                loop {
-                    let status = uptime::UptimeStatus::new(success_ratio, &urls);
-                    println!("{}", status);
-                    std::thread::sleep(std::time::Duration::from_secs(repeat));
-
-                }
+                uptime::continuous_uptime_monitor(success_ratio, urls, repeat * 1000);
             } else {
                     let status = uptime::UptimeStatus::new(success_ratio, &urls);
                     println!("{}", status);

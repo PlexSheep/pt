@@ -19,7 +19,7 @@ use clap::{Parser, Subcommand};
 
 use clap_num::number_range;
 
-use clap_verbosity_flag::Verbosity;
+use clap_verbosity_flag::{Verbosity, InfoLevel};
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// short about section displayed in help
@@ -51,7 +51,11 @@ r#"libpt: {version}{about-section}Author:
 pub struct Cli {
     /// set a verbosity, multiple allowed (f.e. -vvv)
     #[command(flatten)]
-    pub verbose: Verbosity,
+    pub verbose: Verbosity<InfoLevel>,
+
+    /// show logger meta
+    #[arg(short, long)]
+    pub log_meta: bool,
 
     /// choose a subcommand
     #[command(subcommand)]

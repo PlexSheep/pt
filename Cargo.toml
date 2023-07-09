@@ -27,6 +27,7 @@ clap-num = "1.0.2"
 clap-verbosity-flag = "2.0.1"
 env_logger = "0.10.0"
 gag = "1.0.0"
+humantime = "2.1.0"
 log = { version = "0.4.19", features = ["max_level_trace", "release_max_level_trace"] }
 num = "0.4.0"
 pyo3 = "0.18.1"
