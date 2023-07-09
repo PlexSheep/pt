@@ -12,7 +12,6 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use libpt::logger;
 use libpt::networking::monitoring::uptime;
 
 // we want the log macros in any case
@@ -43,9 +42,6 @@ use args::*;
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 /// ## Main function of the `pt` binary
 fn main() {
-    #[cfg(debug_assertions)]
-    std::env::set_var(logger::LOGGER_ENV_KEY, "trace");
-
     let cli = Cli::parse();
     if cli.log_meta {
         // set up our logger to use the given verbosity

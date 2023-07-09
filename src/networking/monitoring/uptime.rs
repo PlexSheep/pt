@@ -47,16 +47,16 @@ pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
 /// [`UptimeStatus`] describes the result of an uptime check.
 pub struct UptimeStatus {
     /// true if the [`UptimeStatus`] is considered successful
-    success: bool,
+    pub success: bool,
     /// the percentage of reachable urls out of the total urls
-    success_ratio: u8,
+    pub success_ratio: u8,
     /// the percentage of reachable urls out of the total urls that need to be reachable in order
     /// for this [`UptimeStatus`] to be considered a success.
-    success_ratio_target: u8,
-    /// the number of reachable [`urls`]
-    reachable: usize,
-    /// which urls to check in [`check()`]
-    urls: Vec<Url>,
+    pub success_ratio_target: u8,
+    /// the number of reachable [`urls`](UptimeStatus::urls)
+    pub reachable: usize,
+    /// which urls to check in [`check()`](UptimeStatus::check)
+    pub urls: Vec<Url>,
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -87,12 +87,15 @@ impl UptimeStatus {
 
     /// ## check for success with the given urls
     ///
-    /// Makes the actual https requests and updates the success fields.
+    /// Makes the actual https requests and updates fields accordingly.
+    ///
+    /// Note: Blocking execution for all requests, timeout is set to
+    /// [REQUEST_TIMEOUT](crate::networking::REQUEST_TIMEOUT).
     pub fn check(&mut self) {
         self.reachable = 0;
         self.urls.iter().for_each(|url| {
             let client = reqwest::blocking::Client::builder()
-                .timeout(Duration::from_millis(2000))
+                .timeout(Duration::from_millis(crate::networking::REQUEST_TIMEOUT))
                 .build()
                 .expect("could not build a client for https requests");
             let response = client.get(url.clone()).send();
@@ -106,7 +109,7 @@ impl UptimeStatus {
     /// ## calculate the success based on the `reachable` and `total`
     ///
     /// Calculates the ratio of [`reachable`](UptimeStatus::reachable) /
-    /// [`total`](UptimeStatus::total).
+    /// (length of [urls](UptimeStatus::urls)).
     ///
     /// Calculates a [`success_ratio`](UptimeStatus::success_ratio) (as [u8]) from that,
     /// by multiplying with 100, then flooring.
@@ -118,7 +121,7 @@ impl UptimeStatus {
     /// In the special case that no URLs to check for have been provided, the check will be
     /// considered a success, but the [`success_ratio`](UptimeStatus::success_ratio) will be `0`.
     ///
-    /// Note: does not check for networking, use [`check()`] for that.
+    /// Note: does not check for networking, use [`check()`](UptimeStatus::check) for that.
     pub fn calc_success(&mut self) {
         // if no urls need to be checked, success without checking
         if self.urls.len() == 0 {
@@ -159,12 +162,12 @@ impl fmt::Display for UptimeStatus {
         }
         write!(
             f,
-            "{{
+            "
     success: {},
     success_ratio: {}%,
     success_ratio_target: {}%,
     reachable: {},
-    urls: {:?}\n}}",
+    urls: {:?}\n",
             self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
         )
     }
@@ -173,7 +176,11 @@ impl fmt::Display for UptimeStatus {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 /// ## Uptime monitor
 ///
-/// This function continuously monitors the uptime of your host/network
+/// This function continuously monitors the uptime of your host/network.
+///
+/// On change of status, an update will be logged at [INFO Level](log::Level::Info), containing
+/// information on your current status, including timestamps of the last up/down time and durations
+/// since.
 pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64) {
     if urls.len() == 0 {
         error!("No URLs provided. There is nothing to monitor.");
@@ -218,6 +225,7 @@ pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, in
 }
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+/// Displays the current status for the [continuous uptime monitor](continuous_uptime_monitor)
 fn display_uptime_status(
     msg: &str,
     last_uptime: Option<SystemTime>,
@@ -227,14 +235,8 @@ fn display_uptime_status(
     // I know it's weird that this has two spaces too much, but somehow just the tabs is missing
     // two spaces.
     info!("uptime check:      {}", msg);
-    info!(
-        "last uptime:       {}",
-        match_format_time(last_uptime)
-    );
-    info!(
-        "last downtime:     {}",
-        match_format_time(last_downtime)
-    );
+    info!("last uptime:       {}", match_format_time(last_uptime));
+    info!("last downtime:     {}", match_format_time(last_downtime));
     info!(
         "since downtime:    {}",
         match_format_duration_since(last_downtime)
@@ -243,7 +245,7 @@ fn display_uptime_status(
         "since uptime:      {}",
         match_format_duration_since(last_uptime)
     );
-    debug!("\n{}", status);
+    debug!("{}", status);
     info!("{}", divider!());
 }
 
