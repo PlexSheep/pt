@@ -14,7 +14,7 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::{fmt::Display, str::FromStr};
+use std::str::FromStr;
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 // we want the log macros in any case
