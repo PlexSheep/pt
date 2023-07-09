@@ -12,8 +12,8 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use libpt::networking::monitoring::uptime;
 use libpt::logger;
+use libpt::networking::monitoring::uptime;
 
 // we want the log macros in any case
 #[allow(unused_imports)]
@@ -66,16 +66,33 @@ fn net(cli: &Cli, command: NetCommands) {
     match command {
         NetCommands::Monitor {
             repeat,
-            percentage_for_success,
-            additional_domains,
+            success_ratio,
+            extra_urls,
+            no_default
         } => {
-            let status: uptime::UptimeStatus = uptime::check_status(
-                additional_domains,
-                percentage_for_success,
-            );
+            let urls: Vec<String>;
+            if no_default {
+                urls = extra_urls;
+            }
+            else {
+                let mut combined: Vec<String> = Vec::new();
+                for i in uptime::DEFAULT_CHECK_URLS {
+                    combined.push(i.to_string());
+                }
+                combined.extend(extra_urls);
+                urls = combined;
+            }
             let _verbose = cli.verbose.log_level().is_some();
-            println!("{}", uptime::display_uptime_status(status));
-
+            if repeat > 0 {
+                loop {
+                    let status: uptime::UptimeStatus = uptime::check_status(&urls, success_ratio);
+                    println!("{}", uptime::display_uptime_status(&status));
+                    std::thread::sleep(std::time::Duration::from_millis(repeat))
+                }
+            } else {
+                let status: uptime::UptimeStatus = uptime::check_status(&urls, success_ratio);
+                println!("{}", uptime::display_uptime_status(&status));
+            }
         }
         NetCommands::Discover {} => {}
     }

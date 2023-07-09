@@ -15,6 +15,8 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use libpt;
+
 use clap::{Args, Parser, Subcommand};
 
 use clap_num::number_range;
@@ -85,14 +87,20 @@ pub enum Commands {
 pub enum NetCommands {
     /// monitor your network
     Monitor {
-        #[clap(short, long)]
-        repeat: bool,
+        /// repeat every N milliseconds, 0 means no repeat
+        #[clap(short, long, default_value_t = 0, name = "N")]
+        repeat: u64,
 
+        /// At what percentage should the try be considered successful
         #[clap(short, long, default_value_t = 100, value_parser=max100)]
-        percentage_for_success: u8,
+        success_ratio: u8,
 
-        #[arg(default_values_t = ["https://cloudflare.com".to_string()])]
-        additional_domains: Vec<String>,
+        /// extra URLs to check with
+        extra_urls: Vec<String>,
+
+        /// Don't check for default URLs
+        #[clap(short, long)]
+        no_default: bool
 
     },
     /// discover hosts in your network

@@ -27,6 +27,11 @@ use reqwest;
 pub type UptimeStatus = (bool, usize, usize);
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+/// urls used for checking by default
+pub const DEFAULT_CHECK_URLS: &'static [&'static str] = &[
+    "https://www.cscherr.de", 
+    "https://www.cloudflare.com"
+];
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +58,7 @@ pub type UptimeStatus = (bool, usize, usize);
 ///
 /// #### `status`
 /// Will be `true` if the check is considered a success.
-pub fn check_status(urls_strs: Vec<String>, percentage_for_success: u8) -> UptimeStatus {
+pub fn check_status(urls_strs: &Vec<String>, percentage_for_success: u8) -> UptimeStatus {
     if percentage_for_success > 100 {
         panic!("percentage_for_success is over 100: {percentage_for_success}")
     }
@@ -99,7 +104,7 @@ pub fn check_status(urls_strs: Vec<String>, percentage_for_success: u8) -> Uptim
 /// ## display UptimeStatus
 ///
 /// returns a fancy string that shows the UptimeStatus, so you can print it to the user.
-pub fn display_uptime_status(status: UptimeStatus) -> String {
+pub fn display_uptime_status(status: &UptimeStatus) -> String {
     format!(
         r"{{
     success:    {},
