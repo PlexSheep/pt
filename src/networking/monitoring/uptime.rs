@@ -30,6 +30,8 @@ use std::time::SystemTime;
 
 use pyo3::prelude::*;
 
+use signal_hook::consts::SIGINT;
+
 use crate::divider;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -181,20 +183,32 @@ impl UptimeStatus {
 
         return url_strs;
     }
+
+    /// we want to display the [`UptimeStatus`] in python too, so we need `__str__`
+    pub fn __str__(&self) -> String {
+        format!("{}", self)
+    }
+
+    /// we want to debug display the [`UptimeStatus`] in python too, so we need `__str__`
+    pub fn __repr__(&self) -> String {
+        format!("{:?}", self)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for UptimeStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut url_strs: Vec<&str> = Vec::new();
+        for url in &self.urls {
+            url_strs.push(url.as_str());
+        }
         write!(
             f,
-            "{{
-    success: {},
-    success_ratio: {}%,
-    success_ratio_target: {}%,
-    reachable: {},
-    urls: {:?}\n}}",
-            self.success, self.success_ratio, self.success_ratio_target, self.reachable, self.urls
+            concat!(
+                "{{ success: {}, success_ratio: {}%, success_ratio_target: {}%,",
+                " reachable: {}, urls: {:?}}}"
+            ),
+            self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
         )
     }
 }
@@ -208,12 +222,10 @@ impl fmt::Display for UptimeStatus {
         }
         write!(
             f,
-            "
-    success: {},
-    success_ratio: {}%,
-    success_ratio_target: {}%,
-    reachable: {},
-    urls: {:?}\n",
+            concat!(
+                "{{\n\tsuccess: {},\n\tsuccess_ratio: {}%,\n\tsuccess_ratio_target: {}%,\n",
+                "\treachable: {},\n\turls: {:?}\n}}"
+            ),
             self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
         )
     }
@@ -227,7 +239,6 @@ impl fmt::Display for UptimeStatus {
 /// On change of status, an update will be logged at [INFO Level](log::Level::Info), containing
 /// information on your current status, including timestamps of the last up/down time and durations
 /// since.
-#[pyfunction]
 pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64) {
     if urls.len() == 0 {
         error!("No URLs provided. There is nothing to monitor.");
@@ -271,6 +282,28 @@ pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, in
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Python interface for [`continuous_uptime_monitor`]
+///
+/// Runs the function in a different thread and checks from time to time for things like Pythons
+/// `KeyboardInterrupt` exception.
+#[pyfunction]
+#[pyo3(name = "continuous_uptime_monitor")]
+pub unsafe fn py_continuous_uptime_monitor(
+    success_ratio_target: u8,
+    urls: Vec<String>,
+    interval: u64,
+) {
+    // execute the function in a different thread
+    let _th = std::thread::spawn(move || {
+        continuous_uptime_monitor(success_ratio_target, urls, interval);
+    });
+    // while we dont receive a SIGINT, just go on and check every once in a while
+    while pyo3::ffi::PyErr_CheckSignals() != SIGINT {
+        std::thread::sleep(std::time::Duration::from_millis(100))
+    }
+}
+
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 /// Displays the current status for the [continuous uptime monitor](continuous_uptime_monitor)
 fn display_uptime_status(
@@ -292,7 +325,7 @@ fn display_uptime_status(
         "since uptime:      {}",
         match_format_duration_since(last_uptime)
     );
-    debug!("{}", status);
+    debug!("\n{}", status);
     info!("{}", divider!());
 }
 

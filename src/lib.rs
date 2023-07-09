@@ -102,7 +102,7 @@ fn py_networking_monitoring_uptime(py: Python, parent: &PyModule) -> PyResult<()
     let module = PyModule::new(py, "uptime")?;
     module.add_class::<networking::monitoring::uptime::UptimeStatus>()?;
     module.add_function(wrap_pyfunction!(
-        networking::monitoring::uptime::continuous_uptime_monitor,
+        networking::monitoring::uptime::py_continuous_uptime_monitor,
         module
     )?)?;
 
