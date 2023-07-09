@@ -2,6 +2,8 @@
 //!
 //! This method offers a way to monitor your networks/hosts uptime. This is achieved by making
 //! HTTPS requests to a given list of
+//!
+//! Warning: This module is not unit tested.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -26,6 +28,8 @@ use reqwest::{self, Url};
 use humantime::{format_duration, format_rfc3339};
 use std::time::SystemTime;
 
+use pyo3::prelude::*;
+
 use crate::divider;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +49,7 @@ pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
 /// ## Describes an uptime status
 ///
 /// [`UptimeStatus`] describes the result of an uptime check.
+#[pyclass]
 pub struct UptimeStatus {
     /// true if the [`UptimeStatus`] is considered successful
     pub success: bool,
@@ -60,9 +65,11 @@ pub struct UptimeStatus {
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
+/// Main implementation
 impl UptimeStatus {
     /// ## create a new `UptimeStatus` and perform it's check
-    pub fn new(success_ratio_target: u8, urls_str: &Vec<String>) -> Self {
+    pub fn new(success_ratio_target: u8, url_strs: &Vec<String>) -> Self {
+        assert!(success_ratio_target <= 100);
         let mut status = UptimeStatus {
             success: false,
             success_ratio: 0,
@@ -70,7 +77,7 @@ impl UptimeStatus {
             reachable: 0,
             urls: Vec::new(),
         };
-        for s in urls_str {
+        for s in url_strs {
             let url = reqwest::Url::from_str(&s);
             if url.is_ok() {
                 status.urls.push(url.unwrap());
@@ -136,6 +143,45 @@ impl UptimeStatus {
         trace!("calculated success as: {}", self.success)
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Implementation of the Python interface
+#[pymethods]
+impl UptimeStatus {
+    /// calls [`new()`](UptimeStatus::new) with python compatible arguments
+    #[new]
+    pub fn py_new(success_ratio_target: u8, url_strs: Vec<String>) -> Self {
+        Self::new(success_ratio_target, &url_strs)
+    }
+
+    /// Same as [`check()`](UptimeStatus::check)
+    #[pyo3(name = "check")]
+    pub fn py_check(&mut self) {
+        self.check();
+    }
+
+    /// Same as [`calc_success()`](UptimeStatus::calc_success)
+    #[pyo3(name = "calc_success")]
+    pub fn py_calc_success(&mut self) {
+        self.calc_success();
+    }
+
+    /// ## get urls for python
+    ///
+    /// Since [`UptimeStatus::urls`] has no python equivalent, return the urls as a `list[str]` in
+    /// Python.
+    ///
+    /// Practically, this is also handy for rust implementations that want to access the URLs as
+    /// [Strings](String).
+    pub fn urls(&self) -> Vec<String> {
+        let mut url_strs: Vec<String> = Vec::new();
+
+        for url in self.urls.clone() {
+            url_strs.push(url.to_string());
+        }
+
+        return url_strs;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for UptimeStatus {
@@ -181,6 +227,7 @@ impl fmt::Display for UptimeStatus {
 /// On change of status, an update will be logged at [INFO Level](log::Level::Info), containing
 /// information on your current status, including timestamps of the last up/down time and durations
 /// since.
+#[pyfunction]
 pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64) {
     if urls.len() == 0 {
         error!("No URLs provided. There is nothing to monitor.");

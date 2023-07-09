@@ -37,6 +37,9 @@ static LONG_ABOUT_ROOT: &'static str = r##"
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Main struct for parsing CLI arguments
+///
+/// This struct describes the complete commandline options/arguments that [pt](crate) can take. It
+/// makes use of composition to build a complex system of commands, subcommands, flags and options.
 #[derive(Debug, Clone, Parser)]
 #[command(
     author, 
@@ -49,12 +52,13 @@ r#"libpt: {version}{about-section}Author:
 {usage-heading} {usage}{all-args}{tab}"#
     )]
 pub struct Cli {
+    // clap_verbosity_flag seems to make this a global option implicitly
     /// set a verbosity, multiple allowed (f.e. -vvv)
     #[command(flatten)]
     pub verbose: Verbosity<InfoLevel>,
 
     /// show logger meta
-    #[arg(short, long)]
+    #[arg(short, long, global = true)]
     pub log_meta: bool,
 
     /// choose a subcommand
@@ -63,19 +67,20 @@ pub struct Cli {
 }
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
-/// # defines the top level commands
+/// ## defines the top level commands
 #[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum Commands {
     /// networking commands
     Net {
+        /// Networking subcommands
         #[command(subcommand)]
         command: NetCommands,
     },
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// defines the networking commands
+/// ## defines the networking commands
 #[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum NetCommands {

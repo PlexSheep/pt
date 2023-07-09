@@ -1,6 +1,8 @@
 //! # Main executable of pt
 //!
-//! This module contains all code specific to the executable version of [`libpt`]: `pt`.
+//! This module contains all code specific to the executable version of [`libpt`]: [`pt`](crate).
+//!
+//!
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -22,7 +24,7 @@ use env_logger;
 
 use clap::Parser;
 
-mod args;
+pub mod args;
 use args::*;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
@@ -38,10 +40,8 @@ use args::*;
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-
-//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
-/// ## Main function of the `pt` binary
-fn main() {
+/// ## Main function of the [`pt`](crate) binary
+pub fn main() {
     let cli = Cli::parse();
     if cli.log_meta {
         // set up our logger to use the given verbosity
@@ -68,8 +68,8 @@ fn main() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Process `Net` subcommands
-fn net(cli: &Cli, command: NetCommands) {
+/// ## Process [`Net`](args::NetCommands) subcommands
+pub fn net(cli: &Cli, command: NetCommands) {
     match command {
         NetCommands::Monitor {
             repeat,
@@ -97,6 +97,8 @@ fn net(cli: &Cli, command: NetCommands) {
                     println!("{}", status);
             }
         }
-        NetCommands::Discover {} => {}
+        NetCommands::Discover {} => {todo!()}
     }
 }
+
+//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
