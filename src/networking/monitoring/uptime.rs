@@ -14,24 +14,21 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 // we want the log macros in any case
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 
-use reqwest;
+use reqwest::{self, Url};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
-pub type UptimeStatus = (bool, usize, usize);
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// urls used for checking by default
-pub const DEFAULT_CHECK_URLS: &'static [&'static str] = &[
-    "https://www.cscherr.de", 
-    "https://www.cloudflare.com"
-];
+pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
+    &["https://www.cscherr.de", "https://www.cloudflare.com"];
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,79 +37,128 @@ pub const DEFAULT_CHECK_URLS: &'static [&'static str] = &[
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
+/// ## Describes an uptime status
+///
+/// [`UptimeStatus`] describes the result of an uptime check.
+pub struct UptimeStatus {
+    /// true if the [`UptimeStatus`] is considered successful
+    success: bool,
+    /// the percentage of reachable urls out of the total urls
+    success_ratio: u8,
+    /// the percentage of reachable urls out of the total urls that need to be reachable in order
+    /// for this [`UptimeStatus`] to be considered a success.
+    success_ratio_target: u8,
+    /// the number of reachable [`urls`]
+    reachable: usize,
+    /// which urls to check in [`check()`]
+    urls: Vec<Url>,
+}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
-
-//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-/// ## check uptime status
-///
-/// This function checks the current network status.
-///
-/// ### Parameters
-/// additional_urls
-///
-/// ### Returns
-/// The function returns a tuple of the format
-///
-/// `(status: [bool], reachable: [usize], checked: [usize])`
-///
-/// #### `status`
-/// Will be `true` if the check is considered a success.
-pub fn check_status(urls_strs: &Vec<String>, percentage_for_success: u8) -> UptimeStatus {
-    if percentage_for_success > 100 {
-        panic!("percentage_for_success is over 100: {percentage_for_success}")
-    }
-    let status: bool;
-    let mut reachable: usize = 0;
-    let total: usize = urls_strs.len();
-
-    info!("checking with the following URLs: {:?}", urls_strs);
-
-    let mut urls: Vec<reqwest::Url> = Vec::new();
-    for s in urls_strs {
-        let url = reqwest::Url::from_str(&s);
-        if url.is_ok() {
-            urls.push(url.unwrap());
-        } else {
-            warn!("Invalid URL: '{}", s);
+impl UptimeStatus {
+    /// ## create a new `UptimeStatus` and perform it's check
+    pub fn new(success_ratio_target: u8, urls_str: &Vec<String>) -> Self {
+        let mut status = UptimeStatus {
+            success: false,
+            success_ratio: 0,
+            success_ratio_target,
+            reachable: 0,
+            urls: Vec::new(),
+        };
+        for s in urls_str {
+            let url = reqwest::Url::from_str(&s);
+            if url.is_ok() {
+                status.urls.push(url.unwrap());
+            } else {
+                warn!("Invalid URL: '{}", s);
+            }
         }
-    }
-    // make urls not mutable
-    let urls = urls;
 
-    for url in urls {
-        let response = reqwest::blocking::get(url);
-        if response.is_ok() {
-            reachable += 1
+        status.check();
+
+        return status;
+    }
+
+    /// ## check for success with the given urls
+    ///
+    /// Makes the actual https requests and updates the success fields.
+    pub fn check(&mut self) {
+        self.reachable = 0;
+        self.urls.iter().for_each(|url| {
+            let response = reqwest::blocking::get(url.clone());
+            if response.is_ok() {
+                self.reachable += 1
+            }
+        });
+        self.calc_success();
+    }
+
+    /// ## calculate the success based on the `reachable` and `total`
+    ///
+    /// Calculates the ratio of [`reachable`](UptimeStatus::reachable) /
+    /// [`total`](UptimeStatus::total).
+    ///
+    /// Calculates a [`success_ratio`](UptimeStatus::success_ratio) (as [u8]) from that,
+    /// by multiplying with 100, then flooring.
+    ///
+    /// If the [`success_ratio`](UptimeStatus::success_ratio) is greater than or equal to the
+    /// [`success_ratio_target`](UptimeStatus::success_ratio_target), the [`UptimeStatus`] will be
+    /// considered a success.
+    ///
+    /// In the special case that no URLs to check for have been provided, the check will be
+    /// considered a success, but the [`success_ratio`](UptimeStatus::success_ratio) will be `0`.
+    ///
+    /// Note: does not check for networking, use [`check()`] for that.
+    pub fn calc_success(&mut self) {
+        // if no urls need to be checked, success without checking
+        if self.urls.len() == 0 {
+            self.success = true;
+            self.success_ratio = 0;
+            return;
         }
+        let ratio: f32 = (self.reachable as f32) / (self.urls.len() as f32) * 100f32;
+        debug!("calculated success_ratio: {}", ratio);
+        self.success_ratio = ratio.floor() as u8;
+        self.success = self.success_ratio >= self.success_ratio_target;
     }
-
-    // evaluate the status
-    if total != 0 {
-        info!("reachability ratio: {}", ((reachable as f32) / total as f32) * 100f32);
-        status = ((reachable as f32) / total as f32) * 100f32 >= percentage_for_success as f32;
-    } else {
-        // no reachable domains at all!
-        info!("no valid services given");
-        status = true;
-    }
-
-    return (status, reachable, total);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## display UptimeStatus
-///
-/// returns a fancy string that shows the UptimeStatus, so you can print it to the user.
-pub fn display_uptime_status(status: &UptimeStatus) -> String {
-    format!(
-        r"{{
-    success:    {},
-    reachable:  {},
-    checked:    {}
-}}",
-        status.0, status.1, status.2
-    )
+impl fmt::Debug for UptimeStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{
+    success: {},
+    success_ratio: {}%,
+    success_ratio_target: {}%,
+    reachable: {},
+    urls: {:?}\n}}",
+            self.success, self.success_ratio, self.success_ratio_target, self.reachable, self.urls
+        )
+    }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl fmt::Display for UptimeStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut url_strs: Vec<&str> = Vec::new();
+        for url in &self.urls {
+            url_strs.push(url.as_str());
+        }
+        write!(
+            f,
+            "{{
+    success: {},
+    success_ratio: {}%,
+    success_ratio_target: {}%,
+    reachable: {},
+    urls: {:?}\n}}",
+            self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
+        )
+    }
+}
+
+//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////

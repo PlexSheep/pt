@@ -85,13 +85,14 @@ fn net(cli: &Cli, command: NetCommands) {
             let _verbose = cli.verbose.log_level().is_some();
             if repeat > 0 {
                 loop {
-                    let status: uptime::UptimeStatus = uptime::check_status(&urls, success_ratio);
-                    println!("{}", uptime::display_uptime_status(&status));
-                    std::thread::sleep(std::time::Duration::from_millis(repeat))
+                    let status = uptime::UptimeStatus::new(success_ratio, &urls);
+                    println!("{}", status);
+                    std::thread::sleep(std::time::Duration::from_secs(repeat));
+
                 }
             } else {
-                let status: uptime::UptimeStatus = uptime::check_status(&urls, success_ratio);
-                println!("{}", uptime::display_uptime_status(&status));
+                    let status = uptime::UptimeStatus::new(success_ratio, &urls);
+                    println!("{}", status);
             }
         }
         NetCommands::Discover {} => {}

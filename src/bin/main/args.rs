@@ -15,9 +15,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use libpt;
-
-use clap::{Args, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
 use clap_num::number_range;
 
@@ -56,21 +54,12 @@ pub struct Cli {
     pub verbose: Verbosity,
 
     /// choose a subcommand
-    ///
-    ///
     #[command(subcommand)]
     pub command: Commands,
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#[derive(Debug, Clone, Args)]
-pub struct NetDiscoverArgs {
-    #[clap(short)]
-    test: bool,
-}
-
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
-/// # Top level commands
+/// # defines the top level commands
 #[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum Commands {
@@ -82,12 +71,13 @@ pub enum Commands {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// defines the networking commands
 #[derive(Debug, Clone, Subcommand)]
 #[non_exhaustive]
 pub enum NetCommands {
     /// monitor your network
     Monitor {
-        /// repeat every N milliseconds, 0 means no repeat
+        /// repeat every N seconds, 0 means no repeat
         #[clap(short, long, default_value_t = 0, name = "N")]
         repeat: u64,
 
