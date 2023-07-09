@@ -12,7 +12,7 @@ So what? I don't care. Besides, there is not enough names to name everything uni
 
 ## Dependencies
 - See `cargo.toml`
-- []openssl bindings for rust](https://docs.rs/openssl/latest/openssl/)
+- [openssl bindings for rust](https://docs.rs/openssl/latest/openssl/)
 - [Python](https://www.python.org/)
 - [`maturin`](https://maturin.rs) - `pip install maturin`
 
