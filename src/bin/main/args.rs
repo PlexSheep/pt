@@ -99,7 +99,11 @@ pub enum NetCommands {
 
         /// Don't check for default URLs
         #[clap(short, long)]
-        no_default: bool
+        no_default: bool,
+
+        /// set a timeout (in ms)
+        #[clap(short, long, default_value_t = 100)]
+        timeout: u64
 
     },
     /// discover hosts in your network

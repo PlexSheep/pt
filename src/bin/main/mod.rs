@@ -75,7 +75,8 @@ pub fn net(cli: &Cli, command: NetCommands) {
             repeat,
             success_ratio,
             extra_urls,
-            no_default
+            no_default,
+            timeout
         } => {
             let urls: Vec<String>;
             if no_default {
@@ -91,9 +92,9 @@ pub fn net(cli: &Cli, command: NetCommands) {
             }
             let _verbose = cli.verbose.log_level().is_some();
             if repeat > 0 {
-                uptime::continuous_uptime_monitor(success_ratio, urls, repeat * 1000);
+                uptime::continuous_uptime_monitor(success_ratio, urls, repeat * 1000, timeout);
             } else {
-                    let status = uptime::UptimeStatus::new(success_ratio, &urls);
+                    let status = uptime::UptimeStatus::new(success_ratio, &urls, timeout);
                     println!("{}", status);
             }
         }

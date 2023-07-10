@@ -62,13 +62,15 @@ pub struct UptimeStatus {
     pub reachable: usize,
     /// which urls to check in [`check()`](UptimeStatus::check)
     pub urls: Vec<Url>,
+    /// timeout length for requests (in ms)
+    pub timeout: u64
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// Main implementation
 impl UptimeStatus {
     /// ## create a new `UptimeStatus` and perform it's check
-    pub fn new(success_ratio_target: u8, url_strs: &Vec<String>) -> Self {
+    pub fn new(success_ratio_target: u8, url_strs: &Vec<String>, timeout: u64) -> Self {
         assert!(success_ratio_target <= 100);
         let mut status = UptimeStatus {
             success: false,
@@ -76,6 +78,7 @@ impl UptimeStatus {
             success_ratio_target,
             reachable: 0,
             urls: Vec::new(),
+            timeout
         };
         for s in url_strs {
             let url = reqwest::Url::from_str(&s);
@@ -102,7 +105,7 @@ impl UptimeStatus {
         self.reachable = 0;
         self.urls.iter().for_each(|url| {
             let client = reqwest::blocking::Client::builder()
-                .timeout(Duration::from_millis(crate::networking::REQUEST_TIMEOUT))
+                .timeout(Duration::from_millis(self.timeout))
                 .build()
                 .expect("could not build a client for https requests");
             let response = client.get(url.clone()).send();
@@ -149,8 +152,8 @@ impl UptimeStatus {
 impl UptimeStatus {
     /// calls [`new()`](UptimeStatus::new) with python compatible arguments
     #[new]
-    pub fn py_new(success_ratio_target: u8, url_strs: Vec<String>) -> Self {
-        Self::new(success_ratio_target, &url_strs)
+    pub fn py_new(success_ratio_target: u8, url_strs: Vec<String>, timeout: u64) -> Self {
+        Self::new(success_ratio_target, &url_strs, timeout)
     }
 
     /// Same as [`check()`](UptimeStatus::check)
@@ -237,7 +240,7 @@ impl fmt::Display for UptimeStatus {
 /// On change of status, an update will be logged at [INFO Level](log::Level::Info), containing
 /// information on your current status, including timestamps of the last up/down time and durations
 /// since.
-pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64) {
+pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64, timeout: u64) {
     if urls.len() == 0 {
         error!("No URLs provided. There is nothing to monitor.");
         return;
@@ -246,7 +249,7 @@ pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, in
     let interval = std::time::Duration::from_millis(interval);
     let mut last_downtime: Option<SystemTime> = None;
     let mut last_uptime: Option<SystemTime> = None;
-    let mut status = UptimeStatus::new(success_ratio_target, &urls);
+    let mut status = UptimeStatus::new(success_ratio_target, &urls, timeout);
     let mut last_was_up: bool = false;
     let mut last_ratio: u8 = status.success_ratio;
     loop {
@@ -292,10 +295,11 @@ pub fn py_continuous_uptime_monitor(
     success_ratio_target: u8,
     urls: Vec<String>,
     interval: u64,
+    timeout: u64
 ) -> PyResult<()>{
     // execute the function in a different thread
     let _th = std::thread::spawn(move || {
-        continuous_uptime_monitor(success_ratio_target, urls, interval);
+        continuous_uptime_monitor(success_ratio_target, urls, interval, timeout);
     });
     loop {
         Python::check_signals(py)?;

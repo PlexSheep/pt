@@ -21,10 +21,12 @@ class UptimeStatus:
     success_ratio_target: int
     """ the number of reachable [`urls`](UptimeStatus::urls) """
     reachable: int
+    """ set a timeout (in ms) """
+    timeout: int
     """URL list cant be ported to python, use UptimeStatus.urls()"""
     __urls: ...
 
-    def __init__(self, success_ratio_target: int, url_strs: list[str]) -> None:
+    def __init__(self, success_ratio_target: int, url_strs: list[str], timeout: int) -> None:
         """
         create a new UptimeStatus and check it
 
@@ -71,7 +73,7 @@ class UptimeStatus:
         """
         ...
 
-def continuous_uptime_monitor(success_ratio_target: int, urls: list[str], interval: int) -> None:
+def continuous_uptime_monitor(success_ratio_target: int, urls: list[str], interval: int, timeout: int) -> None:
     """
     Uptime monitor
     
