@@ -94,7 +94,7 @@ pub fn net(cli: &Cli, command: NetCommands) {
             if repeat > 0 {
                 uptime::continuous_uptime_monitor(success_ratio, urls, repeat * 1000, timeout);
             } else {
-                    let status = uptime::UptimeStatus::new(success_ratio, &urls, timeout);
+                    let status = uptime::UptimeStatus::new(success_ratio, urls, timeout);
                     println!("{}", status);
             }
         }

@@ -16,19 +16,22 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::{fmt, str::FromStr, time::Duration};
+use std::{fmt, time::Duration};
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 // we want the log macros in any case
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 
-use reqwest::{self, Url};
+use reqwest;
 
 use humantime::{format_duration, format_rfc3339};
 use std::time::SystemTime;
 
 use pyo3::prelude::*;
+
+use serde::{Deserialize, Serialize};
+use serde_json;
 
 use crate::divider;
 
@@ -50,44 +53,43 @@ pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
 ///
 /// [`UptimeStatus`] describes the result of an uptime check.
 #[pyclass]
+#[derive(Serialize, Deserialize)]
 pub struct UptimeStatus {
     /// true if the [`UptimeStatus`] is considered successful
+    #[pyo3(get, set)]
     pub success: bool,
     /// the percentage of reachable urls out of the total urls
+    #[pyo3(get, set)]
     pub success_ratio: u8,
     /// the percentage of reachable urls out of the total urls that need to be reachable in order
     /// for this [`UptimeStatus`] to be considered a success.
+    #[pyo3(get, set)]
     pub success_ratio_target: u8,
     /// the number of reachable [`urls`](UptimeStatus::urls)
+    #[pyo3(get, set)]
     pub reachable: usize,
     /// which urls to check in [`check()`](UptimeStatus::check)
-    pub urls: Vec<Url>,
+    #[pyo3(get, set)]
+    pub urls: Vec<String>,
     /// timeout length for requests (in ms)
-    pub timeout: u64
+    #[pyo3(get, set)]
+    pub timeout: u64,
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// Main implementation
 impl UptimeStatus {
     /// ## create a new `UptimeStatus` and perform it's check
-    pub fn new(success_ratio_target: u8, url_strs: &Vec<String>, timeout: u64) -> Self {
+    pub fn new(success_ratio_target: u8, urls: Vec<String>, timeout: u64) -> Self {
         assert!(success_ratio_target <= 100);
         let mut status = UptimeStatus {
             success: false,
             success_ratio: 0,
             success_ratio_target,
             reachable: 0,
-            urls: Vec::new(),
-            timeout
+            urls,
+            timeout,
         };
-        for s in url_strs {
-            let url = reqwest::Url::from_str(&s);
-            if url.is_ok() {
-                status.urls.push(url.unwrap());
-            } else {
-                warn!("Invalid URL: '{}", s);
-            }
-        }
         status.urls.dedup();
 
         status.check();
@@ -152,8 +154,8 @@ impl UptimeStatus {
 impl UptimeStatus {
     /// calls [`new()`](UptimeStatus::new) with python compatible arguments
     #[new]
-    pub fn py_new(success_ratio_target: u8, url_strs: Vec<String>, timeout: u64) -> Self {
-        Self::new(success_ratio_target, &url_strs, timeout)
+    pub fn py_new(success_ratio_target: u8, urls: Vec<String>, timeout: u64) -> Self {
+        Self::new(success_ratio_target, urls, timeout)
     }
 
     /// Same as [`check()`](UptimeStatus::check)
@@ -166,23 +168,6 @@ impl UptimeStatus {
     #[pyo3(name = "calc_success")]
     pub fn py_calc_success(&mut self) {
         self.calc_success();
-    }
-
-    /// ## get urls for python
-    ///
-    /// Since [`UptimeStatus::urls`] has no python equivalent, return the urls as a `list[str]` in
-    /// Python.
-    ///
-    /// Practically, this is also handy for rust implementations that want to access the URLs as
-    /// [Strings](String).
-    pub fn urls(&self) -> Vec<String> {
-        let mut url_strs: Vec<String> = Vec::new();
-
-        for url in self.urls.clone() {
-            url_strs.push(url.to_string());
-        }
-
-        return url_strs;
     }
 
     /// we want to display the [`UptimeStatus`] in python too, so we need `__str__`
@@ -199,36 +184,22 @@ impl UptimeStatus {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for UptimeStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut url_strs: Vec<&str> = Vec::new();
+        let mut urls: Vec<&str> = Vec::new();
         for url in &self.urls {
-            url_strs.push(url.as_str());
+            urls.push(url.as_str());
         }
-        write!(
-            f,
-            concat!(
-                "{{ success: {}, success_ratio: {}%, success_ratio_target: {}%,",
-                " reachable: {}, urls: {:?}}}"
-            ),
-            self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
-        )
+        write!(f, "{}", serde_json::to_string(self).unwrap())
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Display for UptimeStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut url_strs: Vec<&str> = Vec::new();
+        let mut urls: Vec<&str> = Vec::new();
         for url in &self.urls {
-            url_strs.push(url.as_str());
+            urls.push(url.as_str());
         }
-        write!(
-            f,
-            concat!(
-                "{{\n\tsuccess: {},\n\tsuccess_ratio: {}%,\n\tsuccess_ratio_target: {}%,\n",
-                "\treachable: {},\n\turls: {:?}\n}}"
-            ),
-            self.success, self.success_ratio, self.success_ratio_target, self.reachable, url_strs
-        )
+        write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
     }
 }
 
@@ -240,7 +211,12 @@ impl fmt::Display for UptimeStatus {
 /// On change of status, an update will be logged at [INFO Level](log::Level::Info), containing
 /// information on your current status, including timestamps of the last up/down time and durations
 /// since.
-pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, interval: u64, timeout: u64) {
+pub fn continuous_uptime_monitor(
+    success_ratio_target: u8,
+    urls: Vec<String>,
+    interval: u64,
+    timeout: u64,
+) {
     if urls.len() == 0 {
         error!("No URLs provided. There is nothing to monitor.");
         return;
@@ -249,7 +225,7 @@ pub fn continuous_uptime_monitor(success_ratio_target: u8, urls: Vec<String>, in
     let interval = std::time::Duration::from_millis(interval);
     let mut last_downtime: Option<SystemTime> = None;
     let mut last_uptime: Option<SystemTime> = None;
-    let mut status = UptimeStatus::new(success_ratio_target, &urls, timeout);
+    let mut status = UptimeStatus::new(success_ratio_target, urls, timeout);
     let mut last_was_up: bool = false;
     let mut last_ratio: u8 = status.success_ratio;
     loop {
@@ -295,8 +271,8 @@ pub fn py_continuous_uptime_monitor(
     success_ratio_target: u8,
     urls: Vec<String>,
     interval: u64,
-    timeout: u64
-) -> PyResult<()>{
+    timeout: u64,
+) -> PyResult<()> {
     // execute the function in a different thread
     let _th = std::thread::spawn(move || {
         continuous_uptime_monitor(success_ratio_target, urls, interval, timeout);
