@@ -71,4 +71,4 @@ It is mirrored to:
 
 ## License
 
-##### GPL-3 or newer.
+**Pt is MIT Licensed**
