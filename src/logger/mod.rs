@@ -30,6 +30,10 @@ use pyo3::prelude::*;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
+/// The path where logs are stored when no path is given.
+///
+/// Currently, this is `/dev/null`, meaning they will be written to the void = discarded.
+pub const DEFAULT_LOG_DIR: &'static str = "/dev/null";
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -68,15 +72,15 @@ impl Logger {
     /// Will enable the logger to be used.
     ///
     /// Assumes some defaults, use [`init_customized`](init_customized) for more control
-    pub fn init() -> Result<()> {
+    pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>) -> Result<()> {
         Self::init_customized(
-            false,
-            PathBuf::from("/dev/null"),
+            log_dir.is_some(),
+            log_dir.unwrap_or(PathBuf::from(DEFAULT_LOG_DIR)),
             true,
             false,
             true,
             false,
-            Level::INFO,
+            max_level.unwrap_or(DEFAULT_LOG_LEVEL),
             false,
             false,
             false,
@@ -180,8 +184,21 @@ impl Logger {
     /// ## Python version of [`init()`](Logger::init)
     #[pyo3(name = "init")]
     #[staticmethod]
-    pub fn py_init() -> Result<()> {
-        Self::init()
+    pub fn py_init(log_dir: Option<PathBuf>, max_level: Option<String>) -> Result<()> {
+        Self::init(
+            log_dir,
+            match max_level {
+                Some(s) => match s.to_uppercase().as_str() {
+                    "TRACE" => Some(tracing::Level::TRACE),
+                    "DEBUG" => Some(tracing::Level::DEBUG),
+                    "INFO" => Some(tracing::Level::INFO),
+                    "WARN" => Some(tracing::Level::WARN),
+                    "ERROR" => Some(tracing::Level::ERROR),
+                    _ => return Err(Error::Usage(format!("'{s}' is not a valid log level"))),
+                },
+                None => None,
+            },
+        )
     }
     /// ## Python version of [`error()`](Logger::error)
     #[pyo3(name = "error")]

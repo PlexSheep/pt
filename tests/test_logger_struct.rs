@@ -80,9 +80,9 @@ fn test_multi_initialize() {
     setup();
     let l = Logger::new();
     // these should be ignored due to the global flag
-    Logger::init().unwrap_err();
-    Logger::init().unwrap_err();
-    Logger::init().unwrap_err();
-    Logger::init().unwrap_err();
+    Logger::init(None, None).unwrap_err();
+    Logger::init(None, None).unwrap_err();
+    Logger::init(None, None).unwrap_err();
+    Logger::init(None, None).unwrap_err();
     l.info("Successfully ignored extra init");
 }
