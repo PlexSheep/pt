@@ -38,6 +38,7 @@ pub enum Error {
     IO(std::io::Error),
     /// Various errors raised when the messenger is used in a wrong way
     Usage(String),
+    /// Could not assign logger as the global default
     SetGlobalDefaultFail(SetGlobalDefaultError),
 }
 
@@ -95,4 +96,3 @@ impl std::fmt::Display for Error {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
-
