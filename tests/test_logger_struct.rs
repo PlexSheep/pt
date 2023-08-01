@@ -1,21 +1,37 @@
 //! # Tests for pt::logger::Logger
 //!
-//! Note: the module uses a global variable to store if the thread has 
+//! Note: the module uses a global variable to store if the thread has
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use pt::common::macros::get_stdout_for;
 /// ## Tests for basic logging functionality
 use pt::logger::*;
-use pt::common::macros::get_stdout_for;
 
 use regex::Regex;
 
+use std::sync::Once;
+
 //// HELPERS ///////////////////////////////////////////////////////////////////////////////////////
+static SETUP: Once = Once::new();
 // only initialize once
 /// ## setup that's needed before testing the logger struct
 fn setup() {
-    // we don't want to log messages during our tests!
-    std::env::set_var(LOGGER_ENV_KEY, "Trace");
-    Logger::init_specialized(true, false, false, None);
-    println!()
+    SETUP.call_once(|| {
+        // we don't want to log messages during our tests!
+        Logger::init_customized(
+            false,
+            std::path::PathBuf::from("/dev/null"),
+            false,
+            false,
+            true,
+            false,
+            tracing::Level::TRACE,
+            false,
+            false,
+            false,
+        )
+        .expect("could not initialize Logger");
+        println!()
+    });
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -51,8 +67,7 @@ fn test_log_basic() {
     // this matches the format of the env_logger perfectly, but make sure that color is off,
     // else the ANSI escape sequences break this test
     let regex = Regex::new(concat!(
-        r"(?m)\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z ",
-        r"(TRACE|DEBUG|INFO|WARN|ERROR) +pt::logger\] MSG"
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z\s+(TRACE|DEBUG|INFO|WARN|ERROR)\sMSG"
     ))
     .unwrap();
 
@@ -65,9 +80,9 @@ fn test_multi_initialize() {
     setup();
     let l = Logger::new();
     // these should be ignored due to the global flag
-    Logger::init();
-    Logger::init();
-    Logger::init();
-    Logger::init();
+    Logger::init().unwrap_err();
+    Logger::init().unwrap_err();
+    Logger::init().unwrap_err();
+    Logger::init().unwrap_err();
     l.info("Successfully ignored extra init");
 }

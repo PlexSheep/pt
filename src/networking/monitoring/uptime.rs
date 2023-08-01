@@ -21,7 +21,7 @@ use std::{fmt, time::Duration};
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 // we want the log macros in any case
 #[allow(unused_imports)]
-use log::{debug, error, info, trace, warn};
+use tracing;
 
 use reqwest;
 
@@ -142,10 +142,10 @@ impl UptimeStatus {
             return;
         }
         let ratio: f32 = (self.reachable as f32) / (self.urls.len() as f32) * 100f32;
-        trace!("calculated success_ratio: {}", ratio);
+        tracing::trace!("calculated success_ratio: {}", ratio);
         self.success_ratio = ratio.floor() as u8;
         self.success = self.success_ratio >= self.success_ratio_target;
-        trace!("calculated success as: {}", self.success)
+        tracing::trace!("calculated success as: {}", self.success)
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ pub fn continuous_uptime_monitor(
     timeout: u64,
 ) {
     if urls.len() == 0 {
-        error!("No URLs provided. There is nothing to monitor.");
+        tracing::error!("No URLs provided. There is nothing to monitor.");
         return;
     }
 
@@ -293,19 +293,19 @@ fn display_uptime_status(
 ) {
     // I know it's weird that this has two spaces too much, but somehow just the tabs is missing
     // two spaces.
-    info!("uptime check:      {}", msg);
-    info!("last uptime:       {}", match_format_time(last_uptime));
-    info!("last downtime:     {}", match_format_time(last_downtime));
-    info!(
+    tracing::info!("uptime check:      {}", msg);
+    tracing::info!("last uptime:       {}", match_format_time(last_uptime));
+    tracing::info!("last downtime:     {}", match_format_time(last_downtime));
+    tracing::info!(
         "since downtime:    {}",
         match_format_duration_since(last_downtime)
     );
-    info!(
+    tracing::info!(
         "since uptime:      {}",
         match_format_duration_since(last_uptime)
     );
-    debug!("\n{}", status);
-    info!("{}", divider!());
+    tracing::debug!("\n{}", status);
+    tracing::info!("{}", divider!());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

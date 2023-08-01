@@ -15,18 +15,21 @@
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
+    path::PathBuf,
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use env_logger::{Env, Target, WriteStyle};
-use log::{debug, error, info, trace, warn, Level};
+pub mod error;
+use error::*;
+
+pub use tracing::{debug, error, info, trace, warn, Level};
+use tracing_appender;
+use tracing_subscriber::prelude::*;
 
 use pyo3::prelude::*;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
-pub const DEFAULT_LOG_LEVEL: Level = Level::Info;
-/// Register your level to this environment variable to override the used level
-pub const LOGGER_ENV_KEY: &'static str = "LIBPT_LOGLEVEL";
+pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -63,50 +66,68 @@ impl Logger {
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
-    pub fn init() {
+    ///
+    /// Assumes some defaults, use [`init_customized`](init_customized) for more control
+    pub fn init() -> Result<()> {
+        Self::init_customized(
+            false,
+            PathBuf::from("/dev/null"),
+            true,
+            false,
+            true,
+            false,
+            Level::INFO,
+            false,
+            false,
+            false,
+        )
+    }
+
+    /// ## initializes the logger
+    ///
+    /// Will enable the logger to be used.
+    pub fn init_customized(
+        log_to_file: bool,
+        log_dir: PathBuf,
+        ansi: bool,
+        display_filename: bool,
+        display_level: bool,
+        display_target: bool,
+        max_level: Level,
+        display_thread_ids: bool,
+        display_thread_names: bool,
+        display_line_number: bool,
+    ) -> Result<()> {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
-            return;
+            return Err(Error::Usage(format!("logging is already initialized")));
         } else {
-            let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
-            let res = env_logger::Builder::from_env(env)
-                .try_init();
-            if res.is_err() {
-                eprintln!("could not init logger: {}", res.unwrap_err());
-            }
-            INITIALIZED.store(true, Ordering::Relaxed);
-        }
-    }
+            let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
+                // subscriber configuration
+                .with_ansi(ansi)
+                .with_file(display_filename)
+                .with_level(display_level)
+                .with_target(display_target)
+                .with_max_level(max_level)
+                .with_thread_ids(display_thread_ids)
+                .with_line_number(display_line_number)
+                .with_thread_names(display_thread_names)
+                //.pretty // too verbose and over multiple lines, a bit like python tracebacks
+                .finish();
 
-    /// ## initializes the logger to log to a target
-    ///
-    /// Will enable the logger to be used.
-    pub fn init_specialized(show_module: bool, test: bool, color: bool, target: Option<Target>) {
-        let target = match target {
-            Some(t) => t,
-            None => Target::Stdout,
-        };
-        // only init if no init has been performed yet
-        if INITIALIZED.load(Ordering::Relaxed) {
-            eprintln!("trying to reinitialize the logger, ignoring");
-            return;
-        } else {
-            let env = Env::default().filter_or(LOGGER_ENV_KEY, DEFAULT_LOG_LEVEL.to_string());
-            let res = env_logger::Builder::from_env(env)
-                .is_test(test)
-                .target(target)
-                .write_style(if color {
-                    WriteStyle::Auto
-                } else {
-                    WriteStyle::Never
-                })
-                .format_target(show_module)
-                .try_init();
-            if res.is_err() {
-                eprintln!("could not init logger: {}", res.unwrap_err());
+            if log_to_file {
+                let file_appender = tracing_appender::rolling::daily(log_dir, "log");
+                let (file_writer, _guard) = tracing_appender::non_blocking(file_appender);
+                let layered_subscriber = basic_subscriber
+                    .with(tracing_subscriber::fmt::Layer::default().with_writer(file_writer));
+                tracing::subscriber::set_global_default(layered_subscriber)?;
+            } else {
+                tracing::subscriber::set_global_default(basic_subscriber)?;
             }
+
             INITIALIZED.store(true, Ordering::Relaxed);
+            Ok(())
         }
     }
 
@@ -159,14 +180,8 @@ impl Logger {
     /// ## Python version of [`init()`](Logger::init)
     #[pyo3(name = "init")]
     #[staticmethod]
-    pub fn py_init() {
-        Self::init_specialized(false, false, true, None)
-    }
-    /// ## Python version of [`init_specialized()`](Logger::init_specialized)
-    #[pyo3(name = "init_specialized")]
-    #[staticmethod]
-    pub fn py_init_specialized(color: bool) {
-        Self::init_specialized(false, false, color, None)
+    pub fn py_init() -> Result<()> {
+        Self::init()
     }
     /// ## Python version of [`error()`](Logger::error)
     #[pyo3(name = "error")]
