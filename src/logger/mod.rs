@@ -107,6 +107,10 @@ impl Logger {
             warn!("trying to reinitialize the logger, ignoring");
             return Err(Error::Usage(format!("logging is already initialized")));
         } else {
+            let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
+                true
+            });
+
             let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
                 // subscriber configuration
                 .with_ansi(ansi)
@@ -118,7 +122,9 @@ impl Logger {
                 .with_line_number(display_line_number)
                 .with_thread_names(display_thread_names)
                 //.pretty // too verbose and over multiple lines, a bit like python tracebacks
-                .finish();
+                .finish()
+                // add layers
+                .with(filter);
 
             if log_to_file {
                 let file_appender = tracing_appender::rolling::daily(log_dir, "log");
