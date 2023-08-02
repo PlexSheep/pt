@@ -26,7 +26,6 @@ clap = { version = "4.3.11", features = ["derive"] }
 clap-num = "1.0.2"
 clap-verbosity-flag = "2.0.1"
 env_logger = "0.10.0"
-gag = "1.0.0"
 humantime = "2.1.0"
 num = "0.4.0"
 openssl = "0.10.55"
@@ -40,3 +39,6 @@ signal-hook = "0.3.15"
 tracing = "0.1.37"
 tracing-appender = "0.2.2"
 tracing-subscriber = "0.3.17"
+
+[dev-dependencies]
+gag = "1.0.0"
