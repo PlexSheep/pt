@@ -24,7 +24,7 @@ use error::*;
 
 pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender;
-use tracing_subscriber::prelude::*;
+use tracing_subscriber::{prelude::*, fmt::format::FmtSpan};
 
 use pyo3::prelude::*;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,11 @@ impl Logger {
             return Err(Error::Usage(format!("logging is already initialized")));
         } else {
             let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
-                true
+                let mut filter = false;
+                filter |= metadata.target().contains(env!("CARGO_PKG_NAME"));
+                filter |= metadata.target().contains("pt");
+
+                filter
             });
 
             let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
@@ -121,6 +125,7 @@ impl Logger {
                 .with_thread_ids(display_thread_ids)
                 .with_line_number(display_line_number)
                 .with_thread_names(display_thread_names)
+                .with_span_events(FmtSpan::FULL)
                 //.pretty // too verbose and over multiple lines, a bit like python tracebacks
                 .finish()
                 // add layers
