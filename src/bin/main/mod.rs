@@ -28,6 +28,7 @@ pub mod args;
 use args::*;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+#[allow(dead_code)]
 const EXIT_SUCCESS: i32 = 0;
 const EXIT_FAILURE_USAGE: i32 = 1;
 

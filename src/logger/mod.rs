@@ -109,8 +109,14 @@ impl Logger {
         } else {
             let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
                 let mut filter = false;
+
+                // if it's this lib, continue
                 filter |= metadata.target().contains(env!("CARGO_PKG_NAME"));
                 filter |= metadata.target().contains("pt");
+
+                // if it's another crate, only show above debug
+                // FIXME, this is not the behaviour I want for a real release
+                filter |= metadata.level() > &Level::DEBUG;
 
                 filter
             });
