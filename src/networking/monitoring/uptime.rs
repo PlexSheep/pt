@@ -19,9 +19,7 @@
 use std::{fmt, time::Duration};
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-// we want the log macros in any case
-#[allow(unused_imports)]
-use tracing;
+use crate::logger::*;
 
 use reqwest;
 
@@ -142,10 +140,10 @@ impl UptimeStatus {
             return;
         }
         let ratio: f32 = (self.reachable as f32) / (self.urls.len() as f32) * 100f32;
-        tracing::trace!("calculated success_ratio: {}", ratio);
+        trace!("calculated success_ratio: {}", ratio);
         self.success_ratio = ratio.floor() as u8;
         self.success = self.success_ratio >= self.success_ratio_target;
-        tracing::trace!("calculated success as: {}", self.success)
+        trace!("calculated success as: {}", self.success)
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +216,7 @@ pub fn continuous_uptime_monitor(
     timeout: u64,
 ) {
     if urls.len() == 0 {
-        tracing::error!("No URLs provided. There is nothing to monitor.");
+        error!("No URLs provided. There is nothing to monitor.");
         return;
     }
 
@@ -226,11 +224,15 @@ pub fn continuous_uptime_monitor(
     let mut last_downtime: Option<SystemTime> = None;
     let mut last_uptime: Option<SystemTime> = None;
     let mut status = UptimeStatus::new(success_ratio_target, urls, timeout);
-    let mut last_was_up: bool = false;
+    // we assume that the last status was up, so the binary shows the first status if its a
+    // failure.
+    let mut last_was_up: bool = true;
     let mut last_ratio: u8 = status.success_ratio;
     loop {
+        trace!(?status, ?last_was_up, "loop iteration for continuous uptime monitor");
         if !status.success {
             if last_was_up {
+                trace!("displaying status");
                 display_uptime_status("fail", last_uptime, last_downtime, &status)
             }
             last_downtime = Some(SystemTime::now());
@@ -293,19 +295,19 @@ fn display_uptime_status(
 ) {
     // I know it's weird that this has two spaces too much, but somehow just the tabs is missing
     // two spaces.
-    tracing::info!("uptime check:      {}", msg);
-    tracing::info!("last uptime:       {}", match_format_time(last_uptime));
-    tracing::info!("last downtime:     {}", match_format_time(last_downtime));
-    tracing::info!(
+    info!("uptime check:      {}", msg);
+    info!("last uptime:       {}", match_format_time(last_uptime));
+    info!("last downtime:     {}", match_format_time(last_downtime));
+    info!(
         "since downtime:    {}",
         match_format_duration_since(last_downtime)
     );
-    tracing::info!(
+    info!(
         "since uptime:      {}",
         match_format_duration_since(last_uptime)
     );
-    tracing::debug!("\n{}", status);
-    tracing::info!("{}", divider!());
+    debug!("\n{}", status);
+    info!("{}", divider!());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
