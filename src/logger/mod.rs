@@ -107,8 +107,12 @@ impl Logger {
             warn!("trying to reinitialize the logger, ignoring");
             return Err(Error::Usage(format!("logging is already initialized")));
         } else {
-            let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
-                true
+            let filter = tracing_subscriber::filter::FilterFn::new(|_metadata| {
+                #[allow(unused_variables)]
+                #[allow(unused_mut)]
+                let mut status = true;
+
+                status
             });
 
             let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
