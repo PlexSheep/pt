@@ -1,5 +1,7 @@
 # pt / libpt
 
+![pt-logo](data/media/pt-logo.svg)
+
 `pt` stands for either one of "personal tool", "plex tool", "pete" or something among those lines.
 It is a collection of tools that i might or might not use. The intended purpose of this repo is that
 I program whatever i feel is worth having in a personal thing into it, then use it as either a lib,
