@@ -26,6 +26,9 @@ pub mod common;
 pub mod logger;
 /// networking tools
 pub mod networking;
+/// math tools
+pub mod math;
+
 use crate::logger::Logger;
 
 use pyo3::prelude::*;
