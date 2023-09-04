@@ -13,7 +13,6 @@
 // enable clippy's extra lints, the pedantic version
 #![warn(clippy::pedantic)]
 
-use std::path::PathBuf;
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use pt::{logger, networking::monitoring::uptime};
@@ -26,6 +25,8 @@ use clap::Parser;
 
 pub mod args;
 use args::*;
+
+use std::path::PathBuf;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 #[allow(dead_code)]
