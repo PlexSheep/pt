@@ -17,9 +17,8 @@
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 pub mod result;
-use result::{Error, Result};
+pub use result::{Error, Result, ComputeResult};
 
-use self::result::ComputeResult;
 use crate::logger::{trace, debug, info, warn, error};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -78,6 +77,7 @@ impl Computer {
     /// This method only processes a single term at a time, without caching.
     pub fn compute(mut t: Term) -> Result<ComputeResult> {
         trace!("computing term {t:?}");
+        return Ok(ComputeResult::from(0))
     }
 }
 

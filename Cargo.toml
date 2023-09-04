@@ -21,6 +21,10 @@ crate-type = ["cdylib", "rlib"]
 name = "pt"
 path = "src/bin/main/mod.rs"
 
+[[bin]]
+name = "ccc"
+path = "src/bin/ccc/mod.rs"
+
 [dependencies]
 clap = { version = "4.3.11", features = ["derive"] }
 clap-num = "1.0.2"

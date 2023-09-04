@@ -75,6 +75,20 @@ impl<T: num_traits::PrimInt> From<T> for NumericResult where
     }
 }
 
+impl<T: num_traits::PrimInt> From<T> for ComputeResult where
+    u128: TryFrom<T>,
+    u128: TryFrom<T> {
+    fn from(value: T) -> Self {
+        NumericResult::from(value).into()
+    }
+}
+
+impl From<NumericResult> for ComputeResult {
+    fn from(value: NumericResult) -> Self {
+        ComputeResult::Numerical(value)
+    }
+}
+
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
