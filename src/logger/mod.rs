@@ -108,17 +108,19 @@ impl Logger {
             return Err(Error::Usage(format!("logging is already initialized")));
         } else {
             let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
-                let mut filter = false;
-
-                // if it's this lib, continue
-                filter |= metadata.target().contains(env!("CARGO_PKG_NAME"));
-                filter |= metadata.target().contains("pt");
-
-                // if it's another crate, only show above debug
-                // FIXME, this is not the behaviour I want for a real release
-                filter |= metadata.level() > &Level::DEBUG;
-
-                filter
+                // let mut filter = false;
+                //
+                // // if it's this lib, continue
+                // filter |= metadata.target().contains(env!("CARGO_PKG_NAME"));
+                // filter |= metadata.target().contains("pt");
+                //
+                // // if it's another crate, only show above debug
+                // filter |= metadata.level() > &Level::DEBUG;
+                //
+                // filter
+                // FIXME: Make the filter customizable with sane defaults. Don't block the
+                // executing crate.
+                true
             });
 
             let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
