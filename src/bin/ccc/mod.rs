@@ -15,7 +15,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use pt::math::computer::*;
+use pt::math::computer::{*, self};
 use pt::logger::*;
 
 use clap::{Parser, Subcommand};
@@ -126,7 +126,9 @@ fn main() {
     for part in cli.expression {
         expr += &part;
     }
-    
-    info!("exporssion: {}", expr);
+
+    debug!("exporssion: {}", expr);
+    let r = Computer::oneshot(expr);
+    println!("{}", r.unwrap());
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////

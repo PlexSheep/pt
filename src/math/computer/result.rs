@@ -12,6 +12,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use std::fmt::Display;
 use num_traits;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,7 @@ pub struct VarResult {
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
 pub struct ComplexResult {
 
@@ -75,6 +77,7 @@ impl<T: num_traits::PrimInt> From<T> for NumericResult where
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 impl<T: num_traits::PrimInt> From<T> for ComputeResult where
     u128: TryFrom<T>,
     u128: TryFrom<T> {
@@ -83,9 +86,58 @@ impl<T: num_traits::PrimInt> From<T> for ComputeResult where
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 impl From<NumericResult> for ComputeResult {
     fn from(value: NumericResult) -> Self {
         ComputeResult::Numerical(value)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl Display for ComputeResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ComputeResult::Numerical(val) => {
+                write!(f, "{}", val)
+            }
+            ComputeResult::Complex(val) => {
+                write!(f, "{}", val)
+            }
+            ComputeResult::Variable(val) => {
+                write!(f, "{}", val)
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl Display for NumericResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NumericResult::Float(val) => {
+                write!(f, "{val}")
+            }
+            NumericResult::Signed(val) => {
+                write!(f, "{val}")
+            }
+            NumericResult::Unsigned(val) => {
+                write!(f, "{val}")
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl Display for ComplexResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "")
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl Display for VarResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "")
     }
 }
 

@@ -30,15 +30,38 @@ use crate::logger::{trace, debug, info, warn, error};
 //// MACROS ////////////////////////////////////////////////////////////////////////////////////////
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
-#[non_exhaustive]
-pub enum Constants {
-    Pi
-}
+// #[non_exhaustive]
+// #[derive(Debug)]
+// pub enum Constants {
+//     Pi
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[non_exhaustive]
+#[derive(Debug)]
+/// ## Supported Operations
+///
+/// This `enum` contains all operations supported in this module.
 pub enum Operations {
-    Addit
+    /// Mathmatical addition
+    Addition,
+    /// Mathmatical subtraction
+    Subtraction,
+    /// Mathmatical multiplication
+    Multiplication,
+    /// Mathmatical division
+    Division,
+    /// Mathmatical modulo, finite field arithmetic
+    Modulo,
+    /// Draw the mathmatical root, attribute n is the nth root
+    Root(u16),
+    /// round up
+    Floor,
+    /// round down
+    Ceil,
+    /// round to nearest integer
+    /// (commercial rounding)
+    Round
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,11 +71,11 @@ pub enum Functions {
 }
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
-struct Computer;
+pub struct Computer;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-struct Term {
+pub struct Term {
     original: String,
     result: Option<ComputeResult>,
     parts: Vec<String>
