@@ -1,8 +1,8 @@
-//! # Compute expressions
+//! # Calculate expressions
 //!
-//! Compute computations with your computer (`ccc`)
+//! Calculate Calculations with your Calculator (`ccc`)
 //!
-//! This modules aim is to take a term of any kind ([String]) and compute it's value, be it
+//! This modules aim is to take a term of any kind ([String]) and calculate it's value, be it
 //! variable based or a concrete numerical value. It implements different operators and
 //! (mathematical) functions.
 
@@ -17,8 +17,9 @@
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 pub mod result;
-pub use result::{Error, Result, ComputeResult};
+pub use result::{Error, Result, CalculateResult};
 
+#[allow(unused_imports)]    // we possibly want to use all log levels
 use crate::logger::{trace, debug, info, warn, error};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +54,23 @@ pub enum Operations {
     Division,
     /// Mathmatical modulo, finite field arithmetic
     Modulo,
+    /// Any function, seel [`Function`]
+    Function(Function)
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ## Supported Functions
+///
+/// This `enum` contains all functions supported in this module.
+///
+/// A function has a name followed by braces directly afterwards.
+/// A function may have 0 to 31 Arguments.
+///
+/// Example: `sqrt(19)`, `floor(19.9)`
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum Function {
     /// Draw the mathmatical root, attribute n is the nth root
     Root(u16),
     /// round up
@@ -61,46 +79,41 @@ pub enum Operations {
     Ceil,
     /// round to nearest integer
     /// (commercial rounding)
-    Round
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#[non_exhaustive]
-pub enum Functions {
-    Root
+    Round,
 }
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
-pub struct Computer;
+/// ## A Calculator object
+pub struct Calculator;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
 pub struct Term {
     original: String,
-    result: Option<ComputeResult>,
+    result: Option<CalculateResult>,
     parts: Vec<String>
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
-impl Computer {
-    pub fn oneshot(t: String) -> Result<ComputeResult> {
+impl Calculator {
+    pub fn oneshot(t: String) -> Result<CalculateResult> {
         trace!(orig=t, "parsing original string to Term");
         let mut t = Term::new(t);
-        trace!("term has been parsed, starting computation");
+        trace!("term has been parsed, starting Calculation");
         debug!("parsed term: {t:#?}");
-        Self::compute(t)
+        Self::calc(t)
     }
 
-    /// ## compute a [`Term`]
+    /// ## Calculate a [`Term`]
     ///
     /// This method makes use of the 
     /// [shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm) to
-    /// compute the final value of any term.
+    /// Calculate the final value of any term.
     ///
     /// This method only processes a single term at a time, without caching.
-    pub fn compute(mut t: Term) -> Result<ComputeResult> {
-        trace!("computing term {t:?}");
-        return Ok(ComputeResult::from(0))
+    pub fn calc(mut t: Term) -> Result<CalculateResult> {
+        trace!("Calculating term {t:?}");
+        return Ok(CalculateResult::from(0))
     }
 }
 

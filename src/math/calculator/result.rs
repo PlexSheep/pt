@@ -1,4 +1,4 @@
-//! # Results and Errors for the compute module
+//! # Results and Errors for the calculate module
 //!
 //! This module defines the errors and results that can be processed from any given term.
 
@@ -33,7 +33,7 @@ pub enum Error {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-pub enum ComputeResult {
+pub enum CalculateResult {
     Variable(VarResult),
     Numerical(NumericResult),
     Complex(ComplexResult),
@@ -78,7 +78,7 @@ impl<T: num_traits::PrimInt> From<T> for NumericResult where
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl<T: num_traits::PrimInt> From<T> for ComputeResult where
+impl<T: num_traits::PrimInt> From<T> for CalculateResult where
     u128: TryFrom<T>,
     u128: TryFrom<T> {
     fn from(value: T) -> Self {
@@ -87,23 +87,23 @@ impl<T: num_traits::PrimInt> From<T> for ComputeResult where
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl From<NumericResult> for ComputeResult {
+impl From<NumericResult> for CalculateResult {
     fn from(value: NumericResult) -> Self {
-        ComputeResult::Numerical(value)
+        CalculateResult::Numerical(value)
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Display for ComputeResult {
+impl Display for CalculateResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ComputeResult::Numerical(val) => {
+            CalculateResult::Numerical(val) => {
                 write!(f, "{}", val)
             }
-            ComputeResult::Complex(val) => {
+            CalculateResult::Complex(val) => {
                 write!(f, "{}", val)
             }
-            ComputeResult::Variable(val) => {
+            CalculateResult::Variable(val) => {
                 write!(f, "{}", val)
             }
         }

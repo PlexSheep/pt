@@ -1,4 +1,4 @@
-//! # A term that can be the input for computation
+//! # A term that can be the input for calculation
 //!
 //! Short description
 //!

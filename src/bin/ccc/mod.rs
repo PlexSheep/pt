@@ -1,9 +1,9 @@
 //! # Executable for the math/compute submodule
 //!
-//! Compute computations with your computer!
+//! Calculate Calculations with your Computer!
 //!
 //! This command line tool allows you to input a mathematical expression. It will then process the
-//! expression. 
+//! expression.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -15,7 +15,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use pt::math::computer::{*, self};
+use pt::math::calculator::{*, self};
 use pt::logger::*;
 
 use clap::{Parser, Subcommand};
@@ -29,9 +29,9 @@ use std::path::PathBuf;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// short about section displayed in help
 const ABOUT_ROOT: &'static str = r##"
-Compute computations with your computer
+Calculate Calculations with your Computer
 
-    This commandline tool allows you to calculate complex mathematical expressions right in your 
+    This commandline tool allows you to calculate complex mathematical expressions right in your
     shell.
 "##;
 /// longer about section displayed in help, is combined with [the short help](ABOUT_ROOT)
@@ -44,11 +44,11 @@ static LONG_ABOUT_ROOT: &'static str = r##"
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug, Clone, Parser)]
 #[command(
-    author, 
-    version, 
-    about = ABOUT_ROOT, 
+    author,
+    version,
+    about = ABOUT_ROOT,
     long_about = format!("{}{}", ABOUT_ROOT ,LONG_ABOUT_ROOT),
-    help_template = 
+    help_template =
 r#"libpt: {version}{about-section}Author:
 {author-with-newline}
 {usage-heading} {usage}{all-args}{tab}"#
@@ -128,7 +128,7 @@ fn main() {
     }
 
     debug!("exporssion: {}", expr);
-    let r = Computer::oneshot(expr);
+    let r = Calculator::oneshot(expr);
     println!("{}", r.unwrap());
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
