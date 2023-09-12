@@ -13,7 +13,7 @@
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::fmt::Display;
-use num_traits;
+pub use num_traits::PrimInt;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 pub type Result<T> = std::result::Result<T, Error>;
@@ -25,6 +25,50 @@ pub type Result<T> = std::result::Result<T, Error>;
 //// MACROS ////////////////////////////////////////////////////////////////////////////////////////
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
+/// ## Supported Operations
+///
+/// This `enum` contains all operations supported in this module.
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum Operator {
+    /// Mathmatical addition
+    Addition,
+    /// Mathmatical subtraction
+    Subtraction,
+    /// Mathmatical multiplication
+    Multiplication,
+    /// Mathmatical division
+    Division,
+    /// Mathmatical modulo, finite field arithmetic
+    Modulo,
+    /// Any function, seel [`Function`]
+    Function(Function)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ## Supported Functions
+///
+/// This `enum` contains all functions supported in this module.
+///
+/// A function has a name followed by braces directly afterwards.
+/// A function may have 0 to 31 Arguments.
+///
+/// Example: `sqrt(19)`, `floor(19.9)`
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum Function {
+    /// Draw the mathmatical root, attribute n is the nth root
+    Root(u16),
+    /// round up
+    Floor,
+    /// round down
+    Ceil,
+    /// round to nearest integer
+    /// (commercial rounding)
+    Round,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum Error {
@@ -33,15 +77,15 @@ pub enum Error {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-pub enum CalculateResult {
-    Variable(VarResult),
-    Numerical(NumericResult),
-    Complex(ComplexResult),
+pub enum Value {
+    Variable(VarVal),
+    Numerical(NumVal),
+    Complex(ComplVal),
 }
 
 #[non_exhaustive]
 #[derive(Debug)]
-pub enum NumericResult {
+pub enum NumVal {
     Signed(i128),
     Unsigned(u128),
     Float(f64)
@@ -49,61 +93,61 @@ pub enum NumericResult {
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-pub struct VarResult {
+pub struct VarVal {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-pub struct ComplexResult {
+pub struct ComplVal {
 
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
-impl<T: num_traits::PrimInt> From<T> for NumericResult where
+impl<T: num_traits::PrimInt> From<T> for NumVal where
     u128: TryFrom<T>,
     u128: TryFrom<T> {
     fn from(value: T) -> Self {
         if T::min_value().is_zero() {
             // unsigned data types
             // `u128` is the largest unsigned datatype, any other type will fit.
-            NumericResult::Unsigned(value.to_u128().unwrap())
+            NumVal::Unsigned(value.to_u128().unwrap())
         }
         else {
             // signed data types
             // `i128` is the largest unsigned datatype, any other type will fit.
-            NumericResult::Signed(value.to_i128().unwrap())
+            NumVal::Signed(value.to_i128().unwrap())
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl<T: num_traits::PrimInt> From<T> for CalculateResult where
+impl<T: PrimInt> From<T> for Value where
     u128: TryFrom<T>,
     u128: TryFrom<T> {
     fn from(value: T) -> Self {
-        NumericResult::from(value).into()
+        NumVal::from(value).into()
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl From<NumericResult> for CalculateResult {
-    fn from(value: NumericResult) -> Self {
-        CalculateResult::Numerical(value)
+impl From<NumVal> for Value {
+    fn from(value: NumVal) -> Self {
+        Value::Numerical(value)
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Display for CalculateResult {
+impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CalculateResult::Numerical(val) => {
+            Value::Numerical(val) => {
                 write!(f, "{}", val)
             }
-            CalculateResult::Complex(val) => {
+            Value::Complex(val) => {
                 write!(f, "{}", val)
             }
-            CalculateResult::Variable(val) => {
+            Value::Variable(val) => {
                 write!(f, "{}", val)
             }
         }
@@ -111,16 +155,16 @@ impl Display for CalculateResult {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Display for NumericResult {
+impl Display for NumVal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            NumericResult::Float(val) => {
+            NumVal::Float(val) => {
                 write!(f, "{val}")
             }
-            NumericResult::Signed(val) => {
+            NumVal::Signed(val) => {
                 write!(f, "{val}")
             }
-            NumericResult::Unsigned(val) => {
+            NumVal::Unsigned(val) => {
                 write!(f, "{val}")
             }
         }
@@ -128,14 +172,14 @@ impl Display for NumericResult {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Display for ComplexResult {
+impl Display for ComplVal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "")
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Display for VarResult {
+impl Display for VarVal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "")
     }

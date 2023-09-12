@@ -16,8 +16,8 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-pub mod result;
-pub use result::{Error, Result, CalculateResult};
+pub mod base;
+pub use base::{Error, Result, Value};
 pub mod term;
 pub use term::*;
 
@@ -45,7 +45,7 @@ pub struct Calculator;
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 impl Calculator {
     /// Do a single calculation without doing anything else
-    pub fn oneshot(t: String) -> Result<CalculateResult> {
+    pub fn oneshot(t: String) -> Result<Value> {
         trace!(orig=t, "parsing original string to Term");
         let t = Term::new(t)?;
         trace!("term has been parsed, starting Calculation");
@@ -60,7 +60,7 @@ impl Calculator {
     /// Calculate the final value of any term.
     ///
     /// This method only processes a single term at a time, without caching.
-    pub fn calc(mut t: Term) -> Result<CalculateResult> {
+    pub fn calc(mut t: Term) -> Result<Value> {
         trace!("Calculating term {t:?}");
         t.prepare();
         t.process();
@@ -68,7 +68,7 @@ impl Calculator {
             error!("Term was processed but no result was assigned.");
             return Err(Error::SyntaxError)
         }
-        return Ok(t.result.unwrap())
+        return t.result.unwrap()
     }
 }
 

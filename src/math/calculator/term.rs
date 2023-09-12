@@ -20,7 +20,8 @@
 use std::collections::VecDeque;
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-pub use super::{Error, Result, CalculateResult};
+pub use super::{Error, Result, Value, base::{self, *}};
+use crate::logger::*;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,49 +32,6 @@ pub use super::{Error, Result, CalculateResult};
 //// MACROS ////////////////////////////////////////////////////////////////////////////////////////
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
-/// ## Supported Operations
-///
-/// This `enum` contains all operations supported in this module.
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum Operator {
-    /// Mathmatical addition
-    Addition,
-    /// Mathmatical subtraction
-    Subtraction,
-    /// Mathmatical multiplication
-    Multiplication,
-    /// Mathmatical division
-    Division,
-    /// Mathmatical modulo, finite field arithmetic
-    Modulo,
-    /// Any function, seel [`Function`]
-    Function(Function)
-
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Supported Functions
-///
-/// This `enum` contains all functions supported in this module.
-///
-/// A function has a name followed by braces directly afterwards.
-/// A function may have 0 to 31 Arguments.
-///
-/// Example: `sqrt(19)`, `floor(19.9)`
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum Function {
-    /// Draw the mathmatical root, attribute n is the nth root
-    Root(u16),
-    /// round up
-    Floor,
-    /// round down
-    Ceil,
-    /// round to nearest integer
-    /// (commercial rounding)
-    Round,
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ## Parsed value to be calculated
@@ -86,7 +44,7 @@ enum Token {
     Operator(Operator),
     /// A concrete value that we can calculate something with. May be a constant, integer, float,
     /// etc.
-    Value(),
+    Value(super::base::Value),
     /// A variable of some kind that will be present in the result
     Variable(char),
 }
@@ -101,7 +59,7 @@ pub struct Term {
     /// the original expression to calculate
     pub original: String,
     /// the calculated result, may be of diffrent types, see [`crate::math::calculator::result`].
-    pub result: Option<CalculateResult>,
+    pub result: Option<Result<Value>>,
     /////////////////////////////////////
     ///// internal values following /////
     /////////////////////////////////////
@@ -126,16 +84,60 @@ impl Term {
     }
 
     /// Prepare the term for the processing.
-    pub fn prepare(&mut self) {
+    pub fn prepare(&mut self) -> Result<()> {
         // TODO: shunting yard
+
+        // Storage for unfinished tokens
+        let mut unfinished_chars: Vec<char> = Vec::new();
+
+        for c in self.original.chars() {
+            // FIXME: this completely ignores shunting yard, 
+            // only being on the lookout for values
+            if Self::is_tok(&unfinished_chars) {
+                let tok = Self::to_tok(unfinished_chars)?;
+                // TODO: handle the token, depending on type, precedence and so on
+                self.output_queue.push_front(tok);
+                unfinished_chars = Vec::new();
+            }
+            else {
+                unfinished_chars.push(c);
+            }
+        }
+        Ok(())
     }
 
-    pub fn process(&mut self) {
+    /// Process a prepared term, calculating it's result
+    pub fn process(&mut self) -> Result<()> {
+        debug!("processing term: {:#?}", self);
+        debug!("queue: {:#?}", self.output_queue);
         // TODO: process RPN and set result
-        self.result = Some(CalculateResult::Numerical(19.into()))
+        self.result = Some(Ok(19.into()));
+        Ok(())
+    }
+
+    /// Convert a character into a token
+    ///
+    /// Returns: A tuple with a [`Token`] and a [`bool`]. If the bool is false, the [`Token`] is
+    /// marked as "incomplete", meaning that the character cannot be used yet.
+    fn to_tok(s: Vec<char>) -> Result<Token> {
+        Ok(19.into())
+    }
+
+    fn is_tok(s: &Vec<char>) -> bool {
+        false
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+impl<T> From<T> for Token where
+    T: Into<Value>,
+    T: PrimInt,
+    u128: TryFrom<T>
+    {
+    fn from(value: T) -> Self {
+        Token::Value(base::Value::from(value))
+    }
+}
 
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
