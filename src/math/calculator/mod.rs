@@ -62,8 +62,8 @@ impl Calculator {
     /// This method only processes a single term at a time, without caching.
     pub fn calc(mut t: Term) -> Result<Value> {
         trace!("Calculating term {t:?}");
-        t.prepare();
-        t.process();
+        t.prepare()?;
+        t.process()?;
         if t.result.is_none() {
             error!("Term was processed but no result was assigned.");
             return Err(Error::SyntaxError)

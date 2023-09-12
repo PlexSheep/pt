@@ -90,17 +90,18 @@ impl Term {
         // Storage for unfinished tokens
         let mut unfinished_chars: Vec<char> = Vec::new();
 
-        for c in self.original.chars() {
-            // FIXME: this completely ignores shunting yard, 
-            // only being on the lookout for values
-            if Self::is_tok(&unfinished_chars) {
-                let tok = Self::to_tok(unfinished_chars)?;
-                // TODO: handle the token, depending on type, precedence and so on
-                self.output_queue.push_front(tok);
-                unfinished_chars = Vec::new();
+        for (index, c) in self.original.chars().enumerate() {
+            if !c.is_alphanumeric() {
+                // TODO: allow any unicode char to be a variable
+                warn!("'{c}' is not a valid character, only alphanumeric input is allowed.");
+                return Err(Error::SyntaxError);
             }
-            else {
-                unfinished_chars.push(c);
+            // this will be a mess, but it has to be before i can sort the mess.
+            match c {
+                _ => {
+                    warn!("The meaning of '{c}' could not be identified.");
+                    return Err(Error::SyntaxError);
+                }
             }
         }
         Ok(())
@@ -123,10 +124,29 @@ impl Term {
         Ok(19.into())
     }
 
-    fn is_tok(s: &Vec<char>) -> bool {
-        false
+    /// only leave relevant chars for calculation
+    fn filter(s: String) -> String {
+        let mut filtered = String::new();
+        for c in s.chars() {
+            if !Self::is_ignore(&c) {
+                filtered.push(c);
+            }
+        }
+        return filtered
+    }
+
+    /// check if we should ignore this character
+    fn is_ignore(c: &char) -> bool {
+        match *c {
+            ' ' => true,
+            _ => false
+        }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Helper methods for Tokens
+impl Token { }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl<T> From<T> for Token where
