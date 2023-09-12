@@ -40,6 +40,7 @@ use crate::logger::{trace, debug, info, warn, error};
 /// This struct does not do anything at the moment, but aims to be the target for high level
 /// control. Instead of using the [`Calculator`], you could just use the [`Term`] struct for
 /// lower level control.
+#[derive(Debug)]
 pub struct Calculator;
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -65,8 +66,9 @@ impl Calculator {
         t.prepare()?;
         t.process()?;
         if t.result.is_none() {
-            error!("Term was processed but no result was assigned.");
-            return Err(Error::SyntaxError)
+            let reason = format!("Term was processed but no result was assigned.");
+            // FIXME: unfitting error type
+            return Err(Error::SyntaxError(reason))
         }
         return t.result.unwrap()
     }

@@ -72,7 +72,7 @@ pub enum Function {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum Error {
-    SyntaxError
+    SyntaxError(String)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,6 +117,17 @@ impl<T: num_traits::PrimInt> From<T> for NumVal where
             // signed data types
             // `i128` is the largest unsigned datatype, any other type will fit.
             NumVal::Signed(value.to_i128().unwrap())
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Display Errors with a nice little reason
+impl Display for Error {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SyntaxError(reason) => {
+                write!(f, "Syntax Error: {}", reason)
+            }
         }
     }
 }

@@ -58,6 +58,8 @@ enum Token {
 pub struct Term {
     /// the original expression to calculate
     pub original: String,
+    /// the filtered text of the expression, only with relevant information
+    pub text: String,
     /// the calculated result, may be of diffrent types, see [`crate::math::calculator::result`].
     pub result: Option<Result<Value>>,
     /////////////////////////////////////
@@ -76,6 +78,7 @@ impl Term {
         return Ok(
             Term {
                 original: orig,
+                text: String::new(), // will be initialized in `prepare()`
                 result: None,
                 operator_stack: Vec::new(),
                 output_queue: VecDeque::new()
@@ -85,22 +88,20 @@ impl Term {
 
     /// Prepare the term for the processing.
     pub fn prepare(&mut self) -> Result<()> {
-        // TODO: shunting yard
+        trace!("preparing term: {:#?}", self);
+        self.text = Self::filter(&self.original)?;
 
         // Storage for unfinished tokens
         let mut unfinished_chars: Vec<char> = Vec::new();
 
         for (index, c) in self.original.chars().enumerate() {
-            if !c.is_alphanumeric() {
-                // TODO: allow any unicode char to be a variable
-                warn!("'{c}' is not a valid character, only alphanumeric input is allowed.");
-                return Err(Error::SyntaxError);
-            }
             // this will be a mess, but it has to be before i can sort the mess.
             match c {
+                // TODO: make function to check if character is an operator, use it
                 _ => {
-                    warn!("The meaning of '{c}' could not be identified.");
-                    return Err(Error::SyntaxError);
+                    let reason = format!("The meaning of '{c}' could not be identified.");
+                    warn!(reason);
+                    return Err(Error::SyntaxError(reason));
                 }
             }
         }
@@ -125,20 +126,68 @@ impl Term {
     }
 
     /// only leave relevant chars for calculation
-    fn filter(s: String) -> String {
+    // TODO: make function to check if character is an operator, use it
+    fn filter(s: &str) -> Result<String> {
+        // pre checks
+        // NOTE: Apperently, "alphanumeric" in Rust is a pretty broad term.
+        // Even CJK characters or Japanese Kana are allowed:
+        // - 'さ' alphanumeric
+        // - '数' alphanumeric
+        // - '学' alphanumeric
+        // - '+'  not alphanumeric
+        for c in s.chars() {
+            #[cfg(debug_assertions)] {
+                debug!("filter checks for '{c}':
+                alphanumeric:       {}
+                allowed special:    {}
+                EXCEPT IF
+                ascii control:      {}
+                ",
+                !c.is_alphanumeric(),
+                !Self::is_allowed_special_c(&c),
+                c.is_ascii_control(),
+            )
+            }
+            if
+                (
+                    !c.is_alphanumeric()                    ||
+                    !Self::is_allowed_special_c(&c)
+                )
+                &&
+                (
+                    c.is_ascii_control()
+                )
+            {
+                // TODO: allow any unicode char to be a variable
+                let reason = format!("'{c}' is not a valid character, only alphanumeric, punctuation, operators are allowed.");
+                warn!(reason);
+                return Err(Error::SyntaxError(reason));
+            }
+        }
+
+        // filter out single chars
         let mut filtered = String::new();
         for c in s.chars() {
             if !Self::is_ignore(&c) {
                 filtered.push(c);
             }
         }
-        return filtered
+
+        return Ok(filtered)
     }
 
     /// check if we should ignore this character
     fn is_ignore(c: &char) -> bool {
         match *c {
             ' ' => true,
+            _ => false
+        }
+    }
+
+    /// allowed special chars
+    fn is_allowed_special_c(c: &char) -> bool {
+        match *c {
+            '+' | '-' | '*' | '/' | '%' => true,
             _ => false
         }
     }

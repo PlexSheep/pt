@@ -129,6 +129,13 @@ fn main() {
 
     debug!("exporssion: {}", expr);
     let r = Calculator::oneshot(expr);
-    println!("{}", r.unwrap());
+    match r {
+        Ok(r) => {
+            println!("{r}");
+        }
+        Err(err) => {
+            error!("Could not compute: {err}");
+        }
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
