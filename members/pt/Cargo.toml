@@ -1,25 +1,5 @@
-[workspace]
-publish = false
-members = [
-	"members/pt",
-	"members/pt-core",
-	"members/pt-math",
-	"members/pt-bin",
-	"members/pt-log",
-	"members/pt-net",
-	"members/pt-py",
-	"members/pt-hedu",
-]
-default-members = [
-	"members/pt",
-	"members/pt-core",
-	"members/pt-py",
-	"members/pt-log",
-	"members/pt-math",
-]
-
 [package]
-publish = false
+publish = true
 autobins = true
 default-run = "pt"
 name = "libpt"
