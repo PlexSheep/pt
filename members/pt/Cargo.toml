@@ -19,14 +19,15 @@ categories = ["command-line-utilities", "development-tools", "development-tools:
 [lib]
 name = "pt"
 crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
 
 [[bin]]
 name = "pt"
-path = "src/bin/main/mod.rs"
+path = "../members/pt-bin/src/main/mod.rs"
 
 [[bin]]
 name = "ccc"
-path = "src/bin/ccc/mod.rs"
+path = "../members/pt-bin/src/ccc/mod.rs"
 
 [dependencies]
 clap = { version = "4.3.11", features = ["derive"] }

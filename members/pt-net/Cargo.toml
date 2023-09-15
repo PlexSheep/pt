@@ -6,3 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+humantime = "2.1.0"
+pt-core = { version = "0.1.0", path = "../pt-core" }
+pt-log = { version = "0.1.0", path = "../pt-log" }
+pt-math = { version = "0.1.0", path = "../pt-math" }
+reqwest = { version = "0.11.20", features = ["blocking"] }
+serde = { version = "1.0.188", features = ["serde_derive"] }
+serde_json = "1.0.107"

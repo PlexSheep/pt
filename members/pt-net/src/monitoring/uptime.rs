@@ -19,19 +19,17 @@
 use std::{fmt, time::Duration};
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use crate::logger::*;
+use pt_log::*;
 
 use reqwest;
 
 use humantime::{format_duration, format_rfc3339};
 use std::time::SystemTime;
 
-use pyo3::prelude::*;
-
 use serde::{Deserialize, Serialize};
 use serde_json;
 
-use crate::divider;
+use pt_core::divider;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,27 +48,20 @@ pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
 /// ## Describes an uptime status
 ///
 /// [`UptimeStatus`] describes the result of an uptime check.
-#[pyclass]
 #[derive(Serialize, Deserialize)]
 pub struct UptimeStatus {
     /// true if the [`UptimeStatus`] is considered successful
-    #[pyo3(get, set)]
     pub success: bool,
     /// the percentage of reachable urls out of the total urls
-    #[pyo3(get, set)]
     pub success_ratio: u8,
     /// the percentage of reachable urls out of the total urls that need to be reachable in order
     /// for this [`UptimeStatus`] to be considered a success.
-    #[pyo3(get, set)]
     pub success_ratio_target: u8,
     /// the number of reachable [`urls`](UptimeStatus::urls)
-    #[pyo3(get, set)]
     pub reachable: usize,
     /// which urls to check in [`check()`](UptimeStatus::check)
-    #[pyo3(get, set)]
     pub urls: Vec<String>,
     /// timeout length for requests (in ms)
-    #[pyo3(get, set)]
     pub timeout: u64,
 }
 
@@ -144,38 +135,6 @@ impl UptimeStatus {
         self.success_ratio = ratio.floor() as u8;
         self.success = self.success_ratio >= self.success_ratio_target;
         trace!("calculated success as: {}", self.success)
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Implementation of the Python interface
-#[pymethods]
-impl UptimeStatus {
-    /// calls [`new()`](UptimeStatus::new) with python compatible arguments
-    #[new]
-    pub fn py_new(success_ratio_target: u8, urls: Vec<String>, timeout: u64) -> Self {
-        Self::new(success_ratio_target, urls, timeout)
-    }
-
-    /// Same as [`check()`](UptimeStatus::check)
-    #[pyo3(name = "check")]
-    pub fn py_check(&mut self) {
-        self.check();
-    }
-
-    /// Same as [`calc_success()`](UptimeStatus::calc_success)
-    #[pyo3(name = "calc_success")]
-    pub fn py_calc_success(&mut self) {
-        self.calc_success();
-    }
-
-    /// we want to display the [`UptimeStatus`] in python too, so we need `__str__`
-    pub fn __str__(&self) -> String {
-        format!("{}", self)
-    }
-
-    /// we want to debug display the [`UptimeStatus`] in python too, so we need `__str__`
-    pub fn __repr__(&self) -> String {
-        format!("{:?}", self)
     }
 }
 
@@ -258,30 +217,6 @@ pub fn continuous_uptime_monitor(
         last_ratio = status.success_ratio;
         std::thread::sleep(interval);
         status.check();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Python interface for [`continuous_uptime_monitor`]
-///
-/// Runs the function in a different thread and checks from time to time for things like Pythons
-/// `KeyboardInterrupt` exception.
-#[pyfunction]
-#[pyo3(name = "continuous_uptime_monitor")]
-pub fn py_continuous_uptime_monitor(
-    py: Python,
-    success_ratio_target: u8,
-    urls: Vec<String>,
-    interval: u64,
-    timeout: u64,
-) -> PyResult<()> {
-    // execute the function in a different thread
-    let _th = std::thread::spawn(move || {
-        continuous_uptime_monitor(success_ratio_target, urls, interval, timeout);
-    });
-    loop {
-        Python::check_signals(py)?;
-        std::thread::sleep(std::time::Duration::from_millis(100))
     }
 }
 
