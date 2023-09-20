@@ -1,7 +1,9 @@
 //* # See what's behind the datatypes of Rust
 //*
 //* This Crate shows off how datatypes of rust are stored in memory.
-use crate::display::{bytes_to_bin, byte_bit_display};
+
+// reexport macros
+pub use crate::investigate_memory_layout;
 
 /// ## Investigate the internal representation of variables
 ///
@@ -9,9 +11,9 @@ use crate::display::{bytes_to_bin, byte_bit_display};
 #[macro_export]
 macro_rules! investigate_memory_layout {
     ($t:ty, $v:tt) => {
-        println!("Type:\t{}", type_name::<$t>());
+        println!("Type:\t{}", std::any::type_name::<$t>());
         println!("\talign:\t{:?} B", std::mem::align_of::<$t>());
-        println!("\tID:\t{:?}\n", TypeId::of::<$t>());
+        println!("\tID:\t{:?}\n", std::any::TypeId::of::<$t>());
         println!("\tItems:");
         unsafe {
             for (index, item) in $v.iter().enumerate() {
@@ -28,10 +30,10 @@ macro_rules! investigate_memory_layout {
                     \t\tnote:      \tmemory order reversed\n\
                     ",
                     pointer,
-                    byte_bit_display(std::mem::align_of_val(item)),
-                    byte_bit_display(memory.len()),
+                    display::byte_bit_display(std::mem::align_of_val(item)),
+                    display::byte_bit_display(memory.len()),
                     memory,
-                    bytes_to_bin(&memory)
+                    display::bytes_to_bin(&memory)
                 );
             }
         }
