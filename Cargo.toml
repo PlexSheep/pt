@@ -1,6 +1,5 @@
 [workspace]
 resolver = "2"
-publish = false
 members = [
 	"members/pt",
 	"members/pt-core",
@@ -22,8 +21,6 @@ default-members = [
 ]
 [workspace.package]
 publish = false
-default-run = "pt"
-name = "libpt"
 version = "0.1.7"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]

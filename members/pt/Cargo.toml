@@ -1,47 +1,24 @@
 [package]
-default-run = "pt"
 name = "pt"
-version = "0.1.0"
+publish.workspace = true
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-name = "pt"
-crate-type = ["cdylib", "rlib"]
-path = "src/lib.rs"
-
-[[bin]]
-name = "pt"
-path = "../members/pt-bin/src/main/mod.rs"
-
-[[bin]]
-name = "ccc"
-path = "../members/pt-bin/src/ccc/mod.rs"
-
 [dependencies]
-clap = { version = "4.3.11", features = ["derive"] }
-clap-num = "1.0.2"
-clap-verbosity-flag = "2.0.1"
-env_logger = "0.10.0"
-humantime = "2.1.0"
-num = "0.4.0"
-num-traits = "0.2.16"
-openssl = "0.10.55"
-openssl-sys = "0.9.90"
-pt-bin = { version = "0.1.0", path = "../pt-bin" }
+pt-bintols = { version = "0.1.0", path = "../pt-bintols" }
 pt-core = { version = "0.1.0", path = "../pt-core" }
 pt-hedu = { version = "0.1.0", path = "../pt-hedu" }
 pt-log = { version = "0.1.0", path = "../pt-log" }
 pt-math = { version = "0.1.0", path = "../pt-math" }
 pt-net = { version = "0.1.0", path = "../pt-net" }
-regex = "1.9.1"
-reqwest = { version = "0.11.18", features = ["blocking"] }
-serde = { version = "1.0.171", features = ["derive"] }
-serde_json = "1.0.102"
-signal-hook = "0.3.15"
-tracing = "0.1.37"
-tracing-appender = "0.2.2"
-tracing-subscriber = "0.3.17"
-
-[dev-dependencies]
-gag = "1.0.0"
+pt-ccc = { version = "0.1.0", path = "../pt-ccc" }
