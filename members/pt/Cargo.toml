@@ -1,18 +1,7 @@
 [package]
-publish = true
-autobins = true
 default-run = "pt"
-name = "libpt"
-version = "0.1.6"
-edition = "2021"
-authors = ["Christoph J. Scherr <software@cscherr.de>"]
-license = "GPL-3.0-or-later"
-description = "Personal multitool"
-readme = "README.md"
-homepage = "https://git.cscherr.de/PlexSheep/pt"
-repository = "https://git.cscherr.de/PlexSheep/pt"
-keywords = ["cli", "python", "scriptable", "pyo3", "library"]
-categories = ["command-line-utilities", "development-tools", "development-tools::ffi"]
+name = "pt"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -39,7 +28,12 @@ num = "0.4.0"
 num-traits = "0.2.16"
 openssl = "0.10.55"
 openssl-sys = "0.9.90"
-pyo3 = "0.18.1"
+pt-bin = { version = "0.1.0", path = "../pt-bin" }
+pt-core = { version = "0.1.0", path = "../pt-core" }
+pt-hedu = { version = "0.1.0", path = "../pt-hedu" }
+pt-log = { version = "0.1.0", path = "../pt-log" }
+pt-math = { version = "0.1.0", path = "../pt-math" }
+pt-net = { version = "0.1.0", path = "../pt-net" }
 regex = "1.9.1"
 reqwest = { version = "0.11.18", features = ["blocking"] }
 serde = { version = "1.0.171", features = ["derive"] }

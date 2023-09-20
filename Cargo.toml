@@ -12,9 +12,26 @@ members = [
 ]
 default-members = [
 	"members/pt",
+	"members/pt-bin",
 	"members/pt-core",
 	"members/pt-py",
 	"members/pt-log",
 	"members/pt-math",
 ]
+[workspace.package]
+publish = false
+default-run = "pt"
+name = "libpt"
+version = "0.1.7"
+edition = "2021"
+authors = ["Christoph J. Scherr <software@cscherr.de>"]
+license = "MIT"
+description = "Personal multitool"
+readme = "README.md"
+homepage = "https://git.cscherr.de/PlexSheep/pt"
+repository = "https://git.cscherr.de/PlexSheep/pt"
+keywords = ["cli", "python", "scriptable", "pyo3", "library"]
+categories = ["command-line-utilities", "development-tools", "development-tools::ffi"]
 
+[workspace.dependencies]
+pyo3 = "0.19"

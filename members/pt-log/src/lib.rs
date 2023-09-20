@@ -25,6 +25,8 @@ use error::*;
 pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender;
 use tracing_subscriber::{prelude::*, fmt::format::FmtSpan};
+
+use pyo3::prelude::*;
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
@@ -52,6 +54,7 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 /// - `Info`
 /// - `Warn`
 /// - `Error`
+#[pyclass]
 pub struct Logger {}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -189,6 +192,61 @@ impl Logger {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ## Implementation of the python interface
+#[pymethods]
+impl Logger {
+    /// ## Python version of [`new()`](Logger::new)
+    #[new]
+    pub fn py_new() -> PyResult<Self> {
+        Ok(Logger::new())
+    }
+    /// ## Python version of [`init()`](Logger::init)
+    #[pyo3(name = "init")]
+    #[staticmethod]
+    pub fn py_init(log_dir: Option<PathBuf>, max_level: Option<String>) -> Result<()> {
+        Self::init(
+            log_dir,
+            match max_level {
+                Some(s) => match s.to_uppercase().as_str() {
+                    "TRACE" => Some(tracing::Level::TRACE),
+                    "DEBUG" => Some(tracing::Level::DEBUG),
+                    "INFO" => Some(tracing::Level::INFO),
+                    "WARN" => Some(tracing::Level::WARN),
+                    "ERROR" => Some(tracing::Level::ERROR),
+                    _ => return Err(Error::Usage(format!("'{s}' is not a valid log level"))),
+                },
+                None => None,
+            },
+        )
+    }
+    /// ## Python version of [`error()`](Logger::error)
+    #[pyo3(name = "error")]
+    pub fn py_error(&self, printable: String) {
+        self.error(printable)
+    }
+    /// ## Python version of [`warn()`](Logger::warn)
+    #[pyo3(name = "warn")]
+    pub fn py_warn(&self, printable: String) {
+        self.warn(printable)
+    }
+    /// ## Python version of [`info()`](Logger::info)
+    #[pyo3(name = "info")]
+    pub fn py_info(&self, printable: String) {
+        self.info(printable)
+    }
+    /// ## Python version of [`debug()`](Logger::debug)
+    #[pyo3(name = "debug")]
+    pub fn py_debug(&self, printable: String) {
+        self.debug(printable)
+    }
+    /// ## Python version of [`trace()`](Logger::trace)
+    #[pyo3(name = "trace")]
+    pub fn py_trace(&self, printable: String) {
+        self.trace(printable)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for Logger {
     /// ## Debug representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -203,3 +261,4 @@ impl fmt::Debug for Logger {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+

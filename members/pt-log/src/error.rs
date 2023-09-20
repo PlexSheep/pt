@@ -18,6 +18,7 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use pyo3::{exceptions::PyException, PyErr};
 use tracing::subscriber::SetGlobalDefaultError;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +59,19 @@ impl From<SetGlobalDefaultError> for Error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+impl Into<PyErr> for Error {
+    fn into(self) -> PyErr {
+        match self {
+            Error::IO(err) => PyException::new_err(format!("LoggerError: IO {err:?}")),
+            Error::Usage(err) => PyException::new_err(format!("LoggerError: Usage {err}")),
+            Error::SetGlobalDefaultFail(err) => {
+                PyException::new_err(format!("LoggerError: SetGlobalDefaultFail {err}"))
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 impl std::fmt::Debug for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -82,3 +96,4 @@ impl std::fmt::Display for Error {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+
