@@ -15,6 +15,11 @@
 use std::fmt::Display;
 pub use num_traits::PrimInt;
 
+#[allow(unused_imports)]    // we possibly want to use all log levels
+use pt_log::*;
+#[allow(unused_imports)]    // import more complex math stuff from there
+use pt_math;
+
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 pub type Result<T> = std::result::Result<T, Error>;
 

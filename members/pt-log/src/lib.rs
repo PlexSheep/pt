@@ -107,7 +107,7 @@ impl Logger {
             warn!("trying to reinitialize the logger, ignoring");
             return Err(Error::Usage(format!("logging is already initialized")));
         } else {
-            let filter = tracing_subscriber::filter::FilterFn::new(|metadata| {
+            let filter = tracing_subscriber::filter::FilterFn::new(|_metadata| {
                 // let mut filter = false;
                 //
                 // // if it's this lib, continue

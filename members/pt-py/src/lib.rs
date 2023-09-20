@@ -1,4 +1,6 @@
-use pt::*;
+use pt::{
+    log::*,
+};
 
 use pyo3::prelude::*;
 
@@ -21,66 +23,66 @@ fn py_logger(py: Python, parent: &PyModule) -> PyResult<()> {
     parent.add_submodule(module)?;
     Ok(())
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Python module: common
-#[pymodule]
-fn py_common(py: Python, parent: &PyModule) -> PyResult<()> {
-    let module = PyModule::new(py, "common")?;
-    py_common_printing(py, module)?;
-
-    parent.add_submodule(module)?;
-    Ok(())
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Python module: common.printing
-#[pymodule]
-fn py_common_printing(py: Python, parent: &PyModule) -> PyResult<()> {
-    let module = PyModule::new(py, "printing")?;
-    module.add_function(wrap_pyfunction!(common::printing::divider, module)?)?;
-    module.add_function(wrap_pyfunction!(common::printing::print_divider, module)?)?;
-
-    parent.add_submodule(module)?;
-    Ok(())
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Python module: networking
-#[pymodule]
-fn py_networking(py: Python, parent: &PyModule) -> PyResult<()> {
-    let module = PyModule::new(py, "networking")?;
-    py_networking_monitoring(py, module)?;
-
-    parent.add_submodule(module)?;
-    Ok(())
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Python module: networking.monitoring
-#[pymodule]
-fn py_networking_monitoring(py: Python, parent: &PyModule) -> PyResult<()> {
-    let module = PyModule::new(py, "monitoring")?;
-    py_networking_monitoring_uptime(py, module)?;
-
-    parent.add_submodule(module)?;
-    Ok(())
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Python module: networking.monitoring.uptime
-#[pymodule]
-fn py_networking_monitoring_uptime(py: Python, parent: &PyModule) -> PyResult<()> {
-    let module = PyModule::new(py, "uptime")?;
-    module.add_class::<networking::monitoring::uptime::UptimeStatus>()?;
-    module.add_function(wrap_pyfunction!(
-        networking::monitoring::uptime::py_continuous_uptime_monitor,
-        module
-    )?)?;
-
-    parent.add_submodule(module)?;
-    Ok(())
-}
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// /// ## Python module: common
+// #[pymodule]
+// fn py_common(py: Python, parent: &PyModule) -> PyResult<()> {
+//     let module = PyModule::new(py, "common")?;
+//     py_common_printing(py, module)?;
+//
+//     parent.add_submodule(module)?;
+//     Ok(())
+// }
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// /// ## Python module: common.printing
+// #[pymodule]
+// fn py_common_printing(py: Python, parent: &PyModule) -> PyResult<()> {
+//     let module = PyModule::new(py, "printing")?;
+//     module.add_function(wrap_pyfunction!(common::printing::divider, module)?)?;
+//     module.add_function(wrap_pyfunction!(common::printing::print_divider, module)?)?;
+//
+//     parent.add_submodule(module)?;
+//     Ok(())
+// }
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// /// ## Python module: networking
+// #[pymodule]
+// fn py_networking(py: Python, parent: &PyModule) -> PyResult<()> {
+//     let module = PyModule::new(py, "networking")?;
+//     py_networking_monitoring(py, module)?;
+//
+//     parent.add_submodule(module)?;
+//     Ok(())
+// }
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// /// ## Python module: networking.monitoring
+// #[pymodule]
+// fn py_networking_monitoring(py: Python, parent: &PyModule) -> PyResult<()> {
+//     let module = PyModule::new(py, "monitoring")?;
+//     py_networking_monitoring_uptime(py, module)?;
+//
+//     parent.add_submodule(module)?;
+//     Ok(())
+// }
+//
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// /// ## Python module: networking.monitoring.uptime
+// #[pymodule]
+// fn py_networking_monitoring_uptime(py: Python, parent: &PyModule) -> PyResult<()> {
+//     let module = PyModule::new(py, "uptime")?;
+//     module.add_class::<networking::monitoring::uptime::UptimeStatus>()?;
+//     module.add_function(wrap_pyfunction!(
+//         networking::monitoring::uptime::py_continuous_uptime_monitor,
+//         module
+//     )?)?;
+//
+//     parent.add_submodule(module)?;
+//     Ok(())
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ## Python module: root
@@ -91,8 +93,8 @@ fn _libpt(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(is_loaded, m)?)?;
 
     // load sub modules
-    py_common(py, m)?;
+    // py_common(py, m)?;
     py_logger(py, m)?;
-    py_networking(py, m)?;
+    // py_networking(py, m)?;
     Ok(())
 }
