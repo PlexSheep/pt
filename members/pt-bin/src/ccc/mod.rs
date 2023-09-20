@@ -15,11 +15,10 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use pt::math::calculator::{*, self};
-use pt::logger::*;
+use libpt::ccc::*;
+use libpt::log::*;
 
-use clap::{Parser, Subcommand};
-use clap_num::number_range;
+use clap::Parser;
 use clap_verbosity_flag::{Verbosity, InfoLevel};
 
 use std::path::PathBuf;
@@ -42,6 +41,7 @@ static LONG_ABOUT_ROOT: &'static str = r##"
 "##;
 
 //// STATICS ///////////////////////////////////////////////////////////////////////////////////////
+/// defines CLI interface
 #[derive(Debug, Clone, Parser)]
 #[command(
     author,
@@ -81,12 +81,12 @@ pub struct Cli {
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn main() {
     let cli = Cli::parse();
-    let ll: tracing::Level = match cli.verbose.log_level().unwrap().as_str() {
-        "TRACE" => tracing::Level::TRACE,
-        "DEBUG" => tracing::Level::DEBUG,
-        "INFO" => tracing::Level::INFO,
-        "WARN" => tracing::Level::WARN,
-        "ERROR" => tracing::Level::ERROR,
+    let ll: Level = match cli.verbose.log_level().unwrap().as_str() {
+        "TRACE" => Level::TRACE,
+        "DEBUG" => Level::DEBUG,
+        "INFO" => Level::INFO,
+        "WARN" => Level::WARN,
+        "ERROR" => Level::ERROR,
         _ => {
             eprintln!("'{}' is not a valid loglevel", cli.verbose.to_string());
             std::process::exit(1);

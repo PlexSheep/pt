@@ -1,7 +1,10 @@
 //! # common functionalities
 //!
-//! This module implements common functionality useful for many use cases, such as macros,
-//! Formatting functions and more.
+//! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
+//! module.
+//!
+//! This crate implements core functionality useful for many use cases, such as macros,
+//! formatting functions and more.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs

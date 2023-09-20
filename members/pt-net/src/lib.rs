@@ -1,5 +1,8 @@
 //! # various networking tools
 //!
+//! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
+//! module.
+//!
 //! The networking module contains various tools related to connections. For example, it contains a
 //! tool that has the purpose to check if your connection is consistently available.
 

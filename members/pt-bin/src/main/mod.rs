@@ -15,11 +15,7 @@
 
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use pt::{logger, networking::monitoring::uptime, common::*};
-
-// we want the log macros in any case
-#[allow(unused_imports)]
-use tracing::{debug, error, info, trace, warn};
+use libpt::{log::*, net::monitoring::uptime};
 
 use clap::Parser;
 
@@ -45,19 +41,19 @@ use std::path::PathBuf;
 /// ## Main function of the [`pt`](crate) binary
 pub fn main() {
     let cli = Cli::parse();
-    let ll: tracing::Level = match cli.verbose.log_level().unwrap().as_str() {
-        "TRACE" => tracing::Level::TRACE,
-        "DEBUG" => tracing::Level::DEBUG,
-        "INFO" => tracing::Level::INFO,
-        "WARN" => tracing::Level::WARN,
-        "ERROR" => tracing::Level::ERROR,
+    let ll: Level = match cli.verbose.log_level().unwrap().as_str() {
+        "TRACE" => Level::TRACE,
+        "DEBUG" => Level::DEBUG,
+        "INFO" => Level::INFO,
+        "WARN" => Level::WARN,
+        "ERROR" => Level::ERROR,
         _ => {
             eprintln!("'{}' is not a valid loglevel", cli.verbose.to_string());
-            std::process::exit(EXIT_FAILURE_USAGE);
+            std::process::exit(1);
         }
     };
     if cli.log_meta {
-        logger::Logger::init_customized(
+        Logger::init_customized(
             false,
             PathBuf::from("/dev/null"),
             true,
@@ -72,7 +68,7 @@ pub fn main() {
         .expect("could not initialize Logger");
     } else {
         // less verbose version
-        logger::Logger::init_customized(
+        Logger::init_customized(
             false,
             PathBuf::from("/dev/null"),
             true,

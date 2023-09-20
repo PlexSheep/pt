@@ -1,5 +1,8 @@
 //! # Calculate expressions
 //!
+//! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
+//! module.
+//!
 //! Calculate Calculations with your Calculator (`ccc`)
 //!
 //! This modules aim is to take a term of any kind ([String]) and calculate it's value, be it

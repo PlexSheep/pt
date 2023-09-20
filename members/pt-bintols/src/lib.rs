@@ -1,4 +1,7 @@
 //* # Tools to work with binary values, memory, storage
+//!
+//! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
+//! module.
 
 // official binary prefixes, see [https://en.wikipedia.org/wiki/Binary_prefix]
 /// 2^10

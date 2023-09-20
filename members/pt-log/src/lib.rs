@@ -1,5 +1,8 @@
 //! # A specialized Logger for [`pt`](../libpt/index.html)
 //!
+//! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
+//! module.
+//!
 //! For the library version, only the basic [`tracing`] is used, so that it is possible for
 //! the end user to use the [`tracing`] frontend they desire.
 //!
