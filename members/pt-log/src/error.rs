@@ -1,12 +1,6 @@
-//! # very short description
+//! # Error module for [`pt-log`](crate)
 //!
-//! Short description
-//!
-//! Details
-//!
-//! ## Section 1
-//!
-//! ## Section 2
+//! This module handles errors in logging contexts.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
@@ -22,7 +16,7 @@ use pyo3::{exceptions::PyException, PyErr};
 use tracing::subscriber::SetGlobalDefaultError;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
-/// a quick alias for a result with a [`LoggerError`]
+/// a quick alias for a result with a [`Error`]
 pub type Result<T> = std::result::Result<T, Error>;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +26,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 //// MACROS ////////////////////////////////////////////////////////////////////////////////////////
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
-/// ## Errors for the [logger](crate::logger)
+/// ## Errors for the [Logger](super::Logger)
 pub enum Error {
     /// Bad IO operation
     IO(std::io::Error),

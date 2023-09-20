@@ -61,9 +61,6 @@ hedu 		= ["bintols"]
 
 [lib]
 name = "libpt"
-# I chose a bad name for my package and i will have to live with it.
-# make issue here to make it possible to name the lib file in cargo
-# https://github.com/rust-lang/cargo/issues/1970
 crate-type = [
     "dylib",        # .dll, .so, .dynlib
     "staticlib"     # .lib, .a

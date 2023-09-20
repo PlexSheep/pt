@@ -1,14 +1,15 @@
-//! # A specialized Logger for [`pt`](crate)
+//! # A specialized Logger for [`pt`](../libpt/index.html)
 //!
-//! For the library version, only the basic [`log`] is used, so that it is possible for
-//! the end user to use the [`log`] frontend they desire.
+//! For the library version, only the basic [`tracing`] is used, so that it is possible for
+//! the end user to use the [`tracing`] frontend they desire.
 //!
 //! I did however decide to create a [`Logger`] struct. This struct is mainly intended to be used
-//! with the python module of [`pt`](crate), but is still just as usable in other contexts.
+//! with the python module of [`pt`](../libpt/index.html), but is still just as usable in other contexts.
 //!
 //! ## Technologies used for logging:
-//! - [`log`]: base logging crate
-//! - [`env_logger`]: used for the executable
+//! - [`tracing`]: base logging crate
+//! - [`tracing_appender`]: Used to log to files
+//! - [`tracing_subscriber`]: Used to do actual logging, formatting, to stdout
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,21 +40,10 @@ pub const DEFAULT_LOG_DIR: &'static str = "/dev/null";
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
-/// ## Logger for [`pt`](crate)
+/// ## Logger for [`pt`](../libpt/index.html)
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
-///
-/// ### Setting a [`Level`](log::Level)
-///
-/// To set a [`Level`](log::Level), you need to set the environment variable `LIBPT_LOGLEVEL`
-/// to either of:
-///
-/// - `Trace`
-/// - `Debug`
-/// - `Info`
-/// - `Warn`
-/// - `Error`
 #[pyclass]
 pub struct Logger {}
 
@@ -71,7 +61,7 @@ impl Logger {
     ///
     /// Will enable the logger to be used.
     ///
-    /// Assumes some defaults, use [`init_customized`](init_customized) for more control
+    /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
     pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>) -> Result<()> {
         Self::init_customized(
             log_dir.is_some(),
@@ -154,35 +144,35 @@ impl Logger {
         }
     }
 
-    /// ## logging at [`Level::Error`]
+    /// ## logging at [`Level::ERROR`]
     pub fn error<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
         error!("{}", printable)
     }
-    /// ## logging at [`Level::Warn`]
+    /// ## logging at [`Level::WARN`]
     pub fn warn<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
         warn!("{}", printable)
     }
-    /// ## logging at [`Level::Info`]
+    /// ## logging at [`Level::INFO`]
     pub fn info<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
         info!("{}", printable)
     }
-    /// ## logging at [`Level::Debug`]
+    /// ## logging at [`Level::DEBUG`]
     pub fn debug<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
         debug!("{}", printable)
     }
-    /// ## logging at [`Level::Trace`]
+    /// ## logging at [`Level::TRACE`]
     pub fn trace<T>(&self, printable: T)
     where
         T: fmt::Display,
@@ -248,7 +238,7 @@ impl Logger {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for Logger {
-    /// ## Debug representation for [`Logger`]
+    /// ## DEBUG representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,

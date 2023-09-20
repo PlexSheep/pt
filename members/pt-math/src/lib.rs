@@ -1,12 +1,6 @@
-//! # very short description
+//! # General Mathmatics functionalities
 //!
-//! Short description
-//!
-//! Details
-//!
-//! ## Section 1
-//!
-//! ## Section 2
+//! This module is currently empty, but will contain many math functionalities in a future version.
 
 //// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
 // we want docs
