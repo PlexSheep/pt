@@ -1,7 +1,7 @@
 //* # See what's behind the datatypes of Rust
 //*
 //* This Crate shows off how datatypes of rust are stored in memory.
-use std::any::{TypeId, type_name};
+use crate::display::{bytes_to_bin, byte_bit_display};
 
 /// ## Investigate the internal representation of variables
 ///
@@ -31,29 +31,9 @@ macro_rules! investigate_memory_layout {
                     byte_bit_display(std::mem::align_of_val(item)),
                     byte_bit_display(memory.len()),
                     memory,
-                    bytes_to_bin(&memory),
+                    bytes_to_bin(&memory)
                 );
             }
         }
     };
 }
-
-fn bytes_to_bin(v: &[u8]) -> String {
-    if v.len() > 8 || v.len() < 1 {
-        return String::from("(impractical size for dump)")
-    }
-    let mut s = format!("0b{:08b}", v.first().unwrap());
-    for i in 1..v.len() {
-        s.push_str(&format!("_{:08b}", v[i]));
-        if i % 8 == 0 {
-            s.push_str("\n")
-        }
-    }
-    return s;
-}
-
-fn byte_bit_display(v: usize) -> String
-{
-    format!("{:07} B = {:08} bit", v.clone(), v * 8)
-}
-
