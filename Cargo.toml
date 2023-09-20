@@ -36,7 +36,7 @@ categories = ["command-line-utilities", "development-tools", "development-tools:
 pyo3 = "0.19"
 
 [package]
-name = "pt"
+name = "libpt"
 publish.workspace = true
 version.workspace = true
 edition.workspace = true
@@ -58,6 +58,16 @@ bintols = []
 net 		= []
 ccc 		= ["math"]
 hedu 		= ["bintols"]
+
+[lib]
+name = "libpt"
+# I chose a bad name for my package and i will have to live with it.
+# make issue here to make it possible to name the lib file in cargo
+# https://github.com/rust-lang/cargo/issues/1970
+crate-type = [
+    "dylib",        # .dll, .so, .dynlib
+    "staticlib"     # .lib, .a
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
