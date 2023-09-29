@@ -44,11 +44,14 @@ use pt_math;
 #[derive(Debug)]
 enum Token {
     /// Some kind of operator
+    #[allow(unused)] // tmp
     Operator(Operator),
     /// A concrete value that we can calculate something with. May be a constant, integer, float,
     /// etc.
+    /// The Token has a value that can be used in calculation
     Value(super::base::Value),
     /// A variable of some kind that will be present in the result
+    #[allow(unused)] // tmp
     Variable(char),
 }
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
@@ -68,6 +71,7 @@ pub struct Term {
     /////////////////////////////////////
     ///// internal values following /////
     /////////////////////////////////////
+    #[allow(unused)] // tmp
     operator_stack: Vec<Operator>,
     output_queue: VecDeque<Token>
 }
@@ -124,6 +128,7 @@ impl Term {
     ///
     /// Returns: A tuple with a [`Token`] and a [`bool`]. If the bool is false, the [`Token`] is
     /// marked as "incomplete", meaning that the character cannot be used yet.
+    #[allow(unused)] // tmp
     fn to_tok(_s: Vec<char>) -> Result<Token> {
         Ok(19.into())
     }

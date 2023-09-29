@@ -21,6 +21,7 @@ use pt_log::*;
 use pt_math;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
+/// Quick Result with a ccc error
 pub type Result<T> = std::result::Result<T, Error>;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
@@ -74,38 +75,54 @@ pub enum Function {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Top Level Error Type
+///
+/// Contains many variants of other errors, that can occur when using the crate.
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum Error {
+    /// The term has bad syntax
     SyntaxError(String)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Represents some kind of computed value
 #[derive(Debug)]
 pub enum Value {
+    /// Variable value
     Variable(VarVal),
+    /// Numerical value
     Numerical(NumVal),
+    /// Complex number value
     Complex(ComplVal),
 }
 
+/// Represents some kind of numeric value
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum NumVal {
+    /// Value > 0
     Signed(i128),
+    /// Value can be negative
     Unsigned(u128),
+    /// Value is not an integer
     Float(f64)
 }
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
+/// Represents a Value with at least one variable,
+///
+/// currently not implemented
 #[derive(Debug)]
 pub struct VarVal {
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Represents a Value with a complex number,
+///
+/// currently not implemented
 #[derive(Debug)]
 pub struct ComplVal {
-
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////

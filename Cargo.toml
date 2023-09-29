@@ -37,7 +37,7 @@ pyo3 = "0.19"
 
 [package]
 name = "libpt"
-publish.workspace = true
+publish = true
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
