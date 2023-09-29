@@ -37,7 +37,7 @@ pyo3 = "0.19"
 
 [package]
 name = "libpt"
-publish.workspace = true
+publish = true
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -69,10 +69,10 @@ crate-type = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pt-bintols = { version = "0.1.0", path = "members/pt-bintols" }
-pt-core = { version = "0.1.0", path = "members/pt-core" }
-pt-hedu = { version = "0.1.0", path = "members/pt-hedu" }
-pt-log = { version = "0.1.0", path = "members/pt-log" }
-pt-math = { version = "0.1.0", path = "members/pt-math" }
-pt-net = { version = "0.1.0", path = "members/pt-net" }
-pt-ccc = { version = "0.1.0", path = "members/pt-ccc" }
+pt-bintols 	= { version = "0.1.7", path = "members/pt-bintols" }
+pt-core 		= { version = "0.1.7", path = "members/pt-core" 		}
+pt-hedu 		= { version = "0.1.7", path = "members/pt-hedu" 		}
+pt-log 			= { version = "0.1.7", path = "members/pt-log" 		}
+pt-math 		= { version = "0.1.7", path = "members/pt-math" 		}
+pt-net 			= { version = "0.1.7", path = "members/pt-net" 		}
+pt-ccc 			= { version = "0.1.7", path = "members/pt-ccc" 		}

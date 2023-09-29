@@ -9,10 +9,6 @@ crate, python module or executable.
 
 Let's see if I make it a bloated mess or stop committing after 30 hello worlds.
 
-#### But the name `pt` / `libpt` already exists!
-
-So what? I don't care. Besides, there is not enough names to name everything unique.
-
 ## Dependencies
 
 - See `cargo.toml`
