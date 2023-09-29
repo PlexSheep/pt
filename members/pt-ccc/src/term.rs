@@ -95,9 +95,9 @@ impl Term {
         self.text = Self::filter(&self.original)?;
 
         // Storage for unfinished tokens
-        let mut unfinished_chars: Vec<char> = Vec::new();
+        let _unfinished_chars: Vec<char> = Vec::new();
 
-        for (index, c) in self.original.chars().enumerate() {
+        for (_index, c) in self.original.chars().enumerate() {
             // this will be a mess, but it has to be before i can sort the mess.
             match c {
                 // TODO: make function to check if character is an operator, use it
@@ -124,7 +124,7 @@ impl Term {
     ///
     /// Returns: A tuple with a [`Token`] and a [`bool`]. If the bool is false, the [`Token`] is
     /// marked as "incomplete", meaning that the character cannot be used yet.
-    fn to_tok(s: Vec<char>) -> Result<Token> {
+    fn to_tok(_s: Vec<char>) -> Result<Token> {
         Ok(19.into())
     }
 
