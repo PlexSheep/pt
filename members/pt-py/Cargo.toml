@@ -13,7 +13,10 @@ keywords.workspace = true
 categories.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "_libpt"
+crate-type = ["cdylib"]
 
 [dependencies]
-libpt = { path = "../../" }
 pyo3 = { workspace = true }
+libpt = { version = "0.1.7", path = "../../" }
