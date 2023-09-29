@@ -1,0 +1,20 @@
+[package]
+name = "libpt-bintols"
+publish.workspace = true
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-traits = "0.2.16"
+libpt-core = { version = "0.1.0", path = "../libpt-core" }
+libpt-log = { version = "0.1.0", path = "../libpt-log" }

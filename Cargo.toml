@@ -2,22 +2,22 @@
 resolver = "2"
 members = [
 	".",
-	"members/pt-core",
-	"members/pt-bintols",
-	"members/pt-math",
-	"members/pt-bin",
-	"members/pt-log",
-	"members/pt-net",
-	"members/pt-py",
-	"members/pt-hedu",
+	"members/libpt-core",
+	"members/libpt-bintols",
+	"members/libpt-math",
+	"members/libpt-bin",
+	"members/libpt-log",
+	"members/libpt-net",
+	"members/libpt-py",
+	"members/libpt-hedu",
 ]
 default-members = [
 	".",
-	"members/pt-bin",
-	"members/pt-core",
-	"members/pt-py",
-	"members/pt-log",
-	"members/pt-math",
+	"members/libpt-bin",
+	"members/libpt-core",
+	"members/libpt-py",
+	"members/libpt-log",
+	"members/libpt-math",
 ]
 [workspace.package]
 publish = false
@@ -27,8 +27,8 @@ authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
 description = "Personal multitool"
 readme = "README.md"
-homepage = "https://git.cscherr.de/PlexSheep/pt"
-repository = "https://git.cscherr.de/PlexSheep/pt"
+homepage = "https://git.cscherr.de/PlexSheep/libpt"
+repository = "https://git.cscherr.de/PlexSheep/libpt"
 keywords = ["cli", "python", "scriptable", "pyo3", "library"]
 categories = ["command-line-utilities", "development-tools", "development-tools::ffi"]
 
@@ -50,8 +50,17 @@ keywords.workspace = true
 categories.workspace = true
 
 [features]
-default = ["core", "log"]
-core 		= []
+default = ["log"]
+all 		= [
+	"default",
+	"math",
+	"log",
+	"bintols",
+	"net",
+	"ccc",
+	"hedu"
+]
+fw			= []
 math 		= []
 log 		= []
 bintols = []
@@ -63,16 +72,17 @@ hedu 		= ["bintols"]
 name = "libpt"
 crate-type = [
     "dylib",        # .dll, .so, .dynlib
-    "staticlib"     # .lib, .a
+    "staticlib",    # .lib, .a
+		"rlib"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pt-bintols 	= { version = "0.1.7", path = "members/pt-bintols" }
-pt-core 		= { version = "0.1.7", path = "members/pt-core" 		}
-pt-hedu 		= { version = "0.1.7", path = "members/pt-hedu" 		}
-pt-log 			= { version = "0.1.7", path = "members/pt-log" 		}
-pt-math 		= { version = "0.1.7", path = "members/pt-math" 		}
-pt-net 			= { version = "0.1.7", path = "members/pt-net" 		}
-pt-ccc 			= { version = "0.1.7", path = "members/pt-ccc" 		}
+libpt-bintols 	= { version = "0.1.7", path = "members/libpt-bintols" }
+libpt-core 		= { version = "0.1.7", path = "members/libpt-core" 		}
+libpt-hedu 		= { version = "0.1.7", path = "members/libpt-hedu" 		}
+libpt-log 			= { version = "0.1.7", path = "members/libpt-log" 		}
+libpt-math 		= { version = "0.1.7", path = "members/libpt-math" 		}
+libpt-net 			= { version = "0.1.7", path = "members/libpt-net" 		}
+libpt-ccc 			= { version = "0.1.7", path = "members/libpt-ccc" 		}
