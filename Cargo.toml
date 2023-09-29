@@ -20,7 +20,7 @@ default-members = [
 	"members/libpt-math",
 ]
 [workspace.package]
-publish = false
+publish = true
 version = "0.1.7"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
@@ -37,7 +37,7 @@ pyo3 = "0.19"
 
 [package]
 name = "libpt"
-publish = true
+publish.workspace = true
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
