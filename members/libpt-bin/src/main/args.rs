@@ -42,11 +42,11 @@ static LONG_ABOUT_ROOT: &'static str = r##"
 /// makes use of composition to build a complex system of commands, subcommands, flags and options.
 #[derive(Debug, Clone, Parser)]
 #[command(
-    author, 
-    version, 
-    about = ABOUT_ROOT, 
+    author,
+    version,
+    about = ABOUT_ROOT,
     long_about = format!("{}{}", ABOUT_ROOT ,LONG_ABOUT_ROOT),
-    help_template = 
+    help_template =
 r#"libpt: {version}{about-section}Author:
 {author-with-newline}
 {usage-heading} {usage}{all-args}{tab}"#
