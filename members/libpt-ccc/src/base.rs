@@ -12,12 +12,12 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use std::fmt::Display;
 pub use num_traits::PrimInt;
+use std::fmt::Display;
 
-#[allow(unused_imports)]    // we possibly want to use all log levels
+#[allow(unused_imports)] // we possibly want to use all log levels
 use libpt_log::*;
-#[allow(unused_imports)]    // import more complex math stuff from there
+#[allow(unused_imports)] // import more complex math stuff from there
 use libpt_math;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ pub enum Operator {
     /// Mathmatical modulo, finite field arithmetic
     Modulo,
     /// Any function, seel [`Function`]
-    Function(Function)
+    Function(Function),
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ pub enum Function {
 #[derive(Debug)]
 pub enum Error {
     /// The term has bad syntax
-    SyntaxError(String)
+    SyntaxError(String),
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ pub enum NumVal {
     /// Value can be negative
     Unsigned(u128),
     /// Value is not an integer
-    Float(f64)
+    Float(f64),
 }
 
 //// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
@@ -114,28 +114,27 @@ pub enum NumVal {
 ///
 /// currently not implemented
 #[derive(Debug)]
-pub struct VarVal {
-}
+pub struct VarVal {}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Represents a Value with a complex number,
 ///
 /// currently not implemented
 #[derive(Debug)]
-pub struct ComplVal {
-}
+pub struct ComplVal {}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
-impl<T: num_traits::PrimInt> From<T> for NumVal where
+impl<T: num_traits::PrimInt> From<T> for NumVal
+where
     u128: TryFrom<T>,
-    u128: TryFrom<T> {
+    u128: TryFrom<T>,
+{
     fn from(value: T) -> Self {
         if T::min_value().is_zero() {
             // unsigned data types
             // `u128` is the largest unsigned datatype, any other type will fit.
             NumVal::Unsigned(value.to_u128().unwrap())
-        }
-        else {
+        } else {
             // signed data types
             // `i128` is the largest unsigned datatype, any other type will fit.
             NumVal::Signed(value.to_i128().unwrap())
@@ -145,7 +144,7 @@ impl<T: num_traits::PrimInt> From<T> for NumVal where
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Display Errors with a nice little reason
 impl Display for Error {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::SyntaxError(reason) => {
                 write!(f, "Syntax Error: {}", reason)
@@ -155,9 +154,11 @@ impl Display for Error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl<T: PrimInt> From<T> for Value where
+impl<T: PrimInt> From<T> for Value
+where
     u128: TryFrom<T>,
-    u128: TryFrom<T> {
+    u128: TryFrom<T>,
+{
     fn from(value: T) -> Self {
         NumVal::from(value).into()
     }

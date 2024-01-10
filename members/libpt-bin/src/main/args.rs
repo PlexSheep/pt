@@ -19,7 +19,7 @@ use clap::{Parser, Subcommand};
 
 use clap_num::number_range;
 
-use clap_verbosity_flag::{Verbosity, InfoLevel};
+use clap_verbosity_flag::{InfoLevel, Verbosity};
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// short about section displayed in help
@@ -103,13 +103,10 @@ pub enum NetCommands {
 
         /// set a timeout (in ms)
         #[clap(short, long, default_value_t = 100)]
-        timeout: u64
-
+        timeout: u64,
     },
     /// discover hosts in your network
-    Discover {
-
-    }
+    Discover {},
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

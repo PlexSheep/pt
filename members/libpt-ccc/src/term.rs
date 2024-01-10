@@ -20,10 +20,13 @@
 use std::collections::VecDeque;
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-pub use super::{Error, Result, Value, base::{self, *}};
-#[allow(unused_imports)]    // we possibly want to use all log levels
+pub use super::{
+    base::{self, *},
+    Error, Result, Value,
+};
+#[allow(unused_imports)] // we possibly want to use all log levels
 use libpt_log::*;
-#[allow(unused_imports)]    // import more complex math stuff from there
+#[allow(unused_imports)] // import more complex math stuff from there
 use libpt_math;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +76,7 @@ pub struct Term {
     /////////////////////////////////////
     #[allow(unused)] // tmp
     operator_stack: Vec<Operator>,
-    output_queue: VecDeque<Token>
+    output_queue: VecDeque<Token>,
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -82,15 +85,13 @@ impl Term {
     ///
     /// Invalid terms will result in an [`Err`].
     pub fn new(orig: String) -> Result<Term> {
-        return Ok(
-            Term {
-                original: orig,
-                text: String::new(), // will be initialized in `prepare()`
-                result: None,
-                operator_stack: Vec::new(),
-                output_queue: VecDeque::new()
-            }
-        )
+        return Ok(Term {
+            original: orig,
+            text: String::new(), // will be initialized in `prepare()`
+            result: None,
+            operator_stack: Vec::new(),
+            output_queue: VecDeque::new(),
+        });
     }
 
     /// Prepare the term for the processing.
@@ -144,28 +145,21 @@ impl Term {
         // - '学' alphanumeric
         // - '+'  not alphanumeric
         for c in s.chars() {
-            #[cfg(debug_assertions)] {
-                debug!("filter checks for '{c}':
+            #[cfg(debug_assertions)]
+            {
+                debug!(
+                    "filter checks for '{c}':
                 alphanumeric:       {}
                 allowed special:    {}
                 EXCEPT IF
                 ascii control:      {}
                 ",
-                !c.is_alphanumeric(),
-                !Self::is_allowed_special_c(&c),
-                c.is_ascii_control(),
-            )
+                    !c.is_alphanumeric(),
+                    !Self::is_allowed_special_c(&c),
+                    c.is_ascii_control(),
+                )
             }
-            if
-                (
-                    !c.is_alphanumeric()                    ||
-                    !Self::is_allowed_special_c(&c)
-                )
-                &&
-                (
-                    c.is_ascii_control()
-                )
-            {
+            if (!c.is_alphanumeric() || !Self::is_allowed_special_c(&c)) && (c.is_ascii_control()) {
                 // TODO: allow any unicode char to be a variable
                 let reason = format!("'{c}' is not a valid character, only alphanumeric, punctuation, operators are allowed.");
                 warn!(reason);
@@ -181,14 +175,14 @@ impl Term {
             }
         }
 
-        return Ok(filtered)
+        return Ok(filtered);
     }
 
     /// check if we should ignore this character
     fn is_ignore(c: &char) -> bool {
         match *c {
             ' ' => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -196,21 +190,22 @@ impl Term {
     fn is_allowed_special_c(c: &char) -> bool {
         match *c {
             '+' | '-' | '*' | '/' | '%' => true,
-            _ => false
+            _ => false,
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Helper methods for Tokens
-impl Token { }
+impl Token {}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl<T> From<T> for Token where
+impl<T> From<T> for Token
+where
     T: Into<Value>,
     T: PrimInt,
-    u128: TryFrom<T>
-    {
+    u128: TryFrom<T>,
+{
     fn from(value: T) -> Self {
         Token::Value(base::Value::from(value))
     }

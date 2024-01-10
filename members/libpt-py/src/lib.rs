@@ -1,7 +1,5 @@
 // FIXME: Using a local dependency does not work with maturin as it seems?
-use libpt::{
-    log::*,
-};
+use libpt::log::*;
 
 use pyo3::prelude::*;
 

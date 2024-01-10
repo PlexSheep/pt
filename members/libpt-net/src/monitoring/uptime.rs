@@ -188,7 +188,11 @@ pub fn continuous_uptime_monitor(
     let mut last_was_up: bool = true;
     let mut last_ratio: u8 = status.success_ratio;
     loop {
-        trace!(?status, ?last_was_up, "loop iteration for continuous uptime monitor");
+        trace!(
+            ?status,
+            ?last_was_up,
+            "loop iteration for continuous uptime monitor"
+        );
         if !status.success {
             if last_was_up {
                 trace!("displaying status");

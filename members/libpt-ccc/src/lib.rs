@@ -24,9 +24,9 @@ pub use base::{Error, Result, Value};
 pub mod term;
 pub use term::*;
 
-#[allow(unused_imports)]    // we possibly want to use all log levels
+#[allow(unused_imports)] // we possibly want to use all log levels
 use libpt_log::*;
-#[allow(unused_imports)]    // import more complex math stuff from there
+#[allow(unused_imports)] // import more complex math stuff from there
 use libpt_math;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ pub struct Calculator;
 impl Calculator {
     /// Do a single calculation without doing anything else
     pub fn oneshot(t: String) -> Result<Value> {
-        trace!(orig=t, "parsing original string to Term");
+        trace!(orig = t, "parsing original string to Term");
         let t = Term::new(t)?;
         trace!("term has been parsed, starting Calculation");
         debug!("parsed term: {t:#?}");
@@ -73,9 +73,9 @@ impl Calculator {
         if t.result.is_none() {
             let reason = format!("Term was processed but no result was assigned.");
             // FIXME: unfitting error type
-            return Err(Error::SyntaxError(reason))
+            return Err(Error::SyntaxError(reason));
         }
-        return t.result.unwrap()
+        return t.result.unwrap();
     }
 }
 
