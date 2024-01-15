@@ -59,8 +59,7 @@ where
             return format!("{:.2} Z", total.to_f64().unwrap() / ZEBI as f64);
         } else if YOBI <= total {
             return format!("{:.2} Y", total.to_f64().unwrap() / YOBI as f64);
-        }
-        else {
+        } else {
             unreachable!()
         }
     }

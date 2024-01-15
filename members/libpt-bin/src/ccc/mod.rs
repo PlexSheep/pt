@@ -19,7 +19,7 @@ use libpt::ccc::*;
 use libpt::log::*;
 
 use clap::Parser;
-use clap_verbosity_flag::{Verbosity, InfoLevel};
+use clap_verbosity_flag::{InfoLevel, Verbosity};
 
 use std::path::PathBuf;
 
@@ -64,7 +64,7 @@ pub struct Cli {
     pub log_meta: bool,
 
     /// your exporession(s)
-    #[clap(trailing_var_arg=true)]
+    #[clap(trailing_var_arg = true)]
     pub expression: Vec<String>,
 }
 
@@ -125,17 +125,6 @@ fn main() {
     let mut expr: String = String::new();
     for part in cli.expression {
         expr += &part;
-    }
-
-    debug!("exporssion: {}", expr);
-    let r = Calculator::oneshot(expr);
-    match r {
-        Ok(r) => {
-            println!("{r}");
-        }
-        Err(err) => {
-            error!("Could not compute: {err}");
-        }
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
