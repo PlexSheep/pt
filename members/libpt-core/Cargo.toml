@@ -13,3 +13,6 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
+anyhow = "1.0.79"
+cucumber = "0.20.2"
+libpt-log = {path = "../libpt-log" }

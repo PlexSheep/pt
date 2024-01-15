@@ -1,9 +1,9 @@
-name: Cargo Format, Check and Test
+name: Cargo Check, Format, Fix and Test
 on: [push, pull_request]
 
 jobs:
   format:
-    name: cargo fmt
+    name: cargo CI
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
       # added or changed files to the repository.
@@ -11,22 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - run: cargo check --all-features --all-targets
       - run: rustup component add rustfmt
-      - run: cargo fmt
+      - run: cargo fix --all-features --all-targets
+      - run: cargo fmt --all
+      - run: cargo test --all-features --all-targets
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           # Optional. Commit message for the created commit.
           # Defaults to "Apply automatic changes"
-          commit_message: Automatical formatting
-  check:
-    name: cargo check
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo check  --all-features --verbose
-  test:
-    name: cargo test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test   --all-features --verbose
+          commit_message: automatic cargo CI changes
+          commit_user_name: Gitea CI
+          commit_user_email: noreply@cscherr.de
+          commit_author: Gitea CI <noreply@cscherr.de>
+
