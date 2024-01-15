@@ -20,7 +20,8 @@ macro_rules! investigate_memory_layout {
                 let pointer = item as *const $t;
                 let mut memory: [u8; std::mem::size_of::<$t>()] = std::mem::transmute(item.clone());
                 memory.reverse();
-                println!("\
+                println!(
+                    "\
                     \t{index:02x}\titem:\t\t{item:?}\n\
                     \t\tpointer:   \t{:X?}\n\
                     \t\talign:     \t{}\n\
