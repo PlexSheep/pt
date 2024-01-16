@@ -19,8 +19,9 @@
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
+    ops::Deref,
     path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering}, ops::Deref,
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 pub mod error;
@@ -32,7 +33,10 @@ use tracing_appender::{
     non_blocking::{NonBlocking, WorkerGuard},
 };
 use tracing_subscriber::{
-    fmt::{format::FmtSpan, time::{self, FormatTime}},
+    fmt::{
+        format::FmtSpan,
+        time::{self, FormatTime},
+    },
     prelude::*,
 };
 
@@ -176,7 +180,10 @@ impl Logger {
                 tracing::subscriber::set_global_default(subscriber)?;
             }
             (true, true, false, true) => {
-                let subscriber = subscriber.with_writer(new_file_appender(log_dir)).with_timer(time::uptime()).finish();
+                let subscriber = subscriber
+                    .with_writer(new_file_appender(log_dir))
+                    .with_timer(time::uptime())
+                    .finish();
                 tracing::subscriber::set_global_default(subscriber)?;
             }
             (true, true, false, false) => {

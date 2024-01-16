@@ -6,8 +6,8 @@
 //! This crate is currently empty.
 
 use anyhow::{bail, Result};
-use std::io::{prelude::*, BufReader};
 use libpt_log::error;
+use std::io::{prelude::*, BufReader};
 
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';

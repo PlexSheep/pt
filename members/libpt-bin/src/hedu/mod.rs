@@ -20,8 +20,7 @@ use clap_verbosity_flag::{InfoLevel, Verbosity};
 
 use std::{
     fs::File,
-    io::{BufRead, BufReader, IsTerminal, Read},
-    path::PathBuf,
+    io::{BufRead, BufReader, IsTerminal},
 };
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
