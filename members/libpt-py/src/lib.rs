@@ -1,5 +1,6 @@
 // FIXME: Using a local dependency does not work with maturin as it seems?
-use libpt::log::*;
+// TODO: python interface for the logger
+// use libpt::log::*;
 
 use pyo3::prelude::*;
 
@@ -17,7 +18,7 @@ pub fn is_loaded() -> bool {
 #[pymodule]
 fn py_logger(py: Python, parent: &PyModule) -> PyResult<()> {
     let module = PyModule::new(py, "logger")?;
-    module.add_class::<Logger>()?;
+    // module.add_class::<Logger>()?;
 
     parent.add_submodule(module)?;
     Ok(())
