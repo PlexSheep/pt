@@ -7,7 +7,7 @@
 
 use anyhow::{bail, Result};
 use libpt_bintols::display::{bytes_to_bin, humanbytes};
-use libpt_log::{error, info, trace, warn};
+use libpt_log::{error, info, trace, warn, debug};
 use std::io::{prelude::*, BufReader, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
@@ -39,17 +39,21 @@ impl DataSource for std::fs::File {
 }
 
 pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
+    // prepare some variables
+    let mut buf: [[u8; BYTES_PER_LINE]; 2] = [[0; BYTES_PER_LINE]; 2];
+    let mut alt_buf = 0usize;
+    let mut byte_counter: usize = 0;
+    let mut len: usize;
+
     // skip a given number of bytes
     if config.skip > 0 {
         data.skip(config.skip)?;
-        info!("Skipped {}", humanbytes(config.skip));
+        byte_counter += config.skip;
+        debug!("Skipped {}", humanbytes(config.skip));
     }
-    let mut buf: [[u8; BYTES_PER_LINE]; 2] = [[0; BYTES_PER_LINE]; 2];
-    let mut alt_buf = 0usize;
-    let mut line_counter: usize = 0;
-    let mut len: usize;
+
     // print the head
-    print!("LINE IDX {LINE_SEP_VERT} DATA AS HEX");
+    print!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
     if config.chars {
         print!("{:width$} {LINE_SEP_VERT} FOO", "", width = 37);
     }
@@ -59,10 +63,11 @@ pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
     } else {
         println!("{}", format!("{LINE_SEP_HORIZ}").repeat(59));
     }
+
     // data dump loop
     len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
     while len > 0 {
-        print!("{:08X} {LINE_SEP_VERT} ", line_counter);
+        print!("{:08X} {LINE_SEP_VERT} ", byte_counter);
         for i in 0..len {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                 print!(" ");
@@ -85,19 +90,20 @@ pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
             }
             print!("|");
         }
-        line_counter += 1;
+        byte_counter += 1;
         println!();
         len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
+        alt_buf ^= 1; // toggle the alt buf
         if buf[0] == buf[1] && len == BYTES_PER_LINE && !config.show_identical {
             trace!(buf = format!("{:?}", buf), "found a duplicating line");
-            let start_line = line_counter;
+            let start_line = byte_counter;
             while buf[0] == buf[1] && len == BYTES_PER_LINE {
                 len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
-                line_counter += 1;
+                byte_counter += 1;
             }
             println!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
-                line_counter - start_line
+                byte_counter - start_line
             );
         }
         // switch to the second half of the buf, the original half is stored the old buffer
