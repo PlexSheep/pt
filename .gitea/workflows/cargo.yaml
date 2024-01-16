@@ -1,5 +1,8 @@
 name: Cargo Check, Format, Fix and Test
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - devel
 
 jobs:
   format:
