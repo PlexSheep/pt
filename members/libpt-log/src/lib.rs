@@ -20,15 +20,21 @@
 use std::{
     fmt,
     path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, Ordering}, ops::Deref,
 };
 
 pub mod error;
 use error::*;
 
 pub use tracing::{debug, error, info, trace, warn, Level};
-use tracing_appender;
-use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
+use tracing_appender::{
+    self,
+    non_blocking::{NonBlocking, WorkerGuard},
+};
+use tracing_subscriber::{
+    fmt::{format::FmtSpan, time::{self, FormatTime}},
+    prelude::*,
+};
 
 use anyhow::{bail, Result};
 
@@ -77,6 +83,33 @@ impl Logger {
             false,
             false,
             false,
+            false,
+            true,
+            false,
+        )
+    }
+
+    /// ## initializes the logger
+    ///
+    /// Will enable the logger to be used. This is a version that shows less information,
+    /// useful in cases with only one sender to the logging framework.
+    ///
+    /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
+    pub fn init_mini(max_level: Option<Level>) -> Result<()> {
+        Self::init_customized(
+            false,
+            PathBuf::from(DEFAULT_LOG_DIR),
+            true,
+            false,
+            true,
+            false,
+            max_level.unwrap_or(DEFAULT_LOG_LEVEL),
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
         )
     }
 
@@ -94,57 +127,95 @@ impl Logger {
         display_thread_ids: bool,
         display_thread_names: bool,
         display_line_number: bool,
+        pretty: bool,
+        show_time: bool,
+        uptime: bool, // uptime instead of system time
     ) -> Result<()> {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
             bail!(Error::Usage(format!("logging is already initialized")));
-        } else {
-            let filter = tracing_subscriber::filter::FilterFn::new(|_metadata| {
-                // let mut filter = false;
-                //
-                // // if it's this lib, continue
-                // filter |= metadata.target().contains(env!("CARGO_PKG_NAME"));
-                // filter |= metadata.target().contains("libpt");
-                //
-                // // if it's another crate, only show above debug
-                // filter |= metadata.level() > &Level::DEBUG;
-                //
-                // filter
-                // FIXME: Make the filter customizable with sane defaults. Don't block the
-                // executing crate.
-                true
-            });
-
-            let basic_subscriber = tracing_subscriber::fmt::Subscriber::builder()
-                // subscriber configuration
-                .with_ansi(ansi)
-                .with_file(display_filename)
-                .with_level(display_level)
-                .with_target(display_target)
-                .with_max_level(max_level)
-                .with_thread_ids(display_thread_ids)
-                .with_line_number(display_line_number)
-                .with_thread_names(display_thread_names)
-                .with_span_events(FmtSpan::FULL)
-                //.pretty // too verbose and over multiple lines, a bit like python tracebacks
-                .finish()
-                // add layers
-                .with(filter);
-
-            if log_to_file {
-                let file_appender = tracing_appender::rolling::daily(log_dir, "log");
-                let (file_writer, _guard) = tracing_appender::non_blocking(file_appender);
-                let layered_subscriber = basic_subscriber
-                    .with(tracing_subscriber::fmt::Layer::default().with_writer(file_writer));
-                tracing::subscriber::set_global_default(layered_subscriber)?;
-            } else {
-                tracing::subscriber::set_global_default(basic_subscriber)?;
-            }
-
-            INITIALIZED.store(true, Ordering::Relaxed);
-            Ok(())
         }
+        let subscriber = tracing_subscriber::fmt::Subscriber::builder()
+            .with_level(display_level)
+            .with_max_level(max_level)
+            .with_ansi(ansi)
+            .with_target(display_target)
+            .with_file(display_filename)
+            .with_thread_ids(display_thread_ids)
+            .with_line_number(display_line_number)
+            .with_thread_names(display_thread_names)
+            .with_span_events(FmtSpan::FULL);
+        // I know this is hacky, but I couldn't get it any other way. I couldn't even find a
+        // project that could do it any other way. You can't apply one after another, because the
+        // type is changed every time. When using Box<dyn Whatever>, some methods complain about
+        // not being in trait bounds.
+        // TODO: somehow find a better solution for this
+        match (log_to_file, show_time, pretty, uptime) {
+            (true, true, true, true) => {
+                let subscriber = subscriber
+                    .with_writer(new_file_appender(log_dir))
+                    .with_timer(time::uptime())
+                    .pretty()
+                    .finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (true, true, true, false) => {
+                let subscriber = subscriber
+                    .with_writer(new_file_appender(log_dir))
+                    .pretty()
+                    .finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (true, false, true, _) => {
+                let subscriber = subscriber
+                    .with_writer(new_file_appender(log_dir))
+                    .without_time()
+                    .pretty()
+                    .finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (true, true, false, true) => {
+                let subscriber = subscriber.with_writer(new_file_appender(log_dir)).with_timer(time::uptime()).finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (true, true, false, false) => {
+                let subscriber = subscriber.with_writer(new_file_appender(log_dir)).finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (true, false, false, _) => {
+                let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
+                let (file_writer, _guard) = tracing_appender::non_blocking(file_appender);
+                let subscriber = subscriber.with_writer(file_writer).without_time().finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, true, true, true) => {
+                let subscriber = subscriber.pretty().with_timer(time::uptime()).finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, true, true, false) => {
+                let subscriber = subscriber.pretty().with_timer(time::uptime()).finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, false, true, _) => {
+                let subscriber = subscriber.without_time().pretty().finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, true, false, true) => {
+                let subscriber = subscriber.with_timer(time::uptime()).finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, true, false, false) => {
+                let subscriber = subscriber.finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+            (false, false, false, _) => {
+                let subscriber = subscriber.without_time().finish();
+                tracing::subscriber::set_global_default(subscriber)?;
+            }
+        }
+        INITIALIZED.store(true, Ordering::Relaxed);
+        Ok(())
     }
 
     /// ## logging at [`Level::ERROR`]
@@ -199,3 +270,7 @@ impl fmt::Debug for Logger {
 //// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
+    let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
+    return tracing_appender::non_blocking(file_appender).0;
+}
