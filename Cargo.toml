@@ -76,10 +76,10 @@ crate-type = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libpt-bintols 	= { version = "0.1.7", path = "members/libpt-bintols" }
-libpt-core 		= { version = "0.1.7", path = "members/libpt-core" 		}
-libpt-hedu 		= { version = "0.1.7", path = "members/libpt-hedu" 		}
-libpt-log 			= { version = "0.1.7", path = "members/libpt-log" 		}
-libpt-math 		= { version = "0.1.7", path = "members/libpt-math" 		}
-libpt-net 			= { version = "0.1.7", path = "members/libpt-net" 		}
-libpt-ccc 			= { version = "0.1.7", path = "members/libpt-ccc" 		}
+libpt-bintols 	= { path = "members/libpt-bintols" }
+libpt-core 			= { path = "members/libpt-core" 		}
+libpt-hedu 			= { path = "members/libpt-hedu" 		}
+libpt-log 			= { path = "members/libpt-log" 		}
+libpt-math 			= { path = "members/libpt-math" 		}
+libpt-net 			= { path = "members/libpt-net" 		}
+libpt-ccc 			= { path = "members/libpt-ccc" 		}
