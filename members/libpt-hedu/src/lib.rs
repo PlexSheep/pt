@@ -165,7 +165,7 @@ fn rd_data(
                     nlen = (config.limit % BYTES_PER_LINE),
                     "byte counter is farther than limit"
                 );
-                    len = config.limit % BYTES_PER_LINE;
+                len = config.limit % BYTES_PER_LINE;
                 config.stop = true;
             }
             return Ok(len);
