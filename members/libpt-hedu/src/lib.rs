@@ -5,11 +5,15 @@
 //!
 //! This crate is currently empty.
 
-use std::{fmt::Debug, io::{BufReader, BufRead, prelude::*, Bytes}};
 use anyhow::Result;
+use std::{
+    fmt::Debug,
+    io::{prelude::*, BufRead, BufReader, Bytes},
+};
 
 pub fn dump<T>(mut data: BufReader<T>) -> Result<()>
-where T: Read
+where
+    T: Read,
 {
     for (i, b) in data.bytes().enumerate() {
         if i % 8 == 0 {

@@ -18,11 +18,7 @@ use libpt::{hedu::*, log::*};
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-    path::PathBuf,
-};
+use std::{fs::File, io::BufReader, path::PathBuf};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +82,7 @@ fn main() {
             std::process::exit(1);
         }
     };
-    match dump(BufReader::new(file)){
+    match dump(BufReader::new(file)) {
         Ok(_) => (),
         Err(err) => {
             error!("Could not dump data of file: {err}");
