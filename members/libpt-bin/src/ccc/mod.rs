@@ -93,34 +93,10 @@ fn main() {
         }
     };
     if cli.log_meta {
-        Logger::init_customized(
-            false,
-            PathBuf::from("/dev/null"),
-            true,
-            false,
-            true,
-            true,
-            ll,
-            false,
-            false,
-            false,
-        )
-        .expect("could not initialize Logger");
+        Logger::init(None, Some(ll)).expect("could not initialize Logger");
     } else {
         // less verbose version
-        Logger::init_customized(
-            false,
-            PathBuf::from("/dev/null"),
-            true,
-            false,
-            true,
-            false,
-            ll,
-            false,
-            false,
-            false,
-        )
-        .expect("could not initialize Logger");
+        Logger::init_mini(Some(ll)).expect("could not initialize Logger");
     }
     let mut expr: String = String::new();
     for part in cli.expression {

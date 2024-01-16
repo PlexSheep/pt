@@ -18,14 +18,18 @@ use libpt::{hedu::*, log::*};
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 
-use std::{fs::File, io::BufReader, path::PathBuf};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, IsTerminal, Read},
+    path::PathBuf,
+};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// short about section displayed in help
 const ABOUT_ROOT: &'static str = r##"
-Dumps data in fancy formats
+Dumps data in fancy formats.
 "##;
 /// longer about section displayed in help, is combined with [the short help](ABOUT_ROOT)
 static LONG_ABOUT_ROOT: &'static str = r##"
@@ -49,9 +53,13 @@ static LONG_ABOUT_ROOT: &'static str = r##"
     about = ABOUT_ROOT,
     long_about = format!("{}{}", ABOUT_ROOT ,LONG_ABOUT_ROOT),
     help_template =
-r#"libpt: {version}{about-section}Author:
-{author-with-newline}
-{usage-heading} {usage}{all-args}{tab}"#
+r#"{about-section}
+{usage-heading} {usage}
+{all-args}{tab}
+
+libpt: {version}
+Author: {author-with-newline}
+"#
     )]
 pub struct Cli {
     // clap_verbosity_flag seems to make this a global option implicitly
@@ -59,7 +67,7 @@ pub struct Cli {
     #[command(flatten)]
     pub verbose: Verbosity<InfoLevel>,
 
-    /// show logger meta
+    /// show additional logging meta data
     #[arg(short, long, global = true)]
     pub log_meta: bool,
 
@@ -67,8 +75,10 @@ pub struct Cli {
     #[arg(short, long, global = true)]
     pub chars: bool,
 
-    /// a data source, probably a file
-    pub data_source: String,
+    /// a data source, probably a file.
+    ///
+    /// If left empty or set as "-", the program will read from stdin.
+    pub data_source: Option<String>,
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -78,19 +88,31 @@ pub struct Cli {
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn main() {
     let cli = cli_parse();
-    debug!("Trying to open '{}'", cli.data_source);
-    let file = match File::open(cli.data_source.clone()) {
-        Ok(file) => file,
-        Err(err) => {
-            error!("Could not open file '{}': {err}", cli.data_source);
-            std::process::exit(1);
+    let source: Box<dyn BufRead>;
+    if cli.data_source.is_some() && cli.data_source.clone().is_some_and(|val| val != "-") {
+        let data_source = cli.data_source.unwrap();
+        debug!("Trying to open '{}'", data_source);
+        source = match File::open(&data_source) {
+            Ok(file) => Box::new(BufReader::new(file)),
+            Err(err) => {
+                error!("Could not open file '{}': {err}", data_source);
+                std::process::exit(1);
+            }
+        };
+    } else {
+        debug!("Trying to open stdout");
+        let stdin = std::io::stdin();
+        if stdin.is_terminal() {
+            warn!("Refusing to dump from interactive terminal");
+            std::process::exit(2)
         }
-    };
-    match dump(BufReader::new(file), cli.chars) {
+        source = Box::new(BufReader::new(stdin));
+    }
+    match dump(BufReader::new(source), cli.chars) {
         Ok(_) => (),
         Err(err) => {
             error!("Could not dump data of file: {err}");
-            std::process::exit(2);
+            std::process::exit(3);
         }
     }
 }
@@ -109,34 +131,10 @@ fn cli_parse() -> Cli {
         }
     };
     if cli.log_meta {
-        Logger::init_customized(
-            false,
-            PathBuf::from("/dev/null"),
-            true,
-            false,
-            true,
-            true,
-            ll,
-            false,
-            false,
-            false,
-        )
-        .expect("could not initialize Logger");
+        Logger::init(None, Some(ll)).expect("could not initialize Logger");
     } else {
         // less verbose version
-        Logger::init_customized(
-            false,
-            PathBuf::from("/dev/null"),
-            true,
-            false,
-            true,
-            false,
-            ll,
-            false,
-            false,
-            false,
-        )
-        .expect("could not initialize Logger");
+        Logger::init_mini(Some(ll)).expect("could not initialize Logger");
     }
     return cli;
 }
