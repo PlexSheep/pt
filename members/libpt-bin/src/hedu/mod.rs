@@ -126,8 +126,7 @@ fn cli_parse() -> Cli {
         "WARN" => Level::WARN,
         "ERROR" => Level::ERROR,
         _ => {
-            eprintln!("'{}' is not a valid loglevel", cli.verbose.to_string());
-            std::process::exit(1);
+            unreachable!();
         }
     };
     if cli.log_meta {
