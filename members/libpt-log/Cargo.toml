@@ -16,7 +16,8 @@ categories.workspace = true
 tracing = "0.1.37"
 tracing-appender = "0.2.2"
 tracing-subscriber = "0.3.17"
-pyo3 = {workspace = true}
+anyhow = { workspace = true }
+thiserror = { workspace = true }
 
 [dev-dependencies]
 gag = "1.0.0"

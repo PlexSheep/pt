@@ -12,12 +12,11 @@
 #![warn(clippy::pedantic)]
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use pyo3::{exceptions::PyException, PyErr};
 use tracing::subscriber::SetGlobalDefaultError;
+use anyhow;
+use thiserror::Error;
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
-/// a quick alias for a result with a [`Error`]
-pub type Result<T> = std::result::Result<T, Error>;
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,12 +26,16 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 //// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
 /// ## Errors for the [Logger](super::Logger)
+#[derive(Error)]
 pub enum Error {
     /// Bad IO operation
+    #[error("Bad IO operation")]
     IO(std::io::Error),
     /// Various errors raised when the messenger is used in a wrong way
+    #[error("Bad usage")]
     Usage(String),
     /// Could not assign logger as the global default
+    #[error("Could not assign as global default")] // TODO: make this more clear
     SetGlobalDefaultFail(SetGlobalDefaultError),
 }
 
@@ -53,36 +56,12 @@ impl From<SetGlobalDefaultError> for Error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl Into<PyErr> for Error {
-    fn into(self) -> PyErr {
-        match self {
-            Error::IO(err) => PyException::new_err(format!("LoggerError: IO {err:?}")),
-            Error::Usage(err) => PyException::new_err(format!("LoggerError: Usage {err}")),
-            Error::SetGlobalDefaultFail(err) => {
-                PyException::new_err(format!("LoggerError: SetGlobalDefaultFail {err}"))
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 impl std::fmt::Debug for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::IO(e) => write!(f, "<IO Error {e:?}>"),
             Error::Usage(e) => write!(f, "<Usage Error {e:?}>"),
             Error::SetGlobalDefaultFail(e) => write!(f, "<SetGlobalDefaultFail {e:?}>"),
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::IO(e) => write!(f, "IO Error {e}"),
-            Error::Usage(e) => write!(f, "Usage Error {e}"),
-            Error::SetGlobalDefaultFail(e) => write!(f, "SetGlobalDefaultFail {e}"),
         }
     }
 }

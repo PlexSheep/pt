@@ -34,6 +34,8 @@ categories = ["command-line-utilities", "development-tools", "development-tools:
 
 [workspace.dependencies]
 pyo3 = "0.19"
+anyhow = "1.0.79"
+thiserror = "1.0.56"
 
 [package]
 name = "libpt"

@@ -30,7 +30,8 @@ pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender;
 use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 
-use pyo3::prelude::*;
+use anyhow::{Result,bail};
+
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
@@ -47,8 +48,7 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
-#[pyclass]
-pub struct Logger {}
+pub struct Logger;
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// ## Main implementation
@@ -98,7 +98,7 @@ impl Logger {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
-            return Err(Error::Usage(format!("logging is already initialized")));
+            bail!(Error::Usage(format!("logging is already initialized")));
         } else {
             let filter = tracing_subscriber::filter::FilterFn::new(|_metadata| {
                 // let mut filter = false;
@@ -181,61 +181,6 @@ impl Logger {
         T: fmt::Display,
     {
         trace!("{}", printable)
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ## Implementation of the python interface
-#[pymethods]
-impl Logger {
-    /// ## Python version of [`new()`](Logger::new)
-    #[new]
-    pub fn py_new() -> PyResult<Self> {
-        Ok(Logger::new())
-    }
-    /// ## Python version of [`init()`](Logger::init)
-    #[pyo3(name = "init")]
-    #[staticmethod]
-    pub fn py_init(log_dir: Option<PathBuf>, max_level: Option<String>) -> Result<()> {
-        Self::init(
-            log_dir,
-            match max_level {
-                Some(s) => match s.to_uppercase().as_str() {
-                    "TRACE" => Some(tracing::Level::TRACE),
-                    "DEBUG" => Some(tracing::Level::DEBUG),
-                    "INFO" => Some(tracing::Level::INFO),
-                    "WARN" => Some(tracing::Level::WARN),
-                    "ERROR" => Some(tracing::Level::ERROR),
-                    _ => return Err(Error::Usage(format!("'{s}' is not a valid log level"))),
-                },
-                None => None,
-            },
-        )
-    }
-    /// ## Python version of [`error()`](Logger::error)
-    #[pyo3(name = "error")]
-    pub fn py_error(&self, printable: String) {
-        self.error(printable)
-    }
-    /// ## Python version of [`warn()`](Logger::warn)
-    #[pyo3(name = "warn")]
-    pub fn py_warn(&self, printable: String) {
-        self.warn(printable)
-    }
-    /// ## Python version of [`info()`](Logger::info)
-    #[pyo3(name = "info")]
-    pub fn py_info(&self, printable: String) {
-        self.info(printable)
-    }
-    /// ## Python version of [`debug()`](Logger::debug)
-    #[pyo3(name = "debug")]
-    pub fn py_debug(&self, printable: String) {
-        self.debug(printable)
-    }
-    /// ## Python version of [`trace()`](Logger::trace)
-    #[pyo3(name = "trace")]
-    pub fn py_trace(&self, printable: String) {
-        self.trace(printable)
     }
 }
 
