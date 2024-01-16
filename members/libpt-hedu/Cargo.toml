@@ -17,3 +17,4 @@ categories.workspace = true
 [dependencies]
 anyhow = { workspace = true }
 thiserror = { workspace = true }
+libpt-log = {path = "../libpt-log" }

@@ -7,6 +7,7 @@
 
 use anyhow::{bail, Result};
 use std::io::{prelude::*, BufReader};
+use libpt_log::error;
 
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';
@@ -80,6 +81,7 @@ where
     match data.read(&mut buf) {
         Ok(len) => Ok(len),
         Err(err) => {
+            error!("error while reading data: {err}");
             bail!(err)
         }
     }
