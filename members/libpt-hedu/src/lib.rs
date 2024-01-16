@@ -7,18 +7,31 @@
 
 use anyhow::{bail, Result};
 use libpt_bintols::display::{bytes_to_bin, humanbytes};
-use libpt_log::{error, info, trace, warn, debug};
+use libpt_log::{debug, error, info, trace, warn};
 use std::io::{prelude::*, BufReader, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';
 const LINE_SEP_VERT: char = '│';
 
-pub struct DumpConfig {
+pub struct HeduConfig {
     pub chars: bool,
     pub skip: usize,
     pub show_identical: bool,
-    pub len: usize,
+    pub limit: usize,
+    stop: bool,
+}
+
+impl HeduConfig {
+    pub fn new(chars: bool, skip: usize, show_identical: bool, limit: usize) -> Self {
+        HeduConfig {
+            chars,
+            skip,
+            show_identical,
+            limit: limit,
+            stop: false,
+        }
+    }
 }
 
 pub trait DataSource: Read {
@@ -38,7 +51,7 @@ impl DataSource for std::fs::File {
     }
 }
 
-pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
+pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     // prepare some variables
     let mut buf: [[u8; BYTES_PER_LINE]; 2] = [[0; BYTES_PER_LINE]; 2];
     let mut alt_buf = 0usize;
@@ -65,7 +78,7 @@ pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
     }
 
     // data dump loop
-    len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
+    len = rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
     while len > 0 {
         print!("{:08X} {LINE_SEP_VERT} ", byte_counter);
         for i in 0..len {
@@ -90,16 +103,23 @@ pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
             }
             print!("|");
         }
-        byte_counter += 1;
         println!();
-        len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
+
+        // loop breaker logic
+        if config.stop {
+            break;
+        }
+
+        // after line logic
+        len = rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
         alt_buf ^= 1; // toggle the alt buf
         if buf[0] == buf[1] && len == BYTES_PER_LINE && !config.show_identical {
             trace!(buf = format!("{:?}", buf), "found a duplicating line");
             let start_line = byte_counter;
             while buf[0] == buf[1] && len == BYTES_PER_LINE {
-                len = rd_data(data, &mut buf, &mut alt_buf).unwrap();
-                byte_counter += 1;
+                len =
+                    rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
+                byte_counter += BYTES_PER_LINE;
             }
             println!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
@@ -131,9 +151,23 @@ fn rd_data(
     data: &mut dyn DataSource,
     buf: &mut [[u8; BYTES_PER_LINE]; 2],
     alt_buf: &mut usize,
+    byte_counter: &mut usize,
+    config: &mut HeduConfig,
 ) -> Result<usize> {
     match data.read(&mut buf[*alt_buf]) {
-        Ok(len) => {
+        Ok(mut len) => {
+            *byte_counter += len; // FIXME: incremented too early! dump always starts at 0x10
+            if config.limit != 0 && *byte_counter >= config.limit {
+                trace!(
+                    byte_counter,
+                    limit = config.limit,
+                    len,
+                    nlen = (config.limit % BYTES_PER_LINE),
+                    "byte counter is farther than limit"
+                );
+                    len = config.limit % BYTES_PER_LINE;
+                config.stop = true;
+            }
             return Ok(len);
         }
         Err(err) => {

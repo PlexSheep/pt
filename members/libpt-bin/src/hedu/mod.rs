@@ -77,7 +77,7 @@ pub struct Cli {
 
     /// only interpret N bytes (end after N)
     #[arg(short, long, default_value_t = 0)]
-    pub len: usize,
+    pub limit: usize,
 
     /// show identical lines
     #[arg(short = 'i', long)]
@@ -99,7 +99,7 @@ fn main() {
     let mut source: Box<dyn DataSource>;
     if cli.data_source.is_some() && cli.data_source.clone().is_some_and(|val| val != "-") {
         let data_source = cli.data_source.unwrap();
-        debug!("Trying to open '{}'", data_source);
+        trace!("Trying to open '{}'", data_source);
         source = match File::open(&data_source) {
             Ok(file) => Box::new(file),
             Err(err) => {
@@ -108,7 +108,7 @@ fn main() {
             }
         };
     } else {
-        debug!("Trying to open stdout");
+        trace!("Trying to open stdout");
         let stdin = std::io::stdin();
         if stdin.is_terminal() {
             warn!("Refusing to dump from interactive terminal");
@@ -119,12 +119,7 @@ fn main() {
 
     match dump(
         &mut *source,
-        DumpConfig {
-            chars: cli.chars,
-            skip: cli.skip,
-            show_identical: cli.show_identical,
-            len: cli.len,
-        },
+        HeduConfig::new(cli.chars, cli.skip, cli.show_identical, cli.limit),
     ) {
         Ok(_) => (),
         Err(err) => {
