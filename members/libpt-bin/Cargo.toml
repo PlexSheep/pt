@@ -20,6 +20,10 @@ name = "ccc"
 path = "src/ccc/mod.rs"
 
 [[bin]]
+name = "hedu"
+path = "src/hedu/mod.rs"
+
+[[bin]]
 name = "libpt"
 path = "src/main/mod.rs"
 

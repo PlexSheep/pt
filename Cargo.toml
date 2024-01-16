@@ -1,20 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
-	".",
-	"members/libpt-core",
-	"members/libpt-bintols",
-	"members/libpt-math",
-	"members/libpt-bin",
-	"members/libpt-log",
-	"members/libpt-net",
-	"members/libpt-hedu",
+  ".",
+  "members/libpt-core",
+  "members/libpt-bintols",
+  "members/libpt-math",
+  "members/libpt-bin",
+  "members/libpt-log",
+  "members/libpt-net",
+  "members/libpt-hedu",
 ]
-default-members = [
-	".",
-	"members/libpt-bin",
-	"members/libpt-core",
-]
+default-members = [".", "members/libpt-bin", "members/libpt-core"]
 [workspace.package]
 publish = true
 version = "0.1.7"
@@ -26,7 +22,11 @@ readme = "README.md"
 homepage = "https://git.cscherr.de/PlexSheep/libpt"
 repository = "https://git.cscherr.de/PlexSheep/libpt"
 keywords = ["cli", "library"]
-categories = ["command-line-utilities", "development-tools", "development-tools::ffi"]
+categories = [
+  "command-line-utilities",
+  "development-tools",
+  "development-tools::ffi",
+]
 
 [workspace.dependencies]
 anyhow = "1.0.79"
@@ -47,39 +47,32 @@ keywords.workspace = true
 categories.workspace = true
 
 [features]
-default = ["log"]
-all 		= [
-	"default",
-	"math",
-	"log",
-	"bintols",
-	"net",
-	"ccc",
-	"hedu"
-]
-fw			= []
-math 		= []
-log 		= []
+default = ["log", "core"]
+all = ["default", "math", "log", "bintols", "net", "ccc", "hedu", "core"]
+core = []
+fw = []
+math = []
+log = []
 bintols = []
-net 		= []
-ccc 		= ["math"]
-hedu 		= ["bintols"]
+net = []
+ccc = ["math"]
+hedu = ["bintols"]
 
 [lib]
 name = "libpt"
 crate-type = [
-    "dylib",        # .dll, .so, .dynlib
-    "staticlib",    # .lib, .a
-		"rlib"
+  "dylib",     # .dll, .so, .dynlib
+  "staticlib", # .lib, .a
+  "rlib",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libpt-bintols 	= { path = "members/libpt-bintols" }
-libpt-core 			= { path = "members/libpt-core" 		}
-libpt-hedu 			= { path = "members/libpt-hedu" 		}
-libpt-log 			= { path = "members/libpt-log" 		}
-libpt-math 			= { path = "members/libpt-math" 		}
-libpt-net 			= { path = "members/libpt-net" 		}
-libpt-ccc 			= { path = "members/libpt-ccc" 		}
+libpt-bintols = { path = "members/libpt-bintols" }
+libpt-core = { path = "members/libpt-core" }
+libpt-hedu = { path = "members/libpt-hedu" }
+libpt-log = { path = "members/libpt-log" }
+libpt-math = { path = "members/libpt-math" }
+libpt-ccc = { path = "members/libpt-ccc" }
+libpt-net = { path = "members/libpt-net" }
