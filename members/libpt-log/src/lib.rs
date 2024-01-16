@@ -30,7 +30,7 @@ pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender;
 use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 
-use anyhow::{Result,bail};
+use anyhow::{bail, Result};
 
 //// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
