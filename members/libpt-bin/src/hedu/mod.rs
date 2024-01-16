@@ -18,10 +18,7 @@ use libpt::{hedu::*, log::*};
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 
-use std::{
-    fs::File,
-    io::{Seek, IsTerminal},
-};
+use std::{fs::File, io::IsTerminal};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 

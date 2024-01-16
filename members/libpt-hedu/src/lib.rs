@@ -6,8 +6,8 @@
 //! This crate is currently empty.
 
 use anyhow::{bail, Result};
-use libpt_log::{error, trace, warn, info};
 use libpt_bintols::display::{bytes_to_bin, humanbytes};
+use libpt_log::{error, info, trace, warn};
 use std::io::{prelude::*, BufReader, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
@@ -41,7 +41,6 @@ impl DataSource for std::fs::File {
 pub fn dump(data: &mut dyn DataSource, config: DumpConfig) -> Result<()> {
     // skip a given number of bytes
     if config.skip > 0 {
-
         data.skip(config.skip)?;
         info!("Skipped {}", humanbytes(config.skip));
     }
