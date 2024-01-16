@@ -6,7 +6,7 @@
 //! This crate is currently empty.
 
 use anyhow::{bail, Result};
-use libpt_log::error;
+use libpt_log::{error, trace};
 use std::io::{prelude::*, BufReader};
 
 const BYTES_PER_LINE: usize = 16;
@@ -40,6 +40,9 @@ where
                 print!(" ");
             }
             print!("{:02X} ", buf[i]);
+        }
+        if len == BYTES_PER_LINE / 2 {
+            print!(" ")
         }
         for i in 0..(BYTES_PER_LINE - len) {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
