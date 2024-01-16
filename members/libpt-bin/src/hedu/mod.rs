@@ -20,7 +20,7 @@ use clap_verbosity_flag::{InfoLevel, Verbosity};
 
 use std::{
     fs::File,
-    io::{BufRead, BufReader, IsTerminal},
+    io::{Seek, IsTerminal},
 };
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
@@ -67,12 +67,24 @@ pub struct Cli {
     pub verbose: Verbosity<InfoLevel>,
 
     /// show additional logging meta data
-    #[arg(short, long, global = true)]
-    pub log_meta: bool,
+    #[arg(long)]
+    pub meta: bool,
 
     /// show character representation
-    #[arg(short, long, global = true)]
+    #[arg(short, long)]
     pub chars: bool,
+
+    /// skip first N bytes
+    #[arg(short, long, default_value_t = 0)]
+    pub skip: usize,
+
+    /// only interpret N bytes (end after N)
+    #[arg(short, long, default_value_t = 0)]
+    pub len: usize,
+
+    /// show identical lines
+    #[arg(short = 'i', long)]
+    pub show_identical: bool,
 
     /// a data source, probably a file.
     ///
@@ -87,12 +99,12 @@ pub struct Cli {
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn main() {
     let cli = cli_parse();
-    let source: Box<dyn BufRead>;
+    let mut source: Box<dyn DataSource>;
     if cli.data_source.is_some() && cli.data_source.clone().is_some_and(|val| val != "-") {
         let data_source = cli.data_source.unwrap();
         debug!("Trying to open '{}'", data_source);
         source = match File::open(&data_source) {
-            Ok(file) => Box::new(BufReader::new(file)),
+            Ok(file) => Box::new(file),
             Err(err) => {
                 error!("Could not open file '{}': {err}", data_source);
                 std::process::exit(1);
@@ -105,9 +117,18 @@ fn main() {
             warn!("Refusing to dump from interactive terminal");
             std::process::exit(2)
         }
-        source = Box::new(BufReader::new(stdin));
+        source = Box::new(stdin);
     }
-    match dump(BufReader::new(source), cli.chars) {
+
+    match dump(
+        &mut *source,
+        DumpConfig {
+            chars: cli.chars,
+            skip: cli.skip,
+            show_identical: cli.show_identical,
+            len: cli.len,
+        },
+    ) {
         Ok(_) => (),
         Err(err) => {
             error!("Could not dump data of file: {err}");
@@ -128,7 +149,7 @@ fn cli_parse() -> Cli {
             unreachable!();
         }
     };
-    if cli.log_meta {
+    if cli.meta {
         Logger::init(None, Some(ll)).expect("could not initialize Logger");
     } else {
         // less verbose version

@@ -18,3 +18,4 @@ categories.workspace = true
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 libpt-log = {path = "../libpt-log" }
+libpt-bintols = {path = "../libpt-bintols" }
