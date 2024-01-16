@@ -63,6 +63,10 @@ pub struct Cli {
     #[arg(short, long, global = true)]
     pub log_meta: bool,
 
+    /// show character representation
+    #[arg(short, long, global = true)]
+    pub chars: bool,
+
     /// a data source, probably a file
     pub data_source: String,
 }
@@ -82,7 +86,7 @@ fn main() {
             std::process::exit(1);
         }
     };
-    match dump(BufReader::new(file)) {
+    match dump(BufReader::new(file), cli.chars) {
         Ok(_) => (),
         Err(err) => {
             error!("Could not dump data of file: {err}");
