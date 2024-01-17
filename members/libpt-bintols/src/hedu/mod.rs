@@ -5,10 +5,10 @@
 //!
 //! This crate is currently empty.
 
-use crate::display::{bytes_to_bin, humanbytes};
+use crate::display::humanbytes;
 use anyhow::{bail, Result};
-use libpt_log::{debug, error, info, trace, warn};
-use std::io::{prelude::*, BufReader, Read, SeekFrom};
+use libpt_log::{debug, trace, warn, error};
+use std::io::{prelude::*, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';
@@ -20,6 +20,7 @@ pub struct HeduConfig {
     pub show_identical: bool,
     pub limit: usize,
     stop: bool,
+    len: usize,
 }
 
 impl HeduConfig {
@@ -28,8 +29,9 @@ impl HeduConfig {
             chars,
             skip,
             show_identical,
-            limit: limit,
+            limit,
             stop: false,
+            len: usize::MIN,
         }
     }
 }
@@ -56,7 +58,6 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     let mut buf: [[u8; BYTES_PER_LINE]; 2] = [[0; BYTES_PER_LINE]; 2];
     let mut alt_buf = 0usize;
     let mut byte_counter: usize = 0;
-    let mut len: usize;
 
     // skip a given number of bytes
     if config.skip > 0 {
@@ -78,19 +79,19 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     }
 
     // data dump loop
-    len = rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
-    while len > 0 {
+    rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
+    while config.len > 0 {
         print!("{:08X} {LINE_SEP_VERT} ", byte_counter);
-        for i in 0..len {
+        for i in 0..config.len {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                 print!(" ");
             }
             print!("{:02X} ", buf[alt_buf][i]);
         }
-        if len == BYTES_PER_LINE / 2 {
+        if config.len == BYTES_PER_LINE / 2 {
             print!(" ")
         }
-        for i in 0..(BYTES_PER_LINE - len) {
+        for i in 0..(BYTES_PER_LINE - config.len) {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                 print!(" ");
             }
@@ -98,7 +99,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
         }
         if config.chars {
             print!("{LINE_SEP_VERT} |");
-            for i in 0..len {
+            for i in 0..config.len {
                 print!("{}", mask_chars(buf[alt_buf][i] as char));
             }
             print!("|");
@@ -111,14 +112,13 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
         }
 
         // after line logic
-        len = rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
+        rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
         alt_buf ^= 1; // toggle the alt buf
-        if buf[0] == buf[1] && len == BYTES_PER_LINE && !config.show_identical {
+        if buf[0] == buf[1] && config.len == BYTES_PER_LINE && !config.show_identical {
             trace!(buf = format!("{:?}", buf), "found a duplicating line");
             let start_line = byte_counter;
-            while buf[0] == buf[1] && len == BYTES_PER_LINE {
-                len =
-                    rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config).unwrap();
+            while buf[0] == buf[1] && config.len == BYTES_PER_LINE {
+                rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
                 byte_counter += BYTES_PER_LINE;
             }
             println!(
@@ -153,10 +153,10 @@ fn rd_data(
     alt_buf: &mut usize,
     byte_counter: &mut usize,
     config: &mut HeduConfig,
-) -> Result<usize> {
+) -> Result<()> {
+    *byte_counter += config.len;
     match data.read(&mut buf[*alt_buf]) {
         Ok(mut len) => {
-            *byte_counter += len; // FIXME: incremented too early! dump always starts at 0x10
             if config.limit != 0 && *byte_counter >= config.limit {
                 trace!(
                     byte_counter,
@@ -168,7 +168,8 @@ fn rd_data(
                 len = config.limit % BYTES_PER_LINE;
                 config.stop = true;
             }
-            return Ok(len);
+            config.len = len;
+            return Ok(());
         }
         Err(err) => {
             error!("error while reading data: {err}");
