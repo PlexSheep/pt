@@ -158,19 +158,14 @@ fn mask_chars(c: char) -> char {
 }
 
 fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
-    config.rd_counter += config.len;
-    config.data_idx += config.len;
     match data.read(&mut config.buf[config.alt_buf]) {
         Ok(mut len) => {
-            debug!(
+            trace!(
                 conf = format!("{:?}", config),
-                dif = (config.rd_counter as i64 - config.skip as i64),
-                eval = (config.rd_counter as i64 - config.skip as i64) as usize >= config.limit,
+                eval = config.limit != 0 && config.rd_counter >= config.limit,
                 "reached limit?"
             );
-            if config.limit != 0
-                && (config.rd_counter as i64 - config.skip as i64) as usize >= config.limit
-            {
+            if config.limit != 0 && config.rd_counter + (BYTES_PER_LINE - 1) >= config.limit {
                 trace!(
                     conf = format!("{:?}", config),
                     nlen = (config.limit % BYTES_PER_LINE),
@@ -180,6 +175,8 @@ fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
                 config.stop = true;
             }
             config.len = len;
+            config.rd_counter += config.len;
+            config.data_idx += config.len;
             return Ok(());
         }
         Err(err) => {
