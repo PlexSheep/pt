@@ -13,6 +13,7 @@ use std::io::{prelude::*, Read, SeekFrom};
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';
 const LINE_SEP_VERT: char = '│';
+const CHAR_BORDER: &'static str = "|";
 
 #[derive(Debug)]
 pub struct HeduConfig {
@@ -26,6 +27,7 @@ pub struct HeduConfig {
     rd_counter: usize,
     buf: [[u8; BYTES_PER_LINE]; 2],
     alt_buf: usize,
+    display_buf: String,
 }
 
 impl HeduConfig {
@@ -41,7 +43,13 @@ impl HeduConfig {
             rd_counter: usize::MIN,
             buf: [[0; BYTES_PER_LINE]; 2],
             alt_buf: 0,
+            display_buf: String::new(),
         }
+    }
+    #[inline]
+    fn display(&mut self) {
+        println!("{}", self.display_buf);
+        self.display_buf = String::new();
     }
 }
 
@@ -74,44 +82,46 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     }
 
     // print the head
-    print!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
+    config.display_buf += &format!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
     if config.chars {
-        print!("{:width$} {LINE_SEP_VERT} FOO", "", width = 37);
+        config.display_buf += &format!("{:width$} {LINE_SEP_VERT}", "", width = 37);
     }
-    println!();
+    config.display();
     if config.chars {
-        println!("{}", format!("{LINE_SEP_HORIZ}").repeat(80));
+        config.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(80);
     } else {
-        println!("{}", format!("{LINE_SEP_HORIZ}").repeat(59));
+        config.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(59);
     }
+    config.display();
 
     // data dump loop
     rd_data(data, &mut config)?;
     while config.len > 0 {
-        print!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
+        config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
         for i in 0..config.len {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                print!(" ");
+                config.display_buf += " ";
             }
-            print!("{:02X} ", config.buf[config.alt_buf][i]);
+            config.display_buf += &format!("{:02X} ", config.buf[config.alt_buf][i]);
         }
         if config.len == BYTES_PER_LINE / 2 {
-            print!(" ")
+            config.display_buf += " "
         }
         for i in 0..(BYTES_PER_LINE - config.len) {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                print!(" ");
+                config.display_buf += " ";
             }
-            print!("   ");
+            config.display_buf += "   ";
         }
         if config.chars {
-            print!("{LINE_SEP_VERT} |");
+            config.display_buf += &format!("{LINE_SEP_VERT} |");
             for i in 0..config.len {
-                print!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
+                config.display_buf +=
+                    &format!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
             }
-            print!("|");
+            config.display_buf += CHAR_BORDER;
         }
-        println!();
+        config.display();
 
         // loop breaker logic
         if config.stop {
@@ -130,12 +140,13 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
             let start_line = config.data_idx;
             while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
                 rd_data(data, &mut config)?;
-                config.data_idx += BYTES_PER_LINE;
+                config.data_idx += BYTES_PER_LINE; // FIXME: incorrect logic #59
             }
-            println!(
+            config.display_buf += &format!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
-                config.data_idx - start_line
+                (config.data_idx - start_line) / (BYTES_PER_LINE * 2)
             );
+            config.display();
         }
         // switch to the second half of the buf, the original half is stored the old buffer
         // We detect duplicate lines with this
