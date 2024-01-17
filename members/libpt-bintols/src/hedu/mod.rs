@@ -3,17 +3,18 @@
 //! This crate is part of [`pt`](../libpt/index.html), but can also be used as a standalone
 //! module.
 //!
-//! This crate is currently empty.
+//! Hedu is made for hexdumping data. `libpt` offers a cli application using this module.
 
 use crate::display::humanbytes;
 use anyhow::{bail, Result};
-use libpt_log::{debug, trace, warn, error};
+use libpt_log::{debug, error, trace, warn};
 use std::io::{prelude::*, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
 const LINE_SEP_HORIZ: char = '─';
 const LINE_SEP_VERT: char = '│';
 
+#[derive(Debug)]
 pub struct HeduConfig {
     pub chars: bool,
     pub skip: usize,
@@ -21,6 +22,10 @@ pub struct HeduConfig {
     pub limit: usize,
     stop: bool,
     len: usize,
+    data_idx: usize,
+    rd_counter: usize,
+    buf: [[u8; BYTES_PER_LINE]; 2],
+    alt_buf: usize,
 }
 
 impl HeduConfig {
@@ -32,6 +37,10 @@ impl HeduConfig {
             limit,
             stop: false,
             len: usize::MIN,
+            data_idx: usize::MIN,
+            rd_counter: usize::MIN,
+            buf: [[0; BYTES_PER_LINE]; 2],
+            alt_buf: 0,
         }
     }
 }
@@ -55,14 +64,11 @@ impl DataSource for std::fs::File {
 
 pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     // prepare some variables
-    let mut buf: [[u8; BYTES_PER_LINE]; 2] = [[0; BYTES_PER_LINE]; 2];
-    let mut alt_buf = 0usize;
-    let mut byte_counter: usize = 0;
 
     // skip a given number of bytes
     if config.skip > 0 {
         data.skip(config.skip)?;
-        byte_counter += config.skip;
+        config.data_idx += config.skip;
         debug!("Skipped {}", humanbytes(config.skip));
     }
 
@@ -79,14 +85,14 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     }
 
     // data dump loop
-    rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
+    rd_data(data, &mut config)?;
     while config.len > 0 {
-        print!("{:08X} {LINE_SEP_VERT} ", byte_counter);
+        print!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
         for i in 0..config.len {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                 print!(" ");
             }
-            print!("{:02X} ", buf[alt_buf][i]);
+            print!("{:02X} ", config.buf[config.alt_buf][i]);
         }
         if config.len == BYTES_PER_LINE / 2 {
             print!(" ")
@@ -100,7 +106,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
         if config.chars {
             print!("{LINE_SEP_VERT} |");
             for i in 0..config.len {
-                print!("{}", mask_chars(buf[alt_buf][i] as char));
+                print!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
             }
             print!("|");
         }
@@ -112,23 +118,27 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
         }
 
         // after line logic
-        rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
-        alt_buf ^= 1; // toggle the alt buf
-        if buf[0] == buf[1] && config.len == BYTES_PER_LINE && !config.show_identical {
-            trace!(buf = format!("{:?}", buf), "found a duplicating line");
-            let start_line = byte_counter;
-            while buf[0] == buf[1] && config.len == BYTES_PER_LINE {
-                rd_data(data, &mut buf, &mut alt_buf, &mut byte_counter, &mut config)?;
-                byte_counter += BYTES_PER_LINE;
+        rd_data(data, &mut config)?;
+        config.alt_buf ^= 1; // toggle the alt buf
+        if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
+        {
+            trace!(
+                buf = format!("{:?}", config.buf),
+                "found a duplicating line"
+            );
+            let start_line = config.data_idx;
+            while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
+                rd_data(data, &mut config)?;
+                config.data_idx += BYTES_PER_LINE;
             }
             println!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
-                byte_counter - start_line
+                config.data_idx - start_line
             );
         }
         // switch to the second half of the buf, the original half is stored the old buffer
         // We detect duplicate lines with this
-        alt_buf ^= 1; // toggle the alt buf
+        config.alt_buf ^= 1; // toggle the alt buf
     }
     Ok(())
 }
@@ -147,21 +157,22 @@ fn mask_chars(c: char) -> char {
     }
 }
 
-fn rd_data(
-    data: &mut dyn DataSource,
-    buf: &mut [[u8; BYTES_PER_LINE]; 2],
-    alt_buf: &mut usize,
-    byte_counter: &mut usize,
-    config: &mut HeduConfig,
-) -> Result<()> {
-    *byte_counter += config.len;
-    match data.read(&mut buf[*alt_buf]) {
+fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
+    config.rd_counter += config.len;
+    config.data_idx += config.len;
+    match data.read(&mut config.buf[config.alt_buf]) {
         Ok(mut len) => {
-            if config.limit != 0 && *byte_counter >= config.limit {
+            debug!(
+                conf = format!("{:?}", config),
+                dif = (config.rd_counter as i64 - config.skip as i64),
+                eval = (config.rd_counter as i64 - config.skip as i64) as usize >= config.limit,
+                "reached limit?"
+            );
+            if config.limit != 0
+                && (config.rd_counter as i64 - config.skip as i64) as usize >= config.limit
+            {
                 trace!(
-                    byte_counter,
-                    limit = config.limit,
-                    len,
+                    conf = format!("{:?}", config),
                     nlen = (config.limit % BYTES_PER_LINE),
                     "byte counter is farther than limit"
                 );
