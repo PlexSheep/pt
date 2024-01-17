@@ -139,8 +139,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
             );
             let start_line = config.data_idx;
             while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
-                rd_data(data, &mut config)?;
-                config.data_idx += BYTES_PER_LINE; // FIXME: incorrect logic #59
+                rd_data(data, &mut config)?;        // FIXME: incorrect logic #59
             }
             config.display_buf += &format!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
