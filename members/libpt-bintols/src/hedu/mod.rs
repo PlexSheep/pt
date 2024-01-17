@@ -5,8 +5,8 @@
 //!
 //! This crate is currently empty.
 
-use anyhow::{bail, Result};
 use crate::display::{bytes_to_bin, humanbytes};
+use anyhow::{bail, Result};
 use libpt_log::{debug, error, info, trace, warn};
 use std::io::{prelude::*, BufReader, Read, SeekFrom};
 

@@ -13,7 +13,7 @@
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 
-use libpt::{log::*, bintols::hedu::*};
+use libpt::{bintols::hedu::*, log::*};
 
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
