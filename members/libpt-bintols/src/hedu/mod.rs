@@ -69,6 +69,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     if config.skip > 0 {
         data.skip(config.skip)?;
         config.data_idx += config.skip;
+        adjust_data_idx(&mut config);
         debug!("Skipped {}", humanbytes(config.skip));
     }
 
@@ -157,6 +158,11 @@ fn mask_chars(c: char) -> char {
     }
 }
 
+#[inline]
+fn adjust_data_idx(config: &mut HeduConfig) {
+    config.data_idx += BYTES_PER_LINE - config.data_idx % BYTES_PER_LINE;
+}
+
 fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     match data.read(&mut config.buf[config.alt_buf]) {
         Ok(mut len) => {
@@ -177,6 +183,7 @@ fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
             config.len = len;
             config.rd_counter += config.len;
             config.data_idx += config.len;
+            adjust_data_idx(config);
             return Ok(());
         }
         Err(err) => {
