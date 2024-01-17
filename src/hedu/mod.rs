@@ -104,7 +104,7 @@ fn main() {
             if !data_source.is_file() {
                 debug!("Not a regular file'{:?}'", data_source);
                 // std::process::exit(1);
-                continue
+                continue;
             }
             trace!("Trying to open '{:?}'", data_source);
             match File::open(&data_source) {
@@ -128,14 +128,24 @@ fn main() {
         sources.push(Box::new(stdin));
     }
     for (i, source) in sources.iter_mut().enumerate() {
-        println!("{:=^59}", format!(" {} ", cli.data_source[i]));
         let mut config = HeduConfig::new(cli.chars, cli.skip, cli.show_identical, cli.limit);
+        match config.chars {
+            false => {
+                println!("{:─^59}", format!(" {} ", cli.data_source[i]));
+            }
+            true => {
+                println!("{:─^80}", format!(" {} ", cli.data_source[i]));
+            }
+        }
         match dump(&mut **source, &mut config) {
             Ok(_) => (),
             Err(err) => {
                 error!("Could not dump data of file: {err}");
                 std::process::exit(3);
             }
+        }
+        if i < cli.data_source.len() - 1 {
+            config.newline();
         }
     }
 }

@@ -27,7 +27,7 @@ pub struct HeduConfig {
     rd_counter: usize,
     buf: [[u8; BYTES_PER_LINE]; 2],
     alt_buf: usize,
-    display_buf: String,
+    pub display_buf: String,
 }
 
 impl HeduConfig {
@@ -38,7 +38,7 @@ impl HeduConfig {
             show_identical,
             limit,
             stop: false,
-            len: usize::MIN,
+            len: BYTES_PER_LINE,
             data_idx: usize::MIN,
             rd_counter: usize::MIN,
             buf: [[0; BYTES_PER_LINE]; 2],
@@ -47,9 +47,23 @@ impl HeduConfig {
         }
     }
     #[inline]
-    fn display(&mut self) {
+    pub fn display(&mut self) {
         println!("{}", self.display_buf);
         self.display_buf = String::new();
+    }
+    #[inline]
+    pub fn sep(&mut self) {
+        if self.chars {
+            self.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(80);
+        } else {
+            self.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(59);
+        }
+        self.display();
+    }
+    #[inline]
+    pub fn newline(&mut self) {
+        self.display_buf += "\n";
+        self.display();
     }
 }
 
@@ -82,20 +96,15 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     // print the head
     config.display_buf += &format!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
     if config.chars {
-        config.display_buf += &format!("{:width$} {LINE_SEP_VERT}", "", width = 37);
+        config.display_buf += &format!("{:width$} {LINE_SEP_VERT} DATA AS CHAR", "", width = 37);
     }
     config.display();
-    if config.chars {
-        config.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(80);
-    } else {
-        config.display_buf += &format!("{LINE_SEP_HORIZ}").repeat(59);
-    }
-    config.display();
+    config.sep();
 
     // data dump loop
-    rd_data(data, config)?;
     while config.len > 0 {
         config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
+        rd_data(data, config)?;
         for i in 0..config.len {
             if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                 config.display_buf += " ";
@@ -127,7 +136,6 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         }
 
         // after line logic
-        rd_data(data, config)?;
         config.alt_buf ^= 1; // toggle the alt buf
         if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
         {
@@ -139,11 +147,14 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
             while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
                 rd_data(data, config)?;
             }
-            config.alt_buf ^= 1; // toggle the alt buf (now that we have a not same line)
             config.display_buf += &format!(
-                "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
-                (config.data_idx - start_line) / (BYTES_PER_LINE * 2)
+                "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines){:32}",
+                (config.data_idx - start_line) / (BYTES_PER_LINE * 2),
+                ""
             );
+            if config.chars {
+                config.display_buf += &format!("{LINE_SEP_VERT}");
+            }
             trace!(
                 buf = format!("{:X?}", config.buf),
                 "dumping buf after line skip"
@@ -154,6 +165,31 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         // We detect duplicate lines with this
         config.alt_buf ^= 1; // toggle the alt buf
     }
+    config.data_idx += config.len;
+
+    config.sep();
+    config.display_buf += &format!(
+        "{:08X} {LINE_SEP_VERT} dumped total:\t{:<8} {:<16}{:3}",
+        config.rd_counter,
+        humanbytes(config.rd_counter),
+        format!("({} B)",config.rd_counter),
+        ""
+    );
+    if config.chars {
+        config.display_buf += &format!("{LINE_SEP_VERT}");
+    }
+    config.display();
+    config.display_buf += &format!(
+        "{:08X} {LINE_SEP_VERT} read total:\t\t{:<8} {:<16}{:3}",
+        config.data_idx,
+        humanbytes(config.data_idx),
+        format!("({} B)",config.data_idx),
+        ""
+    );
+    if config.chars {
+        config.display_buf += &format!("{LINE_SEP_VERT}");
+    }
+    config.display();
     Ok(())
 }
 
@@ -173,7 +209,7 @@ fn mask_chars(c: char) -> char {
 
 #[inline]
 fn adjust_data_idx(config: &mut HeduConfig) {
-    config.data_idx += BYTES_PER_LINE - config.data_idx % BYTES_PER_LINE;
+    config.data_idx -= config.data_idx % BYTES_PER_LINE;
 }
 
 fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
