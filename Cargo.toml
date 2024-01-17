@@ -69,6 +69,15 @@ crate-type = [
   "rlib",
 ]
 
+[[bin]]
+name = "ccc"
+path = "src/ccc/mod.rs"
+
+[[bin]]
+name = "hedu"
+path = "src/hedu/mod.rs"
+
+
 [dependencies]
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true }

@@ -17,16 +17,16 @@ jobs:
         uses: actions/checkout@v4
       - name: install rust
         uses: dtolnay/rust-toolchain@stable
+      - name: install additional rust things
         run: rustup component add rustfmt
       - name: config custom registry
         run: |
           mkdir -p ~/.cargo/
-          echo -e '[registry]
-          cscherr= "cscherr"
+          echo -e '[registry]\n\
+          cscherr= "cscherr"\n\
 
-          [registries.cscherr]
-          index = "sparse+https://git.cscherr.de/api/packages/PlexSheep/cargo/"
-          ' > ~/.cargo/config.toml
+          [registries.cscherr]\n\
+          index = "sparse+https://git.cscherr.de/api/packages/PlexSheep/cargo/"' > ~/.cargo/config.toml
           cat ~/.cargo/config.toml
       - name: cargo check
         run: cargo check --all-features --all-targets
