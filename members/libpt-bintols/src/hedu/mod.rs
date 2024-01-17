@@ -28,6 +28,7 @@ pub struct HeduConfig {
     buf: [[u8; BYTES_PER_LINE]; 2],
     alt_buf: usize,
     pub display_buf: String,
+    first_iter: bool,
 }
 
 impl HeduConfig {
@@ -38,12 +39,13 @@ impl HeduConfig {
             show_identical,
             limit,
             stop: false,
-            len: BYTES_PER_LINE,
-            data_idx: usize::MIN,
-            rd_counter: usize::MIN,
+            len: 0,
+            data_idx: 0,
+            rd_counter: 0,
             buf: [[0; BYTES_PER_LINE]; 2],
             alt_buf: 0,
             display_buf: String::new(),
+            first_iter: true,
         }
     }
     #[inline]
@@ -102,36 +104,45 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     config.sep();
 
     // data dump loop
-    while config.len > 0 {
+    while config.len > 0 || config.first_iter {
         config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
         rd_data(data, config)?;
-        for i in 0..config.len {
-            if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                config.display_buf += " ";
+        if config.len != 0 && config.first_iter {
+            for i in 0..config.len {
+                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
+                    config.display_buf += " ";
+                }
+                config.display_buf += &format!("{:02X} ", config.buf[config.alt_buf][i]);
             }
-            config.display_buf += &format!("{:02X} ", config.buf[config.alt_buf][i]);
-        }
-        if config.len == BYTES_PER_LINE / 2 {
-            config.display_buf += " "
-        }
-        for i in 0..(BYTES_PER_LINE - config.len) {
-            if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                config.display_buf += " ";
+            if config.len == BYTES_PER_LINE / 2 {
+                config.display_buf += " "
             }
-            config.display_buf += "   ";
+            for i in 0..(BYTES_PER_LINE - config.len) {
+                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
+                    config.display_buf += " ";
+                }
+                config.display_buf += "   ";
+            }
+        } else {
+            config.display_buf += &format!("(no data){:40}", "");
         }
         if config.chars {
-            config.display_buf += &format!("{LINE_SEP_VERT} |");
-            for i in 0..config.len {
-                config.display_buf +=
-                    &format!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
+            config.display_buf += &format!("{LINE_SEP_VERT} ");
+            if config.len != 0 && config.first_iter {
+                config.display_buf += CHAR_BORDER;
+                for i in 0..config.len {
+                    config.display_buf +=
+                        &format!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
+                }
+                config.display_buf += CHAR_BORDER;
+            } else {
+                config.display_buf += &format!("(no data)");
             }
-            config.display_buf += CHAR_BORDER;
         }
         config.display();
 
         // loop breaker logic
-        if config.stop {
+        if config.stop || config.len == 0 {
             break;
         }
 
@@ -160,6 +171,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
                 "dumping buf after line skip"
             );
             config.display();
+            config.first_iter = false;
         }
         // switch to the second half of the buf, the original half is stored the old buffer
         // We detect duplicate lines with this
@@ -172,7 +184,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         "{:08X} {LINE_SEP_VERT} dumped total:\t{:<8} {:<16}{:3}",
         config.rd_counter,
         humanbytes(config.rd_counter),
-        format!("({} B)",config.rd_counter),
+        format!("({} B)", config.rd_counter),
         ""
     );
     if config.chars {
@@ -183,7 +195,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         "{:08X} {LINE_SEP_VERT} read total:\t\t{:<8} {:<16}{:3}",
         config.data_idx,
         humanbytes(config.data_idx),
-        format!("({} B)",config.data_idx),
+        format!("({} B)", config.data_idx),
         ""
     );
     if config.chars {

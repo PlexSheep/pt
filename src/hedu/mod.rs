@@ -102,7 +102,7 @@ fn main() {
         for data_source in &cli.data_source {
             let data_source: PathBuf = PathBuf::from(data_source);
             if !data_source.is_file() {
-                debug!("Not a regular file'{:?}'", data_source);
+                warn!("Not a regular file {:?}, skipping", data_source);
                 // std::process::exit(1);
                 continue;
             }
