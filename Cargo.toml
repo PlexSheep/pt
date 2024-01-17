@@ -13,7 +13,7 @@ members = [
 default-members = [".", "members/libpt-bin", "members/libpt-core"]
 [workspace.package]
 publish = true
-version = "0.2.6"
+version = "0.2.7"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
