@@ -16,5 +16,5 @@ categories.workspace = true
 
 [dependencies]
 num-traits = "0.2.16"
-libpt-core = { path = "../libpt-core" }
-libpt-log = { path = "../libpt-log" }
+libpt-core = { version = "0.2.5-alpha.0", path = "../libpt-core" }
+libpt-log = { version = "0.2.5-alpha.0", path = "../libpt-log" }
