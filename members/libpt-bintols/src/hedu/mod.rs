@@ -7,7 +7,7 @@
 
 use crate::display::humanbytes;
 use anyhow::{bail, Result};
-use libpt_log::{debug, trace, warn, error};
+use libpt_log::{debug, error, trace, warn};
 use std::io::{prelude::*, Read, SeekFrom};
 
 const BYTES_PER_LINE: usize = 16;
