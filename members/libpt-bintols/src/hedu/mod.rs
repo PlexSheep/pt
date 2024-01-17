@@ -139,11 +139,16 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
             );
             let start_line = config.data_idx;
             while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
-                rd_data(data, &mut config)?; // FIXME: incorrect logic #59
+                rd_data(data, &mut config)?;
             }
+            config.alt_buf ^= 1; // toggle the alt buf (now that we have a not same line)
             config.display_buf += &format!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines)",
                 (config.data_idx - start_line) / (BYTES_PER_LINE * 2)
+            );
+            trace!(
+                buf = format!("{:X?}", config.buf),
+                "dumping buf after line skip"
             );
             config.display();
         }
