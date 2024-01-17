@@ -16,9 +16,9 @@ categories.workspace = true
 
 [dependencies]
 humantime = "2.1.0"
-libpt-core = { version = "0.2.0-alpha.2", path = "../libpt-core", registry="cscherr" }
-libpt-log = { version = "0.2.0-alpha.2", path = "../libpt-log", registry="cscherr" }
-libpt-math = { version = "0.2.0-alpha.2", path = "../libpt-math", registry="cscherr" }
+libpt-core = { workspace = true }
+libpt-log = { workspace = true }
+libpt-math = { workspace = true }
 reqwest = { version = "0.11.20", features = ["blocking"] }
 serde = { version = "1.0.188", features = ["serde_derive"] }
 serde_json = "1.0.107"
