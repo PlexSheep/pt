@@ -29,12 +29,10 @@ categories = [
 anyhow = "1.0.79"
 thiserror = "1.0.56"
 libpt-core = { version = "0.2.0-alpha.2", path = "members/libpt-core", registry = "cscherr" }
-libpt-bintols = { version = "0.2.0-alpha.2", path = "members/libpt-bintols", registry = "cscherr", optional = true }
-libpt-hedu = { version = "0.2.0-alpha.2", path = "members/libpt-hedu", registry = "cscherr", optional = true }
-libpt-log = { version = "0.2.0-alpha.2", path = "members/libpt-log", registry = "cscherr", optional = true }
-libpt-math = { version = "0.2.0-alpha.2", path = "members/libpt-math", registry = "cscherr", optional = true }
-libpt-ccc = { version = "0.2.0-alpha.2", path = "members/libpt-ccc", registry = "cscherr", optional = true }
-libpt-net = { version = "0.2.0-alpha.2", path = "members/libpt-net", registry = "cscherr", optional = true }
+libpt-bintols = { version = "0.2.0-alpha.2", path = "members/libpt-bintols", registry = "cscherr" }
+libpt-log = { version = "0.2.0-alpha.2", path = "members/libpt-log", registry = "cscherr" }
+libpt-math = { version = "0.2.0-alpha.2", path = "members/libpt-math", registry = "cscherr" }
+libpt-net = { version = "0.2.0-alpha.2", path = "members/libpt-net", registry = "cscherr" }
 
 [package]
 name = "libpt"
@@ -52,13 +50,11 @@ categories.workspace = true
 
 [features]
 default = ["log", "core"]
-all = ["default", "math", "log", "bintols", "net", "ccc", "hedu", "core"]
 core = []
-math = ["dep:libpt-math"]
-log = ["dep:libpt-log"]
-bintols = ["dep:libpt-bintols"]
-net = ["dep:libpt-net"]
-ccc = ["math"]
+math = []
+log = []
+bintols = []
+net = []
 bin = ["bintols", "math", "dep:clap", "dep:clap-num", "dep:clap-verbosity-flag"]
 
 [lib]
@@ -81,10 +77,8 @@ path = "src/hedu/mod.rs"
 [dependencies]
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true }
-libpt-hedu = { workspace = true }
 libpt-log = { workspace = true }
 libpt-math = { workspace = true }
-libpt-ccc = { workspace = true }
 libpt-net = { workspace = true }
 clap = { version = "4.4.4", features = ["derive"], optional = true }
 clap-num = { version = "1.0.2", optional = true }
