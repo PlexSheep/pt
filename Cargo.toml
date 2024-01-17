@@ -49,13 +49,13 @@ keywords.workspace = true
 categories.workspace = true
 
 [features]
-default = ["log", "core"]
+default = ["log", "core", "bin"]
 core = []
 math = []
 log = []
 bintols = []
 net = []
-bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag"]
+bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag", "math", "bintols"]
 
 [lib]
 name = "libpt"
