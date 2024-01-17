@@ -17,6 +17,6 @@ categories.workspace = true
 [dependencies]
 num = "0.4.1"
 num-traits = "0.2.16"
-libpt-core = { version = "0.2.0-alpha.1", path = "../libpt-core" }
-libpt-log = { version = "0.2.0-alpha.1", path = "../libpt-log" }
-libpt-math = { version = "0.2.0-alpha.1", path = "../libpt-math" }
+libpt-core = { version = "0.2.0-alpha.2", path = "../libpt-core", registry="cscherr" }
+libpt-log = { version = "0.2.0-alpha.2", path = "../libpt-log", registry="cscherr" }
+libpt-math = { version = "0.2.0-alpha.2", path = "../libpt-math", registry="cscherr" }

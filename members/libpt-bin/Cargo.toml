@@ -31,11 +31,11 @@ path = "src/main/mod.rs"
 clap = { version = "4.4.4", features = ["derive"] }
 clap-num = "1.0.2"
 clap-verbosity-flag = "2.0.1"
-libpt = { version = "0.2.0-alpha.1", path = "../..", features = [
+libpt = { version = "0.2.0-alpha.2", path = "../..", features = [
   "default",
   "ccc",
   "math",
   "hedu",
   "net",
   "log",
-] }
+], registry = "cscherr" }
