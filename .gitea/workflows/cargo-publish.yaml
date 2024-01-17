@@ -30,4 +30,4 @@ jobs:
         run: cargo install cargo-workspaces
       - name: publish crates on git.cscherr.de
         run: |
-            cargo workspaces publish --registry cscherr skip
+            cargo workspaces publish --registry cscherr
