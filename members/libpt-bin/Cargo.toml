@@ -31,7 +31,7 @@ path = "src/main/mod.rs"
 clap = { version = "4.4.4", features = ["derive"] }
 clap-num = "1.0.2"
 clap-verbosity-flag = "2.0.1"
-libpt = { version = "0.2.5", path = "../..", features = [
+libpt = {path = "../..", features = [
   "default",
   "ccc",
   "math",
