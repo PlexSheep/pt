@@ -16,8 +16,8 @@ authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
 description = "Personal multitool"
 readme = "README.md"
-homepage = "https://git.cscherr.de/PlexSheep/libpt"
-repository = "https://git.cscherr.de/PlexSheep/libpt"
+homepage = "https://git.cscherr.de/PlexSheep/pt"
+repository = "https://git.cscherr.de/PlexSheep/pt"
 keywords = ["cli", "library"]
 categories = [
   "command-line-utilities",

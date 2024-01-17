@@ -69,6 +69,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     if config.skip > 0 {
         data.skip(config.skip)?;
         config.data_idx += config.skip;
+        config.data_idx += BYTES_PER_LINE - config.data_idx % BYTES_PER_LINE;
         debug!("Skipped {}", humanbytes(config.skip));
     }
 
