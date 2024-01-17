@@ -11,6 +11,7 @@ jobs:
       # Give the default GITHUB_TOKEN write permission to commit and push the
       # added or changed files to the repository.
       contents: write
+      package: write
     steps:
       - name: get repo
         uses: actions/checkout@v4
@@ -21,9 +22,11 @@ jobs:
           mkdir -p ~/.cargo/
           echo "" > ~/.cargo/config.toml
           echo "[registry]" >> ~/.cargo/config.toml
+          # echo 'token = "Bearer ${{ secrets.CARGO_PUBLISH_CRATESIO }}"' >> ~/.cargo/config.toml
           echo 'cscherr = "cscherr"' >> ~/.cargo/config.toml
           echo '[registries.cscherr]' >> ~/.cargo/config.toml
           echo 'index = "https://git.cscherr.de/PlexSheep/_cargo-index.git"' >> ~/.cargo/config.toml
+          echo 'token = "Bearer ${{ GITEA_TOKEN }}"' >> ~/.cargo/config.toml
           cat ~/.cargo/config.toml
       - name: publish crates on git.cscherr.de
         run: |
