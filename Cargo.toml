@@ -55,7 +55,7 @@ math = []
 log = []
 bintols = []
 net = []
-bin = ["bintols", "math", "dep:clap", "dep:clap-num", "dep:clap-verbosity-flag"]
+bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag"]
 
 [lib]
 name = "libpt"
@@ -68,10 +68,12 @@ crate-type = [
 [[bin]]
 name = "ccc"
 path = "src/ccc/mod.rs"
+required-features = ["bin", "math"]
 
 [[bin]]
 name = "hedu"
 path = "src/hedu/mod.rs"
+required-features = ["bin", "bintols"]
 
 
 [dependencies]

@@ -13,7 +13,7 @@
 
 //// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 
-use libpt::{hedu::*, log::*};
+use libpt::{log::*, bintols::hedu::*};
 
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
@@ -87,6 +87,11 @@ pub struct Cli {
     ///
     /// If left empty or set as "-", the program will read from stdin.
     pub data_source: Option<String>,
+}
+impl Cli {
+    fn parse() -> Cli {
+        todo!()
+    }
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
