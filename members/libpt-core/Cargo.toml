@@ -15,4 +15,4 @@ categories.workspace = true
 [dependencies]
 anyhow = "1.0.79"
 cucumber = "0.20.2"
-libpt-log = { version = "0.2.5-alpha.0", path = "../libpt-log" }
+libpt-log = { version = "0.2.0-alpha.0", path = "../libpt-log" }
