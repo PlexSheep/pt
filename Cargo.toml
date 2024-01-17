@@ -13,7 +13,7 @@ members = [
 default-members = [".", "members/libpt-bin", "members/libpt-core"]
 [workspace.package]
 publish = true
-version = "0.2.9-alpha.0"
+version = "0.2.9"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
@@ -71,10 +71,10 @@ crate-type = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libpt-bintols = { version = "0.2.7", path = "members/libpt-bintols" }
-libpt-core = { version = "0.2.7", path = "members/libpt-core" }
-libpt-hedu = { version = "0.2.7", path = "members/libpt-hedu" }
-libpt-log = { version = "0.2.7", path = "members/libpt-log" }
-libpt-math = { version = "0.2.7", path = "members/libpt-math" }
-libpt-ccc = { version = "0.2.7", path = "members/libpt-ccc" }
-libpt-net = { version = "0.2.7", path = "members/libpt-net" }
+libpt-bintols = { version = "0.2.9", path = "members/libpt-bintols" }
+libpt-core = { version = "0.2.9", path = "members/libpt-core" }
+libpt-hedu = { version = "0.2.9", path = "members/libpt-hedu" }
+libpt-log = { version = "0.2.9", path = "members/libpt-log" }
+libpt-math = { version = "0.2.9", path = "members/libpt-math" }
+libpt-ccc = { version = "0.2.9", path = "members/libpt-ccc" }
+libpt-net = { version = "0.2.9", path = "members/libpt-net" }

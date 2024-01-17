@@ -17,5 +17,5 @@ categories.workspace = true
 [dependencies]
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-libpt-log = { version = "0.2.5", path = "../libpt-log" }
-libpt-bintols = { version = "0.2.5", path = "../libpt-bintols" }
+libpt-log = { version = "0.2.9", path = "../libpt-log" }
+libpt-bintols = { version = "0.2.9", path = "../libpt-bintols" }
