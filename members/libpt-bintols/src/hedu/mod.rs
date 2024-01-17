@@ -10,10 +10,10 @@ use anyhow::{bail, Result};
 use libpt_log::{debug, error, trace, warn};
 use std::io::{prelude::*, Read, SeekFrom};
 
-const BYTES_PER_LINE: usize = 16;
-const LINE_SEP_HORIZ: char = '─';
-const LINE_SEP_VERT: char = '│';
-const CHAR_BORDER: &'static str = "|";
+pub const BYTES_PER_LINE: usize = 16;
+pub const LINE_SEP_HORIZ: char = '─';
+pub const LINE_SEP_VERT: char = '│';
+pub const CHAR_BORDER: &'static str = "|";
 
 #[derive(Debug)]
 pub struct HeduConfig {
@@ -70,14 +70,12 @@ impl DataSource for std::fs::File {
     }
 }
 
-pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
-    // prepare some variables
-
+pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     // skip a given number of bytes
     if config.skip > 0 {
         data.skip(config.skip)?;
         config.data_idx += config.skip;
-        adjust_data_idx(&mut config);
+        adjust_data_idx(config);
         debug!("Skipped {}", humanbytes(config.skip));
     }
 
@@ -95,7 +93,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
     config.display();
 
     // data dump loop
-    rd_data(data, &mut config)?;
+    rd_data(data, config)?;
     while config.len > 0 {
         config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
         for i in 0..config.len {
@@ -129,7 +127,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
         }
 
         // after line logic
-        rd_data(data, &mut config)?;
+        rd_data(data, config)?;
         config.alt_buf ^= 1; // toggle the alt buf
         if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
         {
@@ -139,7 +137,7 @@ pub fn dump(data: &mut dyn DataSource, mut config: HeduConfig) -> Result<()> {
             );
             let start_line = config.data_idx;
             while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
-                rd_data(data, &mut config)?;
+                rd_data(data, config)?;
             }
             config.alt_buf ^= 1; // toggle the alt buf (now that we have a not same line)
             config.display_buf += &format!(
