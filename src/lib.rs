@@ -12,8 +12,6 @@ pub use libpt_bintols as bintols;
 pub use libpt_ccc as ccc;
 #[cfg(feature = "core")]
 pub use libpt_core as core;
-#[cfg(feature = "hedu")]
-pub use libpt_hedu as hedu;
 #[cfg(feature = "log")]
 pub use libpt_log as log;
 #[cfg(feature = "math")]

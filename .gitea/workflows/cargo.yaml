@@ -1,4 +1,4 @@
-name: Cargo Check, Format, Fix and Test
+name: cargo devel CI
 on:
   push:
     branches:
@@ -17,16 +17,16 @@ jobs:
         uses: actions/checkout@v4
       - name: install rust
         uses: dtolnay/rust-toolchain@stable
+      - name: install additional rust things
         run: rustup component add rustfmt
       - name: config custom registry
         run: |
           mkdir -p ~/.cargo/
-          echo -e '[registry]
-          cscherr= "cscherr"
-
-          [registries.cscherr]
-          index = "sparse+https://git.cscherr.de/api/packages/PlexSheep/cargo/"
-          ' > ~/.cargo/config.toml
+          echo "" > ~/.cargo/config.toml
+          echo "[registry]" >> ~/.cargo/config.toml
+          echo 'cscherr = "cscherr"' >> ~/.cargo/config.toml
+          echo '[registries.cscherr]' >> ~/.cargo/config.toml
+          echo 'index = "https://git.cscherr.de/PlexSheep/_cargo-index.git"' >> ~/.cargo/config.toml
           cat ~/.cargo/config.toml
       - name: cargo check
         run: cargo check --all-features --all-targets

@@ -16,5 +16,7 @@ categories.workspace = true
 
 [dependencies]
 num-traits = "0.2.16"
-libpt-core = { version = "0.2.0-alpha.2", path = "../libpt-core", registry="cscherr" }
-libpt-log = { version = "0.2.0-alpha.2", path = "../libpt-log", registry="cscherr" }
+libpt-core = { workspace = true }
+libpt-log = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }

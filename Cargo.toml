@@ -3,14 +3,11 @@ resolver = "2"
 members = [
   ".",
   "members/libpt-core",
-  "members/libpt-bintols",
   "members/libpt-math",
-  "members/libpt-bin",
   "members/libpt-log",
   "members/libpt-net",
-  "members/libpt-hedu",
 ]
-default-members = [".", "members/libpt-bin", "members/libpt-core"]
+default-members = [".", "members/libpt-core"]
 [workspace.package]
 publish = true
 version = "0.2.0-alpha.3"
@@ -31,8 +28,11 @@ categories = [
 [workspace.dependencies]
 anyhow = "1.0.79"
 thiserror = "1.0.56"
-libpt-log = { version = "0.2.0-alpha.2", path = "../libpt-log" }
-libpt-bintols = { version = "0.2.0-alpha.2", ath = "../libpt-bintols" }
+libpt-core = { version = "0.2.0-alpha.2", path = "members/libpt-core", registry = "cscherr" }
+libpt-bintols = { version = "0.2.0-alpha.2", path = "members/libpt-bintols", registry = "cscherr" }
+libpt-log = { version = "0.2.0-alpha.2", path = "members/libpt-log", registry = "cscherr" }
+libpt-math = { version = "0.2.0-alpha.2", path = "members/libpt-math", registry = "cscherr" }
+libpt-net = { version = "0.2.0-alpha.2", path = "members/libpt-net", registry = "cscherr" }
 
 [package]
 name = "libpt"
@@ -50,15 +50,12 @@ categories.workspace = true
 
 [features]
 default = ["log", "core"]
-all = ["default", "math", "log", "bintols", "net", "ccc", "hedu", "core"]
 core = []
-fw = []
 math = []
 log = []
 bintols = []
 net = []
-ccc = ["math"]
-hedu = ["bintols"]
+bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag"]
 
 [lib]
 name = "libpt"
@@ -68,13 +65,23 @@ crate-type = [
   "rlib",
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "ccc"
+path = "src/ccc/mod.rs"
+required-features = ["bin", "math"]
+
+[[bin]]
+name = "hedu"
+path = "src/hedu/mod.rs"
+required-features = ["bin", "bintols"]
+
 
 [dependencies]
-libpt-bintols = { version = "0.2.0-alpha.2", path = "members/libpt-bintols", registry="cscherr"}
-libpt-core = { version = "0.2.0-alpha.2", path = "members/libpt-core", registry="cscherr" }
-libpt-hedu = { version = "0.2.0-alpha.2", path = "members/libpt-hedu", registry="cscherr" }
-libpt-log = { version = "0.2.0-alpha.2", path = "members/libpt-log", registry="cscherr" }
-libpt-math = { version = "0.2.0-alpha.2", path = "members/libpt-math", registry="cscherr" }
-libpt-ccc = { version = "0.2.0-alpha.2", path = "members/libpt-ccc", registry="cscherr" }
-libpt-net = { version = "0.2.0-alpha.2", path = "members/libpt-net", registry="cscherr" }
+libpt-core = { workspace = true }
+libpt-bintols = { workspace = true }
+libpt-log = { workspace = true }
+libpt-math = { workspace = true }
+libpt-net = { workspace = true }
+clap = { version = "4.4.4", features = ["derive"], optional = true }
+clap-num = { version = "1.0.2", optional = true }
+clap-verbosity-flag = { version = "2.0.1", optional = true }
