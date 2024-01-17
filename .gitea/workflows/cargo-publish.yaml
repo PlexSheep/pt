@@ -4,29 +4,28 @@ on:
     branches:
       - master
 
-jobs:
-  format:
-    name: cargo CD
-    steps:
-      - run: |
-          echo Registry Token: ${{ secrets.CARGO_PUBLISH_CSCHERR }}
-      - name: get repo
-        uses: actions/checkout@v4
-      - name: install rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: config custom registry
-        run: |
-          mkdir -p ~/.cargo/
-          echo -e '[registry]
-          cscherr= "cscherr"
-
-          [registries.cscherr]
-          index = "sparse+https://git.cscherr.de/api/packages/PlexSheep/cargo/"
-          token = "${{ secrets.CARGO_PUBLISH_CSCHERR }}"
-          ' > ~/.cargo/config.toml
-          cat ~/.cargo/config.toml
-          echo Registry Token: ${{ secrets.CARGO_PUBLISH_CSCHERR }}
-      - name: publish crates on git.cscherr.de
-        uses: katyo/publish-crates@v2
-        with:
-          args: --registry cscherr
+#jobs:
+#  format:
+#    name: cargo CI
+#    permissions:
+#      # Give the default GITHUB_TOKEN write permission to commit and push the
+#      # added or changed files to the repository.
+#      contents: write
+#    steps:
+#      - name: get repo
+#        uses: actions/checkout@v4
+#      - name: install rust
+#        uses: dtolnay/rust-toolchain@stable
+#      - name: config custom registry
+#        run: |
+#          mkdir -p ~/.cargo/
+#          echo -e '[registry]
+#          cscherr= "cscherr"
+#
+#          [registries.cscherr]
+#          index = "sparse+https://git.cscherr.de/api/packages/PlexSheep/cargo/"
+#          ' > ~/.cargo/config.toml
+#          cat ~/.cargo/config.toml
+#      - name: publish crates on git.cscherr.de
+#        run: |
+#            cargo workspaces publish --registry cscherr
