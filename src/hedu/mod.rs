@@ -88,11 +88,6 @@ pub struct Cli {
     /// If left empty or set as "-", the program will read from stdin.
     pub data_source: Option<String>,
 }
-impl Cli {
-    fn parse() -> Cli {
-        todo!()
-    }
-}
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 
