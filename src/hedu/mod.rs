@@ -129,6 +129,8 @@ fn main() {
     }
     for (i, source) in sources.iter_mut().enumerate() {
         let mut config = HeduConfig::new(cli.chars, cli.skip, cli.show_identical, cli.limit);
+        // FIXME: find a better way to get the file name
+        // Currently, skipped sources make an extra newline here.
         match config.chars {
             false => {
                 println!("{:─^59}", format!(" {} ", cli.data_source[i]));
