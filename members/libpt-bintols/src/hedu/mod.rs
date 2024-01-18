@@ -112,7 +112,10 @@ impl Hedu {
         }
         self.display_buf += &format!(
             "******** {LINE_SEP_VERT} {:<49}",
-            format!("(repeats {} lines)", self.data_idx - start_line / (BYTES_PER_LINE) + 1)
+            format!(
+                "(repeats {} lines)",
+                self.data_idx - start_line / (BYTES_PER_LINE) + 1
+            )
         );
         if self.chars {
             self.display_buf += &format!("{LINE_SEP_VERT}");
