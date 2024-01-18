@@ -101,8 +101,8 @@ fn main() {
     if cli.data_source.len() > 0 && cli.data_source[0] != "-" {
         for data_source in &cli.data_source {
             let data_source: PathBuf = PathBuf::from(data_source);
-            if !data_source.is_file() {
-                warn!("Not a regular file {:?}, skipping", data_source);
+            if data_source.is_dir() {
+                warn!("Not a file {:?}, skipping", data_source);
                 // std::process::exit(1);
                 continue;
             }

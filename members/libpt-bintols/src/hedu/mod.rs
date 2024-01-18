@@ -150,6 +150,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         if config.stop || config.len == 0 {
             break;
         }
+        rd_data(data, config)?;
 
         // after line logic
         if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
@@ -164,7 +165,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
             }
             config.display_buf += &format!(
                 "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines){:32}",
-                (config.data_idx - start_line) / (BYTES_PER_LINE * 2),
+                (config.data_idx - start_line) / (BYTES_PER_LINE) + 1,
                 ""
             );
             if config.chars {
@@ -177,28 +178,14 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
             config.alt_buf ^= 1; // read into the other buf, so we can check for sameness
             config.display();
         }
-        rd_data(data, config)?;
     }
-    config.data_idx += config.len;
 
     config.sep();
     config.display_buf += &format!(
-        "{:08X} {LINE_SEP_VERT} dumped total:\t{:<8} {:<16}{:3}",
-        config.data_idx,
-        humanbytes(config.data_idx),
-        format!("({} B)", config.data_idx),
-        ""
-    );
-    if config.chars {
-        config.display_buf += &format!("{LINE_SEP_VERT}");
-    }
-    config.display();
-    config.display_buf += &format!(
-        "{:08X} {LINE_SEP_VERT} read total:\t\t{:<8} {:<16}{:3}",
+        "{:08X} {LINE_SEP_VERT} read total:\t\t    {:<8} {:<15}",
         config.rd_counter,
         humanbytes(config.rd_counter),
-        format!("({} B)", config.rd_counter),
-        ""
+        format!("({} B)", config.rd_counter)
     );
     if config.chars {
         config.display_buf += &format!("{LINE_SEP_VERT}");
