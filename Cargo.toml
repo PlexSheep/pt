@@ -10,7 +10,7 @@ members = [
 default-members = [".", "members/libpt-core"]
 [workspace.package]
 publish = true
-version = "0.3.10"
+version = "0.3.11-alpha.0"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
@@ -28,11 +28,11 @@ categories = [
 [workspace.dependencies]
 anyhow = "1.0.79"
 thiserror = "1.0.56"
-libpt-core = { version = "0.3.10", path = "members/libpt-core" }
-libpt-bintols = { version = "0.3.10", path = "members/libpt-bintols" }
-libpt-log = { version = "0.3.10", path = "members/libpt-log" }
-libpt-math = { version = "0.3.10", path = "members/libpt-math" }
-libpt-net = { version = "0.3.10", path = "members/libpt-net" }
+libpt-core = { version = "0.3.11-alpha.0", path = "members/libpt-core" }
+libpt-bintols = { version = "0.3.11-alpha.0", path = "members/libpt-bintols" }
+libpt-log = { version = "0.3.11-alpha.0", path = "members/libpt-log" }
+libpt-math = { version = "0.3.11-alpha.0", path = "members/libpt-math" }
+libpt-net = { version = "0.3.11-alpha.0", path = "members/libpt-net" }
 
 [package]
 name = "libpt"
