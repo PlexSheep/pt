@@ -8,3 +8,4 @@ git add -A
 git commit -m "Release v$NEW_VERSION"
 cargo ws publish --registry cscherr --no-git-push --publish-as-is || cargo publish --registry cscherr -p libpt
 git push
+cargo ws publish --publish-as-is || cargo publish -p libpt
