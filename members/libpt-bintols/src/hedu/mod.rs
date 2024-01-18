@@ -16,7 +16,7 @@ pub const LINE_SEP_VERT: char = '│';
 pub const CHAR_BORDER: &'static str = "|";
 
 #[derive(Debug)]
-pub struct HeduConfig {
+pub struct Hedu {
     pub chars: bool,
     pub skip: usize,
     pub show_identical: bool,
@@ -31,9 +31,9 @@ pub struct HeduConfig {
     first_iter: bool,
 }
 
-impl HeduConfig {
+impl Hedu {
     pub fn new(chars: bool, skip: usize, show_identical: bool, limit: usize) -> Self {
-        HeduConfig {
+        Hedu {
             chars,
             skip,
             show_identical,
@@ -67,6 +67,141 @@ impl HeduConfig {
         self.display_buf += "\n";
         self.display();
     }
+    fn dump_a_line(&mut self) {
+        self.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", self.data_idx);
+        if self.len != 0 {
+            for i in 0..self.len {
+                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
+                    self.display_buf += " ";
+                }
+                self.display_buf += &format!("{:02X} ", self.buf[self.alt_buf][i]);
+            }
+            if self.len == BYTES_PER_LINE / 2 {
+                self.display_buf += " "
+            }
+            for i in 0..(BYTES_PER_LINE - self.len) {
+                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
+                    self.display_buf += " ";
+                }
+                self.display_buf += "   ";
+            }
+        } else {
+            self.display_buf += &format!("{:49}", "");
+        }
+        if self.chars {
+            self.display_buf += &format!("{LINE_SEP_VERT} ");
+            if self.len != 0 {
+                self.display_buf += CHAR_BORDER;
+                for i in 0..self.len {
+                    self.display_buf +=
+                        &format!("{}", mask_chars(self.buf[self.alt_buf][i] as char));
+                }
+                self.display_buf += CHAR_BORDER;
+            } else {
+                self.display_buf += &format!("{:^8}", "");
+            }
+        }
+        self.display();
+    }
+
+    fn skip_lines(&mut self, data: &mut dyn DataSource) -> Result<()> {
+        trace!(buf = format!("{:?}", self.buf), "found a duplicating line");
+        let start_line = self.data_idx;
+        while self.buf[0] == self.buf[1] && self.len == BYTES_PER_LINE {
+            self.rd_data(data)?;
+        }
+        self.display_buf += &format!(
+            "******** {LINE_SEP_VERT} {:<49}",
+            format!("(repeats {} lines)", self.data_idx - start_line / (BYTES_PER_LINE) + 1)
+        );
+        if self.chars {
+            self.display_buf += &format!("{LINE_SEP_VERT}");
+        }
+        trace!(
+            buf = format!("{:X?}", self.buf),
+            "dumping buf after line skip"
+        );
+        self.alt_buf ^= 1; // read into the other buf, so we can check for sameness
+        self.display();
+        Ok(())
+    }
+    pub fn dump(&mut self, data: &mut dyn DataSource) -> Result<()> {
+        // skip a given number of bytes
+        if self.skip > 0 {
+            data.skip(self.skip)?;
+            self.rd_counter += self.skip;
+            debug!(
+                data_idx = self.data_idx,
+                "Skipped {}",
+                humanbytes(self.skip)
+            );
+        }
+
+        // print the head
+        self.display_buf += &format!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
+        if self.chars {
+            self.display_buf += &format!("{:width$} {LINE_SEP_VERT} DATA AS CHAR", "", width = 37);
+        }
+        self.display();
+        self.sep();
+
+        // data dump loop
+        self.rd_data(data)?;
+        self.data_idx = 0;
+        while self.len > 0 || self.first_iter {
+            self.first_iter = false;
+
+            self.dump_a_line();
+
+            // loop breaker logic
+            if self.stop || self.len < BYTES_PER_LINE {
+                break;
+            }
+            self.rd_data(data)?;
+
+            // after line logic
+            if self.buf[0] == self.buf[1] && self.len == BYTES_PER_LINE && !self.show_identical {
+                self.skip_lines(data)?;
+            }
+        }
+        self.data_idx += BYTES_PER_LINE;
+
+        self.sep();
+        self.display_buf += &format!(
+            "{:08X} {LINE_SEP_VERT} read total:\t\t    {:<8} {:<15}",
+            self.rd_counter,
+            humanbytes(self.rd_counter),
+            format!("({} B)", self.rd_counter)
+        );
+        if self.chars {
+            self.display_buf += &format!("{LINE_SEP_VERT}");
+        }
+        self.display();
+        Ok(())
+    }
+    #[inline]
+    fn adjust_counters(&mut self) {
+        self.rd_counter += self.len;
+        self.data_idx += self.len;
+    }
+
+    fn rd_data(&mut self, data: &mut dyn DataSource) -> Result<()> {
+        match data.read(&mut self.buf[self.alt_buf]) {
+            Ok(mut len) => {
+                if self.limit != 0 && self.rd_counter + (BYTES_PER_LINE - 1) >= self.limit {
+                    len = self.limit % BYTES_PER_LINE;
+                    self.stop = true;
+                }
+                self.len = len;
+                self.adjust_counters();
+                return Ok(());
+            }
+            Err(err) => {
+                error!("error while reading data: {err}");
+                bail!(err)
+            }
+        }
+    }
 }
 
 pub trait DataSource: Read {
@@ -86,114 +221,6 @@ impl DataSource for std::fs::File {
     }
 }
 
-pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
-    // skip a given number of bytes
-    if config.skip > 0 {
-        data.skip(config.skip)?;
-        config.rd_counter += config.skip;
-        debug!(
-            data_idx = config.data_idx,
-            "Skipped {}",
-            humanbytes(config.skip)
-        );
-    }
-
-    // print the head
-    config.display_buf += &format!("DATA IDX {LINE_SEP_VERT} DATA AS HEX");
-    if config.chars {
-        config.display_buf += &format!("{:width$} {LINE_SEP_VERT} DATA AS CHAR", "", width = 37);
-    }
-    config.display();
-    config.sep();
-
-    // data dump loop
-    rd_data(data, config)?;
-    config.data_idx = 0;
-    while config.len > 0 || config.first_iter {
-        config.first_iter = false;
-        config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
-        if config.len != 0 {
-            for i in 0..config.len {
-                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                    config.display_buf += " ";
-                }
-                config.display_buf += &format!("{:02X} ", config.buf[config.alt_buf][i]);
-            }
-            if config.len == BYTES_PER_LINE / 2 {
-                config.display_buf += " "
-            }
-            for i in 0..(BYTES_PER_LINE - config.len) {
-                if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
-                    config.display_buf += " ";
-                }
-                config.display_buf += "   ";
-            }
-        } else {
-            config.display_buf += &format!("(no data){:40}", "");
-        }
-        if config.chars {
-            config.display_buf += &format!("{LINE_SEP_VERT} ");
-            if config.len != 0 {
-                config.display_buf += CHAR_BORDER;
-                for i in 0..config.len {
-                    config.display_buf +=
-                        &format!("{}", mask_chars(config.buf[config.alt_buf][i] as char));
-                }
-                config.display_buf += CHAR_BORDER;
-            } else {
-                config.display_buf += &format!("(no data)");
-            }
-        }
-        config.display();
-
-        // loop breaker logic
-        if config.stop || config.len == 0 {
-            break;
-        }
-        rd_data(data, config)?;
-
-        // after line logic
-        if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
-        {
-            trace!(
-                buf = format!("{:?}", config.buf),
-                "found a duplicating line"
-            );
-            let start_line = config.data_idx;
-            while config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE {
-                rd_data(data, config)?;
-            }
-            config.display_buf += &format!(
-                "^^^^^^^^ {LINE_SEP_VERT} (repeats {} lines){:32}",
-                (config.data_idx - start_line) / (BYTES_PER_LINE) + 1,
-                ""
-            );
-            if config.chars {
-                config.display_buf += &format!("{LINE_SEP_VERT}");
-            }
-            trace!(
-                buf = format!("{:X?}", config.buf),
-                "dumping buf after line skip"
-            );
-            config.alt_buf ^= 1; // read into the other buf, so we can check for sameness
-            config.display();
-        }
-    }
-
-    config.sep();
-    config.display_buf += &format!(
-        "{:08X} {LINE_SEP_VERT} read total:\t\t    {:<8} {:<15}",
-        config.rd_counter,
-        humanbytes(config.rd_counter),
-        format!("({} B)", config.rd_counter)
-    );
-    if config.chars {
-        config.display_buf += &format!("{LINE_SEP_VERT}");
-    }
-    config.display();
-    Ok(())
-}
-
 fn mask_chars(c: char) -> char {
     if c.is_ascii_graphic() {
         return c;
@@ -205,29 +232,5 @@ fn mask_chars(c: char) -> char {
         return '⭾';
     } else {
         return '�';
-    }
-}
-
-#[inline]
-fn adjust_counters(config: &mut HeduConfig) {
-    config.rd_counter += config.len;
-    config.data_idx += config.len;
-}
-
-fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
-    match data.read(&mut config.buf[config.alt_buf]) {
-        Ok(mut len) => {
-            if config.limit != 0 && config.rd_counter + (BYTES_PER_LINE - 1) >= config.limit {
-                len = config.limit % BYTES_PER_LINE;
-                config.stop = true;
-            }
-            config.len = len;
-            adjust_counters(config);
-            return Ok(());
-        }
-        Err(err) => {
-            error!("error while reading data: {err}");
-            bail!(err)
-        }
     }
 }

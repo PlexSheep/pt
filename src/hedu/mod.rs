@@ -128,7 +128,7 @@ fn main() {
         sources.push(Box::new(stdin));
     }
     for (i, source) in sources.iter_mut().enumerate() {
-        let mut config = HeduConfig::new(cli.chars, cli.skip, cli.show_identical, cli.limit);
+        let mut config = Hedu::new(cli.chars, cli.skip, cli.show_identical, cli.limit);
         // FIXME: find a better way to get the file name
         // Currently, skipped sources make an extra newline here.
         match config.chars {
@@ -139,7 +139,7 @@ fn main() {
                 println!("{:─^80}", format!(" {} ", cli.data_source[i]));
             }
         }
-        match dump(&mut **source, &mut config) {
+        match config.dump(&mut **source) {
             Ok(_) => (),
             Err(err) => {
                 error!("Could not dump data of file: {err}");
