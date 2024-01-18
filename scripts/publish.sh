@@ -9,7 +9,8 @@ git add -A
 git commit -m "Release v$NEW_VERSION" || (echo ">>>>>>>> COMMIT FAILED OR THERE WAS NOTHING TO COMMIT"; sleep 5)
 echo ">>>>>>>> SKIP!!!!!"
 cargo ws version --amend
-git push || (echo ">>>>>>>> PUSH FAILED OR THERE WAS NOTHING TO PUSH"; sleep 5)
+echo ">>>>>>>> PUBLISHING RELEASE FOR REPO"
+bash scripts/release.sh
 echo ">>>>>>>> PUBLISHING TO CRATES.IO NEXT"
 sleep 10
 cargo publish -p libpt-log
