@@ -90,9 +90,12 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     // skip a given number of bytes
     if config.skip > 0 {
         data.skip(config.skip)?;
-        config.data_idx += config.skip;
-        adjust_data_idx(config);
-        debug!("Skipped {}", humanbytes(config.skip));
+        config.rd_counter += config.skip;
+        debug!(
+            data_idx = config.data_idx,
+            "Skipped {}",
+            humanbytes(config.skip)
+        );
     }
 
     // print the head
@@ -104,10 +107,12 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     config.sep();
 
     // data dump loop
+    rd_data(data, config)?;
+    config.data_idx = 0;
     while config.len > 0 || config.first_iter {
+        config.first_iter = false;
         config.display_buf += &format!("{:08X} {LINE_SEP_VERT} ", config.data_idx);
-        rd_data(data, config)?;
-        if config.len != 0 && config.first_iter {
+        if config.len != 0 {
             for i in 0..config.len {
                 if i as usize % BYTES_PER_LINE == BYTES_PER_LINE / 2 {
                     config.display_buf += " ";
@@ -128,7 +133,7 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         }
         if config.chars {
             config.display_buf += &format!("{LINE_SEP_VERT} ");
-            if config.len != 0 && config.first_iter {
+            if config.len != 0 {
                 config.display_buf += CHAR_BORDER;
                 for i in 0..config.len {
                     config.display_buf +=
@@ -147,7 +152,6 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
         }
 
         // after line logic
-        config.alt_buf ^= 1; // toggle the alt buf
         if config.buf[0] == config.buf[1] && config.len == BYTES_PER_LINE && !config.show_identical
         {
             trace!(
@@ -170,21 +174,19 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
                 buf = format!("{:X?}", config.buf),
                 "dumping buf after line skip"
             );
+            config.alt_buf ^= 1; // read into the other buf, so we can check for sameness
             config.display();
-            config.first_iter = false;
         }
-        // switch to the second half of the buf, the original half is stored the old buffer
-        // We detect duplicate lines with this
-        config.alt_buf ^= 1; // toggle the alt buf
+        rd_data(data, config)?;
     }
     config.data_idx += config.len;
 
     config.sep();
     config.display_buf += &format!(
         "{:08X} {LINE_SEP_VERT} dumped total:\t{:<8} {:<16}{:3}",
-        config.rd_counter,
-        humanbytes(config.rd_counter),
-        format!("({} B)", config.rd_counter),
+        config.data_idx,
+        humanbytes(config.data_idx),
+        format!("({} B)", config.data_idx),
         ""
     );
     if config.chars {
@@ -193,9 +195,9 @@ pub fn dump(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     config.display();
     config.display_buf += &format!(
         "{:08X} {LINE_SEP_VERT} read total:\t\t{:<8} {:<16}{:3}",
-        config.data_idx,
-        humanbytes(config.data_idx),
-        format!("({} B)", config.data_idx),
+        config.rd_counter,
+        humanbytes(config.rd_counter),
+        format!("({} B)", config.rd_counter),
         ""
     );
     if config.chars {
@@ -220,31 +222,20 @@ fn mask_chars(c: char) -> char {
 }
 
 #[inline]
-fn adjust_data_idx(config: &mut HeduConfig) {
-    config.data_idx -= config.data_idx % BYTES_PER_LINE;
+fn adjust_counters(config: &mut HeduConfig) {
+    config.rd_counter += config.len;
+    config.data_idx += config.len;
 }
 
 fn rd_data(data: &mut dyn DataSource, config: &mut HeduConfig) -> Result<()> {
     match data.read(&mut config.buf[config.alt_buf]) {
         Ok(mut len) => {
-            trace!(
-                conf = format!("{:?}", config),
-                eval = config.limit != 0 && config.rd_counter >= config.limit,
-                "reached limit?"
-            );
             if config.limit != 0 && config.rd_counter + (BYTES_PER_LINE - 1) >= config.limit {
-                trace!(
-                    conf = format!("{:?}", config),
-                    nlen = (config.limit % BYTES_PER_LINE),
-                    "byte counter is farther than limit"
-                );
                 len = config.limit % BYTES_PER_LINE;
                 config.stop = true;
             }
             config.len = len;
-            config.rd_counter += config.len;
-            config.data_idx += config.len;
-            adjust_data_idx(config);
+            adjust_counters(config);
             return Ok(());
         }
         Err(err) => {
