@@ -18,7 +18,7 @@ use libpt::{bintols::hedu::*, log::*};
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 
-use std::{fs::File, io::IsTerminal};
+use std::{fs::File, io::IsTerminal, path::PathBuf};
 
 //// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +86,8 @@ pub struct Cli {
     /// a data source, probably a file.
     ///
     /// If left empty or set as "-", the program will read from stdin.
-    pub data_source: Option<String>,
+    // TODO: take many sources #60
+    pub data_source: Vec<String>,
 }
 
 //// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
@@ -95,36 +96,58 @@ pub struct Cli {
 
 //// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn main() {
-    let cli = cli_parse();
-    let mut source: Box<dyn DataSource>;
-    if cli.data_source.is_some() && cli.data_source.clone().is_some_and(|val| val != "-") {
-        let data_source = cli.data_source.unwrap();
-        trace!("Trying to open '{}'", data_source);
-        source = match File::open(&data_source) {
-            Ok(file) => Box::new(file),
-            Err(err) => {
-                error!("Could not open file '{}': {err}", data_source);
-                std::process::exit(1);
+    let mut cli = cli_parse();
+    let mut sources: Vec<Box<dyn DataSource>> = Vec::new();
+    if cli.data_source.len() > 0 && cli.data_source[0] != "-" {
+        for data_source in &cli.data_source {
+            let data_source: PathBuf = PathBuf::from(data_source);
+            if data_source.is_dir() {
+                warn!("Not a file {:?}, skipping", data_source);
+                // std::process::exit(1);
+                continue;
             }
-        };
+            trace!("Trying to open '{:?}'", data_source);
+            match File::open(&data_source) {
+                Ok(file) => sources.push(Box::new(file)),
+                Err(err) => {
+                    error!("Could not open '{:?}': {err}", data_source);
+                    std::process::exit(1);
+                }
+            };
+        }
     } else {
-        trace!("Trying to open stdout");
+        trace!("Trying to open stdin");
         let stdin = std::io::stdin();
         if stdin.is_terminal() {
             warn!("Refusing to dump from interactive terminal");
             std::process::exit(2)
         }
-        source = Box::new(stdin);
+        // just for the little header
+        cli.data_source = Vec::new();
+        cli.data_source.push(format!("stdin"));
+        sources.push(Box::new(stdin));
     }
-
-    match dump(
-        &mut *source,
-        HeduConfig::new(cli.chars, cli.skip, cli.show_identical, cli.limit),
-    ) {
-        Ok(_) => (),
-        Err(err) => {
-            error!("Could not dump data of file: {err}");
-            std::process::exit(3);
+    for (i, source) in sources.iter_mut().enumerate() {
+        let mut config = Hedu::new(cli.chars, cli.skip, cli.show_identical, cli.limit);
+        // FIXME: find a better way to get the file name
+        // Currently, skipped sources make an extra newline here.
+        match config.chars {
+            false => {
+                println!("{:─^59}", format!(" {} ", cli.data_source[i]));
+            }
+            true => {
+                println!("{:─^80}", format!(" {} ", cli.data_source[i]));
+            }
+        }
+        match config.dump(&mut **source) {
+            Ok(_) => (),
+            Err(err) => {
+                error!("Could not dump data of file: {err}");
+                std::process::exit(3);
+            }
+        }
+        if i < cli.data_source.len() - 1 {
+            config.newline();
         }
     }
 }
