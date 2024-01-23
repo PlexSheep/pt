@@ -165,7 +165,7 @@ fn cli_parse() -> Cli {
         }
     };
     if cli.meta {
-        Logger::init(None, Some(ll)).expect("could not initialize Logger");
+        Logger::init(None, Some(ll), false).expect("could not initialize Logger");
     } else {
         // less verbose version
         Logger::init_mini(Some(ll)).expect("could not initialize Logger");
