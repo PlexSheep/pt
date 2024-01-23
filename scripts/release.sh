@@ -4,7 +4,7 @@ NEW_VERSION=$(cat Cargo.toml | rg '^\s*version\s*=\s*"([^"]*)"\s*$' -or '$1')
 VERSION=$(git rev-parse HEAD)
 GIT_COMMIT_SHA=$(git rev-parse HEAD)
 BODY="
-$(git log $(git describe --tags --abbrev=0)..HEAD --pretty="- %s" -oneline --decorate)
+$(git log $(git describe --tags --abbrev=0)..HEAD --pretty="- %s" --oneline --decorate)
 "
 USER=PlexSheep
 git tag "v$NEW_VERSION-test" || echo "could not tag"
