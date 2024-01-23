@@ -91,7 +91,7 @@ fn main() {
         }
     };
     if cli.log_meta {
-        Logger::init(None, Some(ll)).expect("could not initialize Logger");
+        Logger::init(None, Some(ll), false).expect("could not initialize Logger");
     } else {
         // less verbose version
         Logger::init_mini(Some(ll)).expect("could not initialize Logger");

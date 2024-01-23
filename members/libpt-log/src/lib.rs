@@ -75,7 +75,7 @@ impl Logger {
     /// Will enable the logger to be used.
     ///
     /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
-    pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>) -> Result<()> {
+    pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>, uptime: bool) -> Result<()> {
         Self::init_customized(
             log_dir.is_some(),
             log_dir.unwrap_or(PathBuf::from(DEFAULT_LOG_DIR)),
@@ -89,7 +89,7 @@ impl Logger {
             false,
             false,
             true,
-            false,
+            uptime,
         )
     }
 
