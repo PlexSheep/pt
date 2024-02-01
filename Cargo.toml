@@ -70,12 +70,6 @@ name = "ccc"
 path = "src/ccc/mod.rs"
 required-features = ["bin", "math"]
 
-[[bin]]
-name = "hedu"
-path = "src/hedu/mod.rs"
-required-features = ["bin", "bintols"]
-
-
 [dependencies]
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true }
