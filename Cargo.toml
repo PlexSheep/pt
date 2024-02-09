@@ -49,13 +49,12 @@ keywords.workspace = true
 categories.workspace = true
 
 [features]
-default = ["log", "core", "bin"]
+default = ["log", "core"]
 core = []
 math = []
 log = []
 bintols = []
 net = []
-bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag", "math", "bintols"]
 
 [lib]
 name = "libpt"
@@ -65,17 +64,10 @@ crate-type = [
   "rlib",
 ]
 
-[[bin]]
-name = "ccc"
-path = "src/ccc/mod.rs"
-required-features = ["bin", "math"]
-
 [dependencies]
+# FIXME: We don't want to compile all of the member crates regardless of features
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true }
 libpt-log = { workspace = true }
 libpt-math = { workspace = true }
 libpt-net = { workspace = true }
-clap = { version = "4.4.4", features = ["derive"], optional = true }
-clap-num = { version = "1.0.2", optional = true }
-clap-verbosity-flag = { version = "2.0.1", optional = true }
