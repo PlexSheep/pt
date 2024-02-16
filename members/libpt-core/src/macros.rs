@@ -2,7 +2,6 @@
 //!
 //! This module implements macros for use with `libpt`.
 
-
 pub use crate::get_stdout_for;
 
 /// ## catches what the expression would write to the `stdout`
