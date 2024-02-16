@@ -14,9 +14,6 @@
 //! - [`tracing_appender`]: Used to log to files
 //! - [`tracing_subscriber`]: Used to do actual logging, formatting, to stdout
 
-//// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
-
-//// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
     ops::Deref,
@@ -41,8 +38,6 @@ use tracing_subscriber::{
 };
 
 use anyhow::{bail, Result};
-
-//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 /// The path where logs are stored when no path is given.
@@ -50,17 +45,14 @@ pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 /// Currently, this is `/dev/null`, meaning they will be written to the void = discarded.
 pub const DEFAULT_LOG_DIR: &'static str = "/dev/null";
 
-//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-//// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Logger for [`pt`](../libpt/index.html)
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
 pub struct Logger;
 
-//// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// ## Main implementation
 impl Logger {
     /// ## create a `Logger`
@@ -117,6 +109,8 @@ impl Logger {
         )
     }
 
+    // TODO: make the args a struct for easy access
+    //
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
@@ -262,7 +256,6 @@ impl Logger {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for Logger {
     /// ## DEBUG representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -274,9 +267,6 @@ impl fmt::Debug for Logger {
     }
 }
 
-//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-
-//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
     let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
     return tracing_appender::non_blocking(file_appender).0;

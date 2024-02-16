@@ -9,13 +9,13 @@ pub use num_traits::{PrimInt, ToPrimitive};
 /// * `data` - The data you are trying to dump
 pub fn bytes_to_bin(data: &[u8]) -> String {
     let mut s = format!("0b{:08b}", data.first().unwrap());
-    for i in 1..data.len() {
-        s.push_str(&format!("_{:08b}", data[i]));
-        if i % 8 == 0 {
-            s.push_str("\n")
+    for dat in data {
+        s.push_str(&format!("_{:08b}", dat));
+        if dat % 8 == 0 {
+            s.push('\n')
         }
     }
-    return s;
+    s
 }
 
 /// Quickly format a number of Bytes [`usize`] with the corresponding
