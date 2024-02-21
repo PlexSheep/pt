@@ -5,6 +5,7 @@
 ![Gitea Release](https://img.shields.io/gitea/v/release/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
 ![Gitea language count](https://img.shields.io/gitea/languages/count/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
 [![cargo checks and tests](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml)
+
 ![pt-logo](data/media/pt-logo.svg)
 
 `pt` stands for either one of "personal tool", "plex tool", "pete" or something among those lines.
