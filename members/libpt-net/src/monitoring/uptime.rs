@@ -18,8 +18,8 @@
 
 use std::{fmt, time::Duration};
 
-//// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
-use libpt_log::*;
+// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
+use libpt_log::{debug, error, info, trace, warn};
 
 use reqwest;
 
@@ -31,25 +31,24 @@ use serde_json;
 
 use libpt_core::divider;
 
-//// TYPES /////////////////////////////////////////////////////////////////////////////////////////
+// TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
-//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
+// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// urls used for checking by default
-pub const DEFAULT_CHECK_URLS: &'static [&'static str] =
-    &["https://www.cscherr.de", "https://www.cloudflare.com"];
+pub const DEFAULT_CHECK_URLS: &[&str] = &["https://www.cscherr.de", "https://www.cloudflare.com"];
 
-//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
+// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 
-//// MACROS ////////////////////////////////////////////////////////////////////////////////////////
+// MACROS ////////////////////////////////////////////////////////////////////////////////////////
 
-//// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
+// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
 
-//// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
+// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Describes an uptime status
 ///
 /// [`UptimeStatus`] describes the result of an uptime check.
 #[derive(Serialize, Deserialize)]
-pub struct UptimeStatus {
+pub struct Status {
     /// true if the [`UptimeStatus`] is considered successful
     pub success: bool,
     /// the percentage of reachable urls out of the total urls
@@ -65,13 +64,13 @@ pub struct UptimeStatus {
     pub timeout: u64,
 }
 
-//// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// Main implementation
-impl UptimeStatus {
+impl Status {
     /// ## create a new `UptimeStatus` and perform it's check
     pub fn new(success_ratio_target: u8, urls: Vec<String>, timeout: u64) -> Self {
         assert!(success_ratio_target <= 100);
-        let mut status = UptimeStatus {
+        let mut status = Status {
             success: false,
             success_ratio: 0,
             success_ratio_target,
@@ -139,7 +138,7 @@ impl UptimeStatus {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl fmt::Debug for UptimeStatus {
+impl fmt::Debug for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut urls: Vec<&str> = Vec::new();
         for url in &self.urls {
@@ -150,7 +149,7 @@ impl fmt::Debug for UptimeStatus {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-impl fmt::Display for UptimeStatus {
+impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut urls: Vec<&str> = Vec::new();
         for url in &self.urls {
@@ -182,7 +181,7 @@ pub fn continuous_uptime_monitor(
     let interval = std::time::Duration::from_millis(interval);
     let mut last_downtime: Option<SystemTime> = None;
     let mut last_uptime: Option<SystemTime> = None;
-    let mut status = UptimeStatus::new(success_ratio_target, urls, timeout);
+    let mut status = Status::new(success_ratio_target, urls, timeout);
     // we assume that the last status was up, so the binary shows the first status if its a
     // failure.
     let mut last_was_up: bool = true;
@@ -224,13 +223,13 @@ pub fn continuous_uptime_monitor(
     }
 }
 
-//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 /// Displays the current status for the [continuous uptime monitor](continuous_uptime_monitor)
 fn display_uptime_status(
     msg: &str,
     last_uptime: Option<SystemTime>,
     last_downtime: Option<SystemTime>,
-    status: &UptimeStatus,
+    status: &Status,
 ) {
     // I know it's weird that this has two spaces too much, but somehow just the tabs is missing
     // two spaces.

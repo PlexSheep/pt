@@ -34,17 +34,17 @@ where
     T: std::fmt::Debug,
 {
     if total < T::from(KIBI).unwrap() {
-        return format!("{total} B");
+        format!("{total} B")
     } else if T::from(KIBI).unwrap() <= total && total < T::from(MEBI).unwrap() {
-        return format!("{:.2} K", total.to_f64().unwrap() / KIBI as f64);
+        format!("{:.2} K", total.to_f64().unwrap() / KIBI as f64)
     } else if T::from(MEBI).unwrap() <= total && total < T::from(GIBI).unwrap() {
-        return format!("{:.2} M", total.to_f64().unwrap() / MEBI as f64);
+        format!("{:.2} M", total.to_f64().unwrap() / MEBI as f64)
     } else if T::from(GIBI).unwrap() <= total && total < T::from(TEBI).unwrap() {
-        return format!("{:.2} G", total.to_f64().unwrap() / GIBI as f64);
+        format!("{:.2} G", total.to_f64().unwrap() / GIBI as f64)
     } else if T::from(TEBI).unwrap() <= total && total < T::from(PEBI).unwrap() {
-        return format!("{:.2} T", total.to_f64().unwrap() / TEBI as f64);
+        format!("{:.2} T", total.to_f64().unwrap() / TEBI as f64)
     } else if T::from(PEBI).unwrap() <= total && total < T::from(EXBI).unwrap() {
-        return format!("{:.2} P", total.to_f64().unwrap() / PEBI as f64);
+        format!("{:.2} P", total.to_f64().unwrap() / PEBI as f64)
     }
     // now we are starting to reach the sizes that are pretty unrealistic
     // (as of 2023 that is, hello future)
@@ -53,9 +53,9 @@ where
     // to work with a fixed, larger sized datatype
     else {
         let total: u128 = total.to_u128().unwrap();
-        if EXBI <= total && total < ZEBI {
+        if (EXBI..ZEBI).contains(&total) {
             return format!("{:.2} E", total.to_f64().unwrap() / EXBI as f64);
-        } else if ZEBI <= total && total < YOBI {
+        } else if (ZEBI..YOBI).contains(&total) {
             return format!("{:.2} Z", total.to_f64().unwrap() / ZEBI as f64);
         } else if YOBI <= total {
             return format!("{:.2} Y", total.to_f64().unwrap() / YOBI as f64);

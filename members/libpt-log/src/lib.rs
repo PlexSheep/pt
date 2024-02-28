@@ -16,7 +16,6 @@
 
 use std::{
     fmt,
-    ops::Deref,
     path::PathBuf,
     sync::atomic::{AtomicBool, Ordering},
 };
@@ -25,17 +24,8 @@ pub mod error;
 use error::*;
 
 pub use tracing::{debug, error, info, trace, warn, Level};
-use tracing_appender::{
-    self,
-    non_blocking::{NonBlocking, WorkerGuard},
-};
-use tracing_subscriber::{
-    fmt::{
-        format::FmtSpan,
-        time::{self, FormatTime},
-    },
-    prelude::*,
-};
+use tracing_appender::{self, non_blocking::NonBlocking};
+use tracing_subscriber::fmt::{format::FmtSpan, time};
 
 use anyhow::{bail, Result};
 /// The log level used when none is specified
@@ -43,7 +33,7 @@ pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 /// The path where logs are stored when no path is given.
 ///
 /// Currently, this is `/dev/null`, meaning they will be written to the void = discarded.
-pub const DEFAULT_LOG_DIR: &'static str = "/dev/null";
+pub const DEFAULT_LOG_DIR: &str = "/dev/null";
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
@@ -59,8 +49,7 @@ impl Logger {
     ///
     /// Creates a new uninitialized [`Logger`] object.
     pub fn new() -> Self {
-        let l = Logger {};
-        l
+        Logger {}
     }
     /// ## initializes the logger
     ///
@@ -132,7 +121,7 @@ impl Logger {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
-            bail!(Error::Usage(format!("logging is already initialized")));
+            bail!(Error::Usage("logging is already initialized".to_string()));
         }
         let subscriber = tracing_subscriber::fmt::Subscriber::builder()
             .with_level(display_level)
@@ -256,6 +245,12 @@ impl Logger {
     }
 }
 
+impl Default for Logger {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl fmt::Debug for Logger {
     /// ## DEBUG representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -269,5 +264,5 @@ impl fmt::Debug for Logger {
 
 fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
     let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
-    return tracing_appender::non_blocking(file_appender).0;
+    tracing_appender::non_blocking(file_appender).0
 }

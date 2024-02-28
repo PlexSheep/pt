@@ -8,8 +8,6 @@
 
 #[cfg(feature = "bintols")]
 pub use libpt_bintols as bintols;
-#[cfg(feature = "ccc")]
-pub use libpt_ccc as ccc;
 #[cfg(feature = "core")]
 pub use libpt_core as core;
 #[cfg(feature = "log")]
