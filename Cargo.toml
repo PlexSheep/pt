@@ -5,7 +5,7 @@ members = [
   "members/libpt-core",
   "members/libpt-math",
   "members/libpt-log",
-  "members/libpt-net",
+  "members/libpt-net", "members/libpt-py",
 ]
 default-members = [".", "members/libpt-core"]
 [workspace.package]
@@ -33,6 +33,7 @@ libpt-bintols = { version = "0.3.11", path = "members/libpt-bintols" }
 libpt-log = { version = "0.3.11", path = "members/libpt-log" }
 libpt-math = { version = "0.3.11", path = "members/libpt-math" }
 libpt-net = { version = "0.3.11", path = "members/libpt-net" }
+libpt-py = { version = "0.3.11", path = "members/libpt-py" }
 
 [package]
 name = "libpt"
@@ -51,10 +52,11 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-math = []
-log = []
-bintols = []
-net = []
+math = ["dep:libpt-math"]
+log = ["dep:libpt-log"]
+bintols = ["dep:libpt-bintols"]
+net = ["dep:libpt-net"]
+py = ["dep:libpt-py"]
 
 [lib]
 name = "libpt"
@@ -65,9 +67,9 @@ crate-type = [
 ]
 
 [dependencies]
-# FIXME: We don't want to compile all of the member crates regardless of features
 libpt-core = { workspace = true }
-libpt-bintols = { workspace = true }
-libpt-log = { workspace = true }
-libpt-math = { workspace = true }
-libpt-net = { workspace = true }
+libpt-bintols = { workspace = true, optional = true }
+libpt-log = { workspace = true, optional = true }
+libpt-math = { workspace = true, optional = true }
+libpt-net = { workspace = true, optional = true }
+libpt-py = { workspace = true, optional = true }

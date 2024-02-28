@@ -18,3 +18,5 @@ pub use libpt_log as log;
 pub use libpt_math as math;
 #[cfg(feature = "net")]
 pub use libpt_net as net;
+#[cfg(feature = "py")]
+pub use libpt_py as py;
