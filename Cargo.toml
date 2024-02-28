@@ -5,9 +5,11 @@ members = [
   "members/libpt-core",
   "members/libpt-math",
   "members/libpt-log",
-  "members/libpt-net", "members/libpt-py",
+  "members/libpt-net",
+  "members/libpt-py",
 ]
 default-members = [".", "members/libpt-core"]
+
 [workspace.package]
 publish = true
 version = "0.3.11"
@@ -18,7 +20,7 @@ description = "Personal multitool"
 readme = "README.md"
 homepage = "https://git.cscherr.de/PlexSheep/pt"
 repository = "https://git.cscherr.de/PlexSheep/pt"
-keywords = ["cli", "library"]
+keywords = ["library"]
 categories = [
   "command-line-utilities",
   "development-tools",
@@ -52,10 +54,11 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-math = ["dep:libpt-math"]
+full = ["default", "core", "math", "log", "bintols", "net", "py"]
+math = ["dep:libpt-math", "log"]
 log = ["dep:libpt-log"]
-bintols = ["dep:libpt-bintols"]
-net = ["dep:libpt-net"]
+bintols = ["dep:libpt-bintols", "log"]
+net = ["dep:libpt-net", "log"]
 py = ["dep:libpt-py"]
 
 [lib]
