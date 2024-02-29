@@ -54,12 +54,12 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-full = ["default", "core", "math", "log", "bintols", "net", "py"]
+full = ["default", "core", "math", "log", "bintols", "net"]
 math = ["dep:libpt-math", "log"]
 log = ["dep:libpt-log"]
 bintols = ["dep:libpt-bintols", "log"]
 net = ["dep:libpt-net", "log"]
-py = ["dep:libpt-py"]
+# py = ["dep:libpt-py"]
 
 [lib]
 name = "libpt"
@@ -75,4 +75,3 @@ libpt-bintols = { workspace = true, optional = true }
 libpt-log = { workspace = true, optional = true }
 libpt-math = { workspace = true, optional = true }
 libpt-net = { workspace = true, optional = true }
-libpt-py = { workspace = true, optional = true }

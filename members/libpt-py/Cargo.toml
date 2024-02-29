@@ -1,6 +1,6 @@
 [package]
 name = "libpt-py"
-version = "0.3.11"
+version.workspace = true
 edition.workspace = true
 
 [package.metadata.maturin]
@@ -11,4 +11,14 @@ name = "libpt"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+libpt = { version = "0.3.11", path = "../.." }
 pyo3 = "0.19.0"
+
+[features]
+default = ["log", "core", "full"]
+core = []
+full = ["default", "core", "math", "log", "bintols", "net"]
+math = ["libpt/math", "log"]
+log = ["libpt/log"]
+bintols = ["libpt/bintols", "log"]
+net = ["libpt/net", "log"]
