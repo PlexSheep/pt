@@ -1,11 +1,11 @@
 //! Python bindings for [`libpt`](libpt)
 
+#[cfg(feature = "bintols")]
+mod bintols;
 #[cfg(feature = "core")]
 mod core;
 #[cfg(feature = "log")]
 mod log;
-#[cfg(feature = "bintols")]
-mod bintols;
 
 use pyo3::prelude::*;
 
