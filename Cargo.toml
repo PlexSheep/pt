@@ -3,9 +3,7 @@ resolver = "2"
 members = [
   ".",
   "members/libpt-core",
-  "members/libpt-math",
   "members/libpt-log",
-  "members/libpt-net",
   "members/libpt-py",
 ]
 default-members = [".", "members/libpt-core"]
@@ -33,8 +31,6 @@ thiserror = "1.0.56"
 libpt-core = { version = "0.3.11", path = "members/libpt-core" }
 libpt-bintols = { version = "0.3.11", path = "members/libpt-bintols" }
 libpt-log = { version = "0.3.11", path = "members/libpt-log" }
-libpt-math = { version = "0.3.11", path = "members/libpt-math" }
-libpt-net = { version = "0.3.11", path = "members/libpt-net" }
 libpt-py = { version = "0.3.11", path = "members/libpt-py" }
 
 [package]
@@ -54,11 +50,9 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-full = ["default", "core", "math", "log", "bintols", "net"]
-math = ["dep:libpt-math", "log"]
+full = ["default", "core", "log", "bintols"]
 log = ["dep:libpt-log"]
 bintols = ["dep:libpt-bintols", "log"]
-net = ["dep:libpt-net", "log"]
 # py = ["dep:libpt-py"]
 
 [lib]
@@ -73,5 +67,3 @@ crate-type = [
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true, optional = true }
 libpt-log = { workspace = true, optional = true }
-libpt-math = { workspace = true, optional = true }
-libpt-net = { workspace = true, optional = true }
