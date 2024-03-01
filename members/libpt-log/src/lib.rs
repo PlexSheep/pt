@@ -45,19 +45,13 @@ pub struct Logger;
 
 /// ## Main implementation
 impl Logger {
-    /// ## create a `Logger`
-    ///
-    /// Creates a new uninitialized [`Logger`] object.
-    pub fn new() -> Self {
-        Logger {}
-    }
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
     ///
     /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
-    pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>, uptime: bool) -> Result<()> {
-        Self::init_customized(
+    pub fn build(log_dir: Option<PathBuf>, max_level: Option<Level>, uptime: bool) -> Result<Self> {
+        Self::build_customized(
             log_dir.is_some(),
             log_dir.unwrap_or(PathBuf::from(DEFAULT_LOG_DIR)),
             true,
@@ -80,8 +74,8 @@ impl Logger {
     /// useful in cases with only one sender to the logging framework.
     ///
     /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
-    pub fn init_mini(max_level: Option<Level>) -> Result<()> {
-        Self::init_customized(
+    pub fn build_mini(max_level: Option<Level>) -> Result<Self> {
+        Self::build_customized(
             false,
             PathBuf::from(DEFAULT_LOG_DIR),
             true,
@@ -103,7 +97,7 @@ impl Logger {
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
-    pub fn init_customized(
+    pub fn build_customized(
         log_to_file: bool,
         log_dir: PathBuf,
         ansi: bool,
@@ -117,7 +111,7 @@ impl Logger {
         pretty: bool,
         show_time: bool,
         uptime: bool, // uptime instead of system time
-    ) -> Result<()> {
+    ) -> Result<Self> {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
@@ -205,7 +199,7 @@ impl Logger {
             }
         }
         INITIALIZED.store(true, Ordering::Relaxed);
-        Ok(())
+        Ok(Logger {})
     }
 
     /// ## logging at [`Level::ERROR`]
@@ -242,12 +236,6 @@ impl Logger {
         T: fmt::Display,
     {
         trace!("{}", printable)
-    }
-}
-
-impl Default for Logger {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

@@ -29,7 +29,7 @@ use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use serde_json;
 
-use libpt_core::divider;
+use libpt_core::printing::divider;
 
 // TYPES /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -245,7 +245,7 @@ fn display_uptime_status(
         match_format_duration_since(last_uptime)
     );
     debug!("\n{}", status);
-    info!("{}", divider!());
+    info!("{}", divider());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

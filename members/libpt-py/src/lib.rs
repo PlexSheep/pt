@@ -1,8 +1,9 @@
 //! Python bindings for [`libpt`](libpt)
-use libpt;
 
 #[cfg(feature = "core")]
 mod core;
+#[cfg(feature = "log")]
+mod log;
 
 use pyo3::prelude::*;
 
@@ -19,5 +20,6 @@ fn libpt_py(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
     #[cfg(feature = "core")]
     core::submodule(py, m)?;
+    log::submodule(py, m)?;
     Ok(())
 }
