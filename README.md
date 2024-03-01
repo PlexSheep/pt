@@ -1,5 +1,11 @@
 # pt / libpt
 
+![Project badge](https://img.shields.io/badge/language-Rust-blue.svg)
+![Crates.io License](https://img.shields.io/crates/l/libpt)
+![Gitea Release](https://img.shields.io/gitea/v/release/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
+![Gitea language count](https://img.shields.io/gitea/languages/count/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
+[![cargo checks and tests](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml)
+
 ![pt-logo](data/media/pt-logo.svg)
 
 `pt` stands for either one of "personal tool", "plex tool", "pete" or something among those lines.
@@ -8,6 +14,12 @@ I program whatever i feel is worth having in a personal thing into it, then use 
 crate, python module or executable.
 
 Let's see if I make it a bloated mess or stop committing after 30 hello worlds.
+
+* [Original Repository](https://git.cscherr.de/PlexSheep/pt)
+* [GitHub Mirror](https://github.com/PlexSheep/pt)
+* [Codeberg Mirror](https://codeberg.org/PlexSheep/pt)
+* [crates.io](https://crates.io/crates/libpt)
+* [docs.rs](https://docs.rs/crate/libpt/)
 
 ## Dependencies
 
@@ -58,14 +70,6 @@ Testing needs to be done separately for the rust and python parts:
 The documentation can be automatically generated with `cargo doc --open`.
 
 An up to date version of the Documentation can be found [here](https://docs.rs/libpt/)
-
-## Mirrored
-
-The origin of this repository is [git.cscherr.de](https://git.cscherr.de/PlexSheep/pt)
-
-It is mirrored to:
-- [Codeberg](https://codeberg.org/PlexSheep/pt)
-
 
 ## License
 

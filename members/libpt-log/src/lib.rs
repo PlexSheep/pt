@@ -14,12 +14,8 @@
 //! - [`tracing_appender`]: Used to log to files
 //! - [`tracing_subscriber`]: Used to do actual logging, formatting, to stdout
 
-//// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
-
-//// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use std::{
     fmt,
-    ops::Deref,
     path::PathBuf,
     sync::atomic::{AtomicBool, Ordering},
 };
@@ -28,55 +24,34 @@ pub mod error;
 use error::*;
 
 pub use tracing::{debug, error, info, trace, warn, Level};
-use tracing_appender::{
-    self,
-    non_blocking::{NonBlocking, WorkerGuard},
-};
-use tracing_subscriber::{
-    fmt::{
-        format::FmtSpan,
-        time::{self, FormatTime},
-    },
-    prelude::*,
-};
+use tracing_appender::{self, non_blocking::NonBlocking};
+use tracing_subscriber::fmt::{format::FmtSpan, time};
 
 use anyhow::{bail, Result};
-
-//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
 /// The log level used when none is specified
 pub const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 /// The path where logs are stored when no path is given.
 ///
 /// Currently, this is `/dev/null`, meaning they will be written to the void = discarded.
-pub const DEFAULT_LOG_DIR: &'static str = "/dev/null";
+pub const DEFAULT_LOG_DIR: &str = "/dev/null";
 
-//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-//// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
 /// ## Logger for [`pt`](../libpt/index.html)
 ///
 /// This struct exists mainly for the python module, so that we can use the same logger with both
 /// python and rust.
 pub struct Logger;
 
-//// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
 /// ## Main implementation
 impl Logger {
-    /// ## create a `Logger`
-    ///
-    /// Creates a new uninitialized [`Logger`] object.
-    pub fn new() -> Self {
-        let l = Logger {};
-        l
-    }
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
     ///
     /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
-    pub fn init(log_dir: Option<PathBuf>, max_level: Option<Level>, uptime: bool) -> Result<()> {
-        Self::init_customized(
+    pub fn build(log_dir: Option<PathBuf>, max_level: Option<Level>, uptime: bool) -> Result<Self> {
+        Self::build_customized(
             log_dir.is_some(),
             log_dir.unwrap_or(PathBuf::from(DEFAULT_LOG_DIR)),
             true,
@@ -99,8 +74,8 @@ impl Logger {
     /// useful in cases with only one sender to the logging framework.
     ///
     /// Assumes some defaults, use [`init_customized`](Self::init_customized) for more control
-    pub fn init_mini(max_level: Option<Level>) -> Result<()> {
-        Self::init_customized(
+    pub fn build_mini(max_level: Option<Level>) -> Result<Self> {
+        Self::build_customized(
             false,
             PathBuf::from(DEFAULT_LOG_DIR),
             true,
@@ -117,10 +92,12 @@ impl Logger {
         )
     }
 
+    // TODO: make the args a struct for easy access
+    //
     /// ## initializes the logger
     ///
     /// Will enable the logger to be used.
-    pub fn init_customized(
+    pub fn build_customized(
         log_to_file: bool,
         log_dir: PathBuf,
         ansi: bool,
@@ -134,11 +111,11 @@ impl Logger {
         pretty: bool,
         show_time: bool,
         uptime: bool, // uptime instead of system time
-    ) -> Result<()> {
+    ) -> Result<Self> {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
-            bail!(Error::Usage(format!("logging is already initialized")));
+            bail!(Error::Usage("logging is already initialized".to_string()));
         }
         let subscriber = tracing_subscriber::fmt::Subscriber::builder()
             .with_level(display_level)
@@ -222,7 +199,7 @@ impl Logger {
             }
         }
         INITIALIZED.store(true, Ordering::Relaxed);
-        Ok(())
+        Ok(Logger {})
     }
 
     /// ## logging at [`Level::ERROR`]
@@ -262,7 +239,6 @@ impl Logger {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 impl fmt::Debug for Logger {
     /// ## DEBUG representation for [`Logger`]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -274,10 +250,7 @@ impl fmt::Debug for Logger {
     }
 }
 
-//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-
-//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
     let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
-    return tracing_appender::non_blocking(file_appender).0;
+    tracing_appender::non_blocking(file_appender).0
 }

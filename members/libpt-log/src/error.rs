@@ -2,70 +2,22 @@
 //!
 //! This module handles errors in logging contexts.
 
-//// ATTRIBUTES ////////////////////////////////////////////////////////////////////////////////////
-// we want docs
-#![warn(missing_docs)]
-#![warn(rustdoc::missing_crate_level_docs)]
-// we want Debug everywhere.
-#![warn(missing_debug_implementations)]
-// enable clippy's extra lints, the pedantic version
-#![warn(clippy::pedantic)]
-
-//// IMPORTS ///////////////////////////////////////////////////////////////////////////////////////
 use anyhow;
 use thiserror::Error;
 use tracing::subscriber::SetGlobalDefaultError;
-
-//// TYPES /////////////////////////////////////////////////////////////////////////////////////////
-
-//// CONSTANTS /////////////////////////////////////////////////////////////////////////////////////
-
-//// STATICS ///////////////////////////////////////////////////////////////////////////////////////
-
-//// MACROS ////////////////////////////////////////////////////////////////////////////////////////
-
-//// ENUMS /////////////////////////////////////////////////////////////////////////////////////////
 /// ## Errors for the [Logger](super::Logger)
-#[derive(Error)]
+#[derive(Error, Debug)]
 pub enum Error {
     /// Bad IO operation
     #[error("Bad IO operation")]
-    IO(std::io::Error),
+    IO(#[from] std::io::Error),
     /// Various errors raised when the messenger is used in a wrong way
     #[error("Bad usage")]
     Usage(String),
     /// Could not assign logger as the global default
-    #[error("Could not assign as global default")] // TODO: make this more clear
-    SetGlobalDefaultFail(SetGlobalDefaultError),
+    #[error("Could not assign logger as global default")]
+    SetGlobalDefaultFail(#[from] SetGlobalDefaultError),
+    /// any other error type, wrapped in [anyhow::Error](anyhow::Error)
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
 }
-
-//// STRUCTS ///////////////////////////////////////////////////////////////////////////////////////
-
-//// IMPLEMENTATION ////////////////////////////////////////////////////////////////////////////////
-impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Error::IO(value)
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-impl From<SetGlobalDefaultError> for Error {
-    fn from(value: SetGlobalDefaultError) -> Self {
-        Error::SetGlobalDefaultFail(value)
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-impl std::fmt::Debug for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::IO(e) => write!(f, "<IO Error {e:?}>"),
-            Error::Usage(e) => write!(f, "<Usage Error {e:?}>"),
-            Error::SetGlobalDefaultFail(e) => write!(f, "<SetGlobalDefaultFail {e:?}>"),
-        }
-    }
-}
-
-//// PUBLIC FUNCTIONS //////////////////////////////////////////////////////////////////////////////
-
-//// PRIVATE FUNCTIONS /////////////////////////////////////////////////////////////////////////////

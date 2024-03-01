@@ -3,14 +3,14 @@ resolver = "2"
 members = [
   ".",
   "members/libpt-core",
-  "members/libpt-math",
   "members/libpt-log",
-  "members/libpt-net",
+  "members/libpt-py",
 ]
 default-members = [".", "members/libpt-core"]
+
 [workspace.package]
 publish = true
-version = "0.3.11"
+version = "0.4.0-alpha.1"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
@@ -18,7 +18,7 @@ description = "Personal multitool"
 readme = "README.md"
 homepage = "https://git.cscherr.de/PlexSheep/pt"
 repository = "https://git.cscherr.de/PlexSheep/pt"
-keywords = ["cli", "library"]
+keywords = ["library"]
 categories = [
   "command-line-utilities",
   "development-tools",
@@ -28,11 +28,10 @@ categories = [
 [workspace.dependencies]
 anyhow = "1.0.79"
 thiserror = "1.0.56"
-libpt-core = { version = "0.3.11", path = "members/libpt-core" }
-libpt-bintols = { version = "0.3.11", path = "members/libpt-bintols" }
-libpt-log = { version = "0.3.11", path = "members/libpt-log" }
-libpt-math = { version = "0.3.11", path = "members/libpt-math" }
-libpt-net = { version = "0.3.11", path = "members/libpt-net" }
+libpt-core = { version = "0.3.12", path = "members/libpt-core" }
+libpt-bintols = { version = "0.3.12", path = "members/libpt-bintols" }
+libpt-log = { version = "0.3.12", path = "members/libpt-log" }
+libpt-py = { version = "0.3.12", path = "members/libpt-py" }
 
 [package]
 name = "libpt"
@@ -49,13 +48,12 @@ keywords.workspace = true
 categories.workspace = true
 
 [features]
-default = ["log", "core", "bin"]
+default = ["log", "core"]
 core = []
-math = []
-log = []
-bintols = []
-net = []
-bin = ["dep:clap", "dep:clap-num", "dep:clap-verbosity-flag", "math", "bintols"]
+full = ["default", "core", "log", "bintols"]
+log = ["dep:libpt-log"]
+bintols = ["dep:libpt-bintols", "log"]
+# py = ["dep:libpt-py"]
 
 [lib]
 name = "libpt"
@@ -65,23 +63,7 @@ crate-type = [
   "rlib",
 ]
 
-[[bin]]
-name = "ccc"
-path = "src/ccc/mod.rs"
-required-features = ["bin", "math"]
-
-[[bin]]
-name = "hedu"
-path = "src/hedu/mod.rs"
-required-features = ["bin", "bintols"]
-
-
 [dependencies]
 libpt-core = { workspace = true }
-libpt-bintols = { workspace = true }
-libpt-log = { workspace = true }
-libpt-math = { workspace = true }
-libpt-net = { workspace = true }
-clap = { version = "4.4.4", features = ["derive"], optional = true }
-clap-num = { version = "1.0.2", optional = true }
-clap-verbosity-flag = { version = "2.0.1", optional = true }
+libpt-bintols = { workspace = true, optional = true }
+libpt-log = { workspace = true, optional = true }
