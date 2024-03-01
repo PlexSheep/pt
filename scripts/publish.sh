@@ -16,14 +16,10 @@ sleep 10
 cargo publish -p libpt-log
 cargo publish -p libpt-core
 cargo publish -p libpt-bintols
-cargo publish -p libpt-math
-cargo publish -p libpt-net
 cargo publish -p libpt
 echo ">>>>>>>> PUBLISHING TO CSCHERR.DE NEXT"
 sleep 3
 cargo publish --registry cscherr -p libpt-log
 cargo publish --registry cscherr -p libpt-core
 cargo publish --registry cscherr -p libpt-bintols
-cargo publish --registry cscherr -p libpt-math
-cargo publish --registry cscherr -p libpt-net
 cargo publish --registry cscherr -p libpt
