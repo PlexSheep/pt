@@ -4,6 +4,8 @@
 mod core;
 #[cfg(feature = "log")]
 mod log;
+#[cfg(feature = "bintols")]
+mod bintols;
 
 use pyo3::prelude::*;
 
@@ -20,6 +22,9 @@ fn libpt_py(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
     #[cfg(feature = "core")]
     core::submodule(py, m)?;
+    #[cfg(feature = "log")]
     log::submodule(py, m)?;
+    #[cfg(feature = "bintols")]
+    bintols::submodule(py, m)?;
     Ok(())
 }
