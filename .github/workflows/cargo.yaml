@@ -38,7 +38,9 @@ jobs:
       - name: cargo fmt
         run: cargo fmt --all
       - name: install python
-        run: apt update && apt install libpython3-dev -y
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: cargo test
         run: cargo test --all-features --all-targets --workspace
       - name: commit back to repository
