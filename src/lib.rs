@@ -5,6 +5,7 @@
 //!
 //! `pt` is a project consisting of multiple smaller crates, all bundled together in this
 //! "main crate". Most crates will only show up if you activate their feature.
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 
 #[cfg(feature = "bintols")]
 pub use libpt_bintols as bintols;
