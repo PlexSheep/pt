@@ -10,7 +10,7 @@ default-members = [".", "members/libpt-core"]
 
 [workspace.package]
 publish = true
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "MIT"
