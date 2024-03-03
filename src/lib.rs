@@ -12,5 +12,3 @@ pub use libpt_bintols as bintols;
 pub use libpt_core as core;
 #[cfg(feature = "log")]
 pub use libpt_log as log;
-#[cfg(feature = "py")]
-pub use libpt_py as py;
