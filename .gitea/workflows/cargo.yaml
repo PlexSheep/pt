@@ -36,6 +36,8 @@ jobs:
         run: cargo clippy --fix --all-features --all-targets --workspace
       - name: cargo fmt
         run: cargo fmt --all
+      - name: install python
+        run: apt update && apt install libpython3-dev -y
       - name: cargo test
         run: cargo test --all-features --all-targets --workspace
       - name: commit back to repository
