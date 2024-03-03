@@ -8,11 +8,12 @@ pub use num_traits::{PrimInt, ToPrimitive};
 /// ### Arguments
 /// * `data` - The data you are trying to dump
 pub fn bytes_to_bin(data: &[u8]) -> String {
-    let mut s = format!("0b{:08b}", data.first().unwrap());
-    for dat in data {
-        s.push_str(&format!("_{:08b}", dat));
-        if dat % 8 == 0 {
-            s.push('\n')
+    let mut s = String::new();
+    for (i, dat) in data.iter().enumerate() {
+        if i == 0 {
+            s.push_str(&format!("0b{:08b}", dat));
+        } else {
+            s.push_str(&format!("_{:08b}", dat));
         }
     }
     s
