@@ -3,9 +3,24 @@
 //! Sometimes, you need a large integer in the form of many bytes, so split into [u8].
 //! Rust provides
 
-/// split an integer into it's bytes, ignoring those bytes that would be all zero.
+
+/// Split unsigned integers into a [Vec] of [u8]s
 ///
-/// If the integer is zero, the Vec contains a single null byte.
+/// Say you have the [u32] 1717 (binary: `00000000 00000000 00000110 10110101 `). This number would
+/// be splitted to `vec![0b00000110, 0b10110101]`.
+///
+/// The 0 bytes of the numbers will be discarded (unless the number is 0, then the Vec contains a
+/// single Null byte.) and the remaining parts of the numbers are inserted into a Vec as [u8].
+///
+/// # Examples
+///
+/// ```
+/// # use libpt_bintols::split_numbers::*;
+///
+/// let x: u32 = 1717;
+///
+/// assert_eq!(unsigned_to_vec(x), vec![0b00000110, 0b10110101]);
+/// ```
 pub fn unsigned_to_vec<T>(num: T) -> Vec<u8>
 where
     u128: std::convert::From<T>
@@ -19,5 +34,6 @@ where
         buf.push(num as u8);
         num >>= 8;
     }
+    buf.reverse();
     buf
 }
