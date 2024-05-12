@@ -2,10 +2,29 @@ use pyo3::prelude::*;
 
 use libpt::bintols as origin;
 
-mod display {
+mod split {
+    use libpt::bintols::split as origin;
     use pyo3::prelude::*;
 
+    #[pyfunction]
+    pub fn split_int(data: u128) -> Vec<u8> {
+        origin::unsigned_to_vec(data)
+    }
+
+    /// implement a python module in Rust
+    pub fn submodule(py: Python, parent: &PyModule) -> PyResult<()> {
+        let module = PyModule::new(py, "split")?;
+
+        module.add_function(wrap_pyfunction!(split_int, module)?)?;
+
+        parent.add_submodule(module)?;
+        Ok(())
+    }
+}
+
+mod display {
     use libpt::bintols::display as origin;
+    use pyo3::prelude::*;
 
     #[pyfunction]
     pub fn bytes_to_bin(data: &[u8]) -> String {
@@ -50,6 +69,7 @@ pub fn submodule(py: Python, parent: &PyModule) -> PyResult<()> {
     module.add("YOBI", origin::YOBI)?;
 
     display::submodule(py, module)?;
+    split::submodule(py, module)?;
 
     parent.add_submodule(module)?;
     Ok(())
