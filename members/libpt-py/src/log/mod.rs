@@ -47,7 +47,17 @@ impl Logger {
     ) -> anyhow::Result<Self> {
         // concert our wrapper type
         let max_level = max_level.map(origin::Level::from);
-        Ok(origin::Logger::build(log_dir, max_level, uptime.unwrap_or(false))?.into())
+        let mut builder = origin::Logger::builder();
+        if log_dir.is_some() {
+            builder = builder.log_dir(log_dir.unwrap());
+        }
+        if max_level.is_some() {
+            builder = builder.max_level(max_level.unwrap());
+        }
+        if uptime.is_some() {
+            builder = builder.uptime(uptime.unwrap());
+        }
+        Ok(builder.build()?.into())
     }
 
     /// ## logging at [`Level::ERROR`]
