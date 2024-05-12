@@ -1,4 +1,4 @@
-use libpt_bintols::split_numbers::*;
+use libpt_bintols::split::*;
 
 #[test]
 fn split_u128() {
