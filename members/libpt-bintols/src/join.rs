@@ -27,7 +27,13 @@ pub fn array_to_unsigned<T>(parts: &[u8]) -> anyhow::Result<T>
 where
     u128: std::convert::From<T>,
     T: std::str::FromStr,
+    T: std::convert::TryFrom<u128>,
     <T as std::str::FromStr>::Err: std::fmt::Debug,
+    <T as std::str::FromStr>::Err: std::error::Error,
+    <T as std::convert::TryFrom<u128>>::Error: std::error::Error,
+    <T as std::convert::TryFrom<u128>>::Error: std::marker::Send,
+    <T as std::convert::TryFrom<u128>>::Error: std::marker::Sync,
+    <T as std::convert::TryFrom<u128>>::Error: 'static,
 {
     trace!("amount of parts: {}", parts.len());
     if parts.len() > (u128::BITS / 8) as usize {
@@ -40,5 +46,5 @@ where
     for (i, e) in parts.iter().rev().enumerate() {
         ri += (*e as u128) * 256u128.pow(i as u32);
     }
-    Ok(ri.to_string().parse().unwrap())
+    T::try_from(ri).map_err(anyhow::Error::from)
 }
