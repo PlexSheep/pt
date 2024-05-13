@@ -25,5 +25,5 @@ pub const YOBI: u128 = 2u128.pow(80);
 // use libpt_core;
 pub mod datalayout;
 pub mod display;
-pub mod split;
 pub mod join;
+pub mod split;
