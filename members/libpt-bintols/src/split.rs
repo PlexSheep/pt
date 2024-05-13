@@ -3,7 +3,6 @@
 //! Sometimes, you need a large integer in the form of many bytes, so split into [u8].
 //! Rust provides
 
-
 /// Split unsigned integers into a [Vec] of [u8]s
 ///
 /// Say you have the [u32] 1717 (binary: `00000000 00000000 00000110 10110101 `). This number would
@@ -23,7 +22,7 @@
 /// ```
 pub fn unsigned_to_vec<T>(num: T) -> Vec<u8>
 where
-    u128: std::convert::From<T>
+    u128: std::convert::From<T>,
 {
     let mut num: u128 = num.into();
     if num == 0 {
