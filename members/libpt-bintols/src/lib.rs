@@ -26,3 +26,4 @@ pub const YOBI: u128 = 2u128.pow(80);
 pub mod datalayout;
 pub mod display;
 pub mod split;
+pub mod join;
