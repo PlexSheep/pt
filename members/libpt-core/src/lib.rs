@@ -8,5 +8,3 @@
 
 /// macros to make things faster in your code
 pub mod macros;
-/// some general use printing to stdout tools
-pub mod printing;

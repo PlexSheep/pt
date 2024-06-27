@@ -1,4 +1,5 @@
 pub mod repl;
+pub mod printing;
 
 pub use indicatif;
 pub use console;
