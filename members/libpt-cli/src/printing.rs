@@ -45,7 +45,7 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
         color,
         presets::UTF8_BORDERS_ONLY,
         ContentArrangement::DynamicFullWidth,
-        CellAlignment::Center
+        CellAlignment::Center,
     )
 }
 
@@ -89,17 +89,14 @@ pub fn blockfmt_advanced(
     color: Color,
     preset: &str,
     arrangement: ContentArrangement,
-    alignment: CellAlignment
+    alignment: CellAlignment,
 ) -> String {
     let mut table = Table::new();
     table
         .load_preset(preset)
         .set_content_arrangement(arrangement)
         .add_row(vec![content.to_string()]);
-    table
-        .column_mut(0)
-        .unwrap()
-        .set_cell_alignment(alignment);
+    table.column_mut(0).unwrap().set_cell_alignment(alignment);
 
     format!("{}", style(table).fg(color))
 }
