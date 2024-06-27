@@ -1,8 +1,14 @@
+//! Utilities for formatting, bordering, aligning and printing text content.
+//!
+//! This module provides functions for formatting content with borders and colors, printing them to the console.
+//! The functions in this module are designed to simplify the process of creating visually appealing
+//! output for CLI applications.
+
 use comfy_table::presets;
 use comfy_table::{CellAlignment, ContentArrangement, Table};
 use console::{style, Color};
 
-/// Prints content with a simple border around it.
+/// Prints content with a simple border around it
 ///
 /// This function is a convenience wrapper around [blockfmt] and [println]. It automatically
 /// formats the content with a border using the specified color and then prints it to the console.
@@ -21,7 +27,7 @@ pub fn blockprint(content: impl ToString, color: Color) {
     println!("{}", blockfmt(content, color))
 }
 
-/// Formats content with a simple border around it.
+/// Formats content with a simple border around it
 ///
 /// This function is a convenience wrapper around [blockfmt_advanced] with preset values for
 /// border style, content arrangement, and cell alignment. It automatically formats the content
@@ -49,7 +55,7 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
     )
 }
 
-/// Formats content with a border around it.
+/// Formats content with a border around it
 ///
 /// Unless you are looking for something specific, use [blockfmt] or [blockprint].
 ///
