@@ -1,0 +1,20 @@
+[package]
+name = "libpt-cli"
+publish.workspace = true
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+clap = "4.5.7"
+comfy-table = "7.1.1"
+console = "0.15.8"
+dialoguer = "0.11.0"
+indicatif = "0.17.8"
