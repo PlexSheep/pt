@@ -1,5 +1,5 @@
-pub mod repl;
 pub mod printing;
+pub mod repl;
 
 pub use comfy_table;
 pub use console;
