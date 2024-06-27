@@ -54,7 +54,7 @@ core = []
 full = ["default", "core", "log", "bintols"]
 log = ["dep:libpt-log"]
 bintols = ["dep:libpt-bintols", "log"]
-cli = ["dep:libpt-cli", "core"]
+cli = ["dep:libpt-cli", "core", "log"]
 # py = ["dep:libpt-py"]
 
 [lib]

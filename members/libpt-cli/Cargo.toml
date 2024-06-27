@@ -12,9 +12,15 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[features]
+default = ["log"]
+log = ["dep:libpt-log"]
+
 [dependencies]
+anyhow.workspace = true
 clap = { version = "4.5.7", features = ["derive"] }
 comfy-table = "7.1.1"
 console = "0.15.8"
 dialoguer = "0.11.0"
 indicatif = "0.17.8"
+libpt-log = {workspace = true, optional = true}
