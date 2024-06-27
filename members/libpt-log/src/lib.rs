@@ -23,6 +23,7 @@ use std::{
 pub mod error;
 use error::*;
 
+pub use tracing;
 pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender::{self, non_blocking::NonBlocking};
 use tracing_subscriber::fmt::{format::FmtSpan, time};
