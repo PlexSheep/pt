@@ -83,7 +83,11 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
 ///
 /// # Parameters
 ///
-///
+/// - `content`: The content to be formatted within the border
+/// - `color`: The color of the border and text
+/// - `preset`: The preset style for the border
+/// - `arrangement`: The arrangement of the the border (e.g., stretch to sides, wrap around )
+/// - `alignment`: The alignment of the content within the cells (e.g., left, center, right)
 pub fn blockfmt_advanced(
     content: impl ToString,
     color: Option<Color>,
