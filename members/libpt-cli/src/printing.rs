@@ -1,4 +1,4 @@
-//! Utilities for formatting, bordering, aligning and printing text content.
+//! Utilities for formatting, bordering, aligning and printing text content
 //!
 //! This module provides functions for formatting content with borders and colors, printing them to the console.
 //! The functions in this module are designed to simplify the process of creating visually appealing

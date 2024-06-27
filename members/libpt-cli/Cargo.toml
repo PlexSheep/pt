@@ -14,7 +14,7 @@ categories.workspace = true
 
 [features]
 default = ["log"]
-log = ["dep:libpt-log"]
+log = ["dep:libpt-log", "dep:log"]
 
 [dependencies]
 anyhow.workspace = true
@@ -23,4 +23,5 @@ comfy-table = "7.1.1"
 console = "0.15.8"
 dialoguer = "0.11.0"
 indicatif = "0.17.8"
-libpt-log = {workspace = true, optional = true}
+libpt-log = { workspace = true, optional = true }
+log = { version = "0.4.21", optional = true }

@@ -1,5 +1,10 @@
+//! Utilities for parsing options and arguments on the start of a CLI application
+
 use clap::Parser;
+#[cfg(feature = "log")]
 use libpt_log::Level;
+#[cfg(feature = "log")]
+use log;
 
 /// Custom help template for displaying command-line usage information
 ///
@@ -50,17 +55,52 @@ pub const HELP_TEMPLATE: &str = r#"{about-section}
 Author: {author-with-newline}
 "#;
 
-#[derive(Parser, Debug, Clone, PartialEq, Eq, Hash)]
-#[command(help_template = HELP_TEMPLATE)]
-pub struct DefaultArguments {
-    /// get a [tracing] log level
-    ///
-    /// set the verbosity with repeated '-q' and '-v' flags
-    #[command(flatten)]
-    verbose: VerbosityLevel,
-}
-
+/// Transform -v and -q flags to some kind of loglevel
+///
+/// # Example
+///
+/// Include this into your [clap] derive struct like this:
+///
+/// ```
+/// use libpt_cli::args::VerbosityLevel;
+/// use clap::Parser;
+///
+/// #[derive(Parser, Debug)]
+/// pub struct Opts {
+///     #[command(flatten)]
+///     pub verbose: VerbosityLevel,
+///     #[arg(short, long)]
+///     pub mynum: usize,
+/// }
+///
+/// ```
+///
+/// Get the loglevel like this:
+///
+/// ```no_run
+/// # use libpt_cli::args::VerbosityLevel;
+/// use libpt_log::Level;
+/// # use clap::Parser;
+/// use log;
+///
+/// # #[derive(Parser, Debug)]
+/// # pub struct Opts {
+/// #     #[command(flatten)]
+/// #     pub verbose: VerbosityLevel,
+/// # }
+///
+/// fn main() {
+///     let opts = Opts::parse();
+///
+///     // Level might be None if the user wants no output at all.
+///     // for the 'tracing' level:
+///     let level: Option<Level> = opts.verbose.level();
+///     // for the 'log' level:
+///     let llevel: Option<log::Level> = opts.verbose.level_for_log_crate();
+/// }
+/// ```
 #[derive(Parser, Clone, PartialEq, Eq, Hash)]
+#[cfg(feature = "log")]
 pub struct VerbosityLevel {
     /// make the output more verbose
     #[arg(
@@ -116,6 +156,23 @@ impl VerbosityLevel {
             _ => return None,
         })
     }
+
+    /// get the [log::Level] for that VerbosityLevel
+    ///
+    /// This is the method for the [log] crate, which I use less often.
+    ///
+    /// [None] means that absolutely no output is wanted (completely quiet)
+    #[inline]
+    pub fn level_for_log_crate(&self) -> Option<log::Level> {
+        self.level().map(|ll| match ll {
+            Level::TRACE => log::Level::Trace,
+            Level::DEBUG => log::Level::Debug,
+            Level::INFO => log::Level::Info,
+            Level::WARN => log::Level::Warn,
+            Level::ERROR => log::Level::Error,
+        })
+    }
+
     #[inline]
     fn level_value(level: Level) -> i8 {
         match level {
@@ -129,6 +186,7 @@ impl VerbosityLevel {
 }
 
 impl std::fmt::Debug for VerbosityLevel {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.level())
     }
