@@ -9,3 +9,4 @@ pub use dialoguer;
 pub use exitcode;
 pub use human_panic;
 pub use indicatif;
+pub use shlex;
