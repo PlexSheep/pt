@@ -28,3 +28,4 @@ indicatif = "0.17.8"
 libpt-log = { workspace = true, optional = true }
 log = { version = "0.4.21", optional = true }
 shlex = "1.3.0"
+strum = { version = "0.26.3", features = ["derive"] }

@@ -1,21 +1,11 @@
-use libpt_cli::repl::REPL_HELP_TEMPLATE;
-use libpt_cli::{clap, dialoguer, printing};
-use libpt_log::{debug, trace, Level, Logger};
+use libpt_cli::repl::{DefaultRepl, Repl};
+use libpt_cli::{clap, printing, strum};
+use libpt_log::{debug, Level, Logger};
 
-use clap::{Parser, Subcommand};
+use clap::Subcommand;
+use strum::EnumIter;
 
-/// This is the help menu of the repl
-///
-/// More text here
-#[derive(Parser, Debug)]
-#[command(multicall = true)]
-pub struct Repl {
-    /// the command you want to execute, along with its args
-    #[command(subcommand)]
-    command: ReplCommand,
-}
-
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, EnumIter, Clone)]
 enum ReplCommand {
     /// wait for LEN seconds
     Wait {
@@ -36,72 +26,21 @@ enum ReplCommand {
     Exit,
 }
 
-// TODO: somehow autogenerate this!!!
-pub struct MyCompletion {
-    options: Vec<String>,
-}
-impl Default for MyCompletion {
-    fn default() -> Self {
-        MyCompletion {
-            options: vec![
-                "help".to_string(),
-                "?".to_string(),
-                "list".to_string(),
-                "publish".to_string(),
-                "unpublish".to_string(),
-                "delete".to_string(),
-                "read".to_string(),
-                "show".to_string(),
-                "new".to_string(),
-                "ls".to_string(),
-            ],
-        }
-    }
-}
-
-impl dialoguer::Completion for MyCompletion {
-    /// Simple completion implementation based on substring
-    fn get(&self, input: &str) -> Option<String> {
-        let matches = self
-            .options
-            .iter()
-            .filter(|option| option.starts_with(input))
-            .collect::<Vec<_>>();
-
-        if matches.len() == 1 {
-            Some(matches[0].to_string())
-        } else {
-            None
-        }
-    }
-}
-
 fn main() -> anyhow::Result<()> {
+    // You would normally make a proper cli interface with clap before entering the repl. This is
+    // omitted here for brevity
     let _logger = Logger::builder()
         .show_time(false)
         .max_level(Level::DEBUG)
         .build();
 
-    let mut buf: String = String::new();
-    let mut buf_preparsed: Vec<String>;
-    let completion = MyCompletion::default();
-    let mut history = dialoguer::BasicHistory::new();
+    // the compiler can infer that we want to use the ReplCommand enum.
+    let mut repl = DefaultRepl::<ReplCommand>::new();
 
     debug!("entering the repl");
     loop {
-        buf.clear();
-
-        buf = dialoguer::Input::with_theme(&dialoguer::theme::ColorfulTheme::default())
-            .completion_with(&completion)
-            .history_with(&mut history)
-            .interact_text()?;
-
-        buf_preparsed = Vec::new();
-        buf_preparsed.extend(shlex::split(&buf).unwrap_or_default());
-
-        trace!("read input: {buf_preparsed:?}");
-
-        let options = match Repl::try_parse_from(buf_preparsed) {
+        // repl.step() should be at the start of your loop
+        match repl.step() {
             Ok(c) => c,
             Err(e) => {
                 println!("{e}");
@@ -109,7 +48,10 @@ fn main() -> anyhow::Result<()> {
             }
         };
 
-        match options.command {
+        // now we can match our defined commands
+        //
+        // only None if the repl has not stepped yet
+        match repl.command().to_owned().unwrap() {
             ReplCommand::Exit => break,
             ReplCommand::Wait { len } => {
                 debug!("len: {len}");
@@ -122,8 +64,7 @@ fn main() -> anyhow::Result<()> {
             ReplCommand::Echo { text, fancy } => {
                 if !fancy {
                     println!("{}", text.concat())
-                }
-                else {
+                } else {
                     printing::blockprint(text.concat(), console::Color::Cyan)
                 }
             }
