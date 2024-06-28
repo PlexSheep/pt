@@ -3,6 +3,10 @@
 //! This module provides functions for formatting content with borders and colors, printing them to the console.
 //! The functions in this module are designed to simplify the process of creating visually appealing
 //! output for CLI applications.
+//!
+//! Note that most of the utilities in this module are focused on communication with humans, not
+//! with machines. Consider evaluating [std::io::IsTerminal] before using colorful, dynamic and bordered
+//! printing.
 
 use comfy_table::presets;
 use comfy_table::{CellAlignment, ContentArrangement, Table};
