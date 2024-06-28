@@ -6,7 +6,29 @@
 //!
 //! Note that most of the utilities in this module are focused on communication with humans, not
 //! with machines. Consider evaluating [std::io::IsTerminal] before using colorful, dynamic and bordered
-//! printing.
+//! printing. If you are talking to a machine, it might be useful to not add extra space, add a
+//! newline per output or even output JSON. An example that does this well is `ls`:
+//!
+//! ```bash
+//! $ ls
+//! Cargo.lock  Cargo.toml  data  LICENSE  members  README.md  scripts  src  target
+//! ```
+//!
+//! ```bash
+//! $ ls | cat
+//! Cargo.lock
+//! Cargo.toml
+//! data
+//! LICENSE
+//! members
+//! README.md
+//! scripts
+//! src
+//! target
+//! ```
+//!
+//! See the [CLI Rustbook](https://rust-cli.github.io/book/in-depth/machine-communication.html) for
+//! more information on the topic.
 
 use comfy_table::presets;
 use comfy_table::{CellAlignment, ContentArrangement, Table};
