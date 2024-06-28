@@ -1,4 +1,4 @@
-//! Python bindings for [`libpt`](libpt)
+//! Python bindings for [`libpt`]
 
 #[cfg(feature = "bintols")]
 mod bintols;
