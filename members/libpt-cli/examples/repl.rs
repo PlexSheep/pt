@@ -1,3 +1,4 @@
+use console::style;
 use libpt_cli::repl::{DefaultRepl, Repl};
 use libpt_cli::{clap, printing, strum};
 use libpt_log::{debug, Level, Logger};
@@ -5,6 +6,7 @@ use libpt_log::{debug, Level, Logger};
 use clap::Subcommand;
 use strum::EnumIter;
 
+// this is where you define what data/commands/arguments the REPL accepts
 #[derive(Subcommand, Debug, EnumIter, Clone)]
 enum ReplCommand {
     /// wait for LEN seconds
@@ -31,19 +33,28 @@ fn main() -> anyhow::Result<()> {
     // omitted here for brevity
     let _logger = Logger::builder()
         .show_time(false)
-        .max_level(Level::DEBUG)
-        .build();
+        .max_level(Level::INFO)
+        .build()?;
 
     // the compiler can infer that we want to use the ReplCommand enum.
-    let mut repl = DefaultRepl::<ReplCommand>::new();
+    let mut repl = DefaultRepl::<ReplCommand>::default();
 
     debug!("entering the repl");
     loop {
         // repl.step() should be at the start of your loop
+        // It is here that the repl will get the user input, validate it, and so on
         match repl.step() {
             Ok(c) => c,
             Err(e) => {
-                println!("{e}");
+                // if the user requested the help, print in blue, otherwise in red as it's just an
+                // error
+                if let libpt_cli::repl::error::ReplError::Parsing(e) = &e {
+                    if e.kind() == clap::error::ErrorKind::DisplayHelp {
+                        println!("{}", style(e).cyan());
+                        continue;
+                    }
+                }
+                println!("{}", style(e).red().bold());
                 continue;
             }
         };
@@ -63,9 +74,9 @@ fn main() -> anyhow::Result<()> {
             ReplCommand::Hello => println!("Hello!"),
             ReplCommand::Echo { text, fancy } => {
                 if !fancy {
-                    println!("{}", text.concat())
+                    println!("{}", text.join(" "))
                 } else {
-                    printing::blockprint(text.concat(), console::Color::Cyan)
+                    printing::blockprint(text.join(" "), console::Color::Cyan)
                 }
             }
         }
