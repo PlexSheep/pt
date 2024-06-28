@@ -1,3 +1,5 @@
+//! Errors for the Repl module
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]

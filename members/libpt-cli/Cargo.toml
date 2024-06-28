@@ -12,6 +12,9 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[package.metadata.docs.rs]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
+
 [features]
 default = ["log"]
 log = ["dep:libpt-log", "dep:log"]
@@ -22,6 +25,7 @@ clap = { version = "4.5.7", features = ["derive"] }
 comfy-table = "7.1.1"
 console = "0.15.8"
 dialoguer = { version = "0.11.0", features = ["completion", "history"] }
+embed-doc-image = "0.1.4"
 exitcode = "1.1.2"
 human-panic = "2.0.0"
 indicatif = "0.17.8"

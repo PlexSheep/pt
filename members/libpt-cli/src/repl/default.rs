@@ -1,13 +1,61 @@
+//! This module implements a default repl that fullfills the [Repl] trait
+//!
+//! You can implement your own [Repl] if you want.
+
 use std::fmt::Debug;
 
 use super::Repl;
+
+use embed_doc_image::embed_doc_image;
+
+/// [clap] help template with only usage and commands/options
+pub const REPL_HELP_TEMPLATE: &str = r#"{usage-heading} {usage}
+
+{all-args}{tab}
+"#;
 
 use clap::{Parser, Subcommand};
 use dialoguer::{BasicHistory, Completion};
 use libpt_log::trace;
 
+#[allow(clippy::needless_doctest_main)] // It makes the example look better
+/// Default implementation for a REPL
+///
+/// Note that you need to define the commands by yourself with a Subcommands enum.
+///
+/// # Example
+///
+/// ```no_run
+/// use libpt_cli::repl::{DefaultRepl, Repl};
+/// use libpt_cli::clap::Subcommand;
+/// use libpt_cli::strum::EnumIter;
+///
+/// #[derive(Subcommand, Debug, EnumIter, Clone)]
+/// enum ReplCommand {
+///     /// hello world
+///     Hello,
+///     /// leave the repl
+///     Exit,
+/// }
+///
+/// fn main() {
+///     let mut repl = DefaultRepl::<ReplCommand>::default();
+///     loop {
+///         repl.step().unwrap();
+///         match repl.command().to_owned().unwrap() {
+///             ReplCommand::Hello => println!("Hello"),
+///             ReplCommand::Exit => break,
+///             _ => (),
+///         }
+///     }
+/// }
+/// ```
+/// **Screenshot**
+///
+/// ![Screenshot of an example program with a REPL][repl_screenshot]
+#[embed_doc_image("repl_screenshot", "data/media/repl.png")]
 #[derive(Parser)]
-#[command(multicall = true)]
+#[command(multicall = true, help_template = REPL_HELP_TEMPLATE)]
 pub struct DefaultRepl<C>
 where
     C: Debug,
@@ -31,7 +79,7 @@ where
 }
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, PartialOrd, Ord)]
-pub struct DefaultReplCompletion<C>
+struct DefaultReplCompletion<C>
 where
     C: Debug,
     C: Subcommand,
@@ -57,12 +105,6 @@ where
     }
     fn command(&self) -> &Option<C> {
         &self.command
-    }
-    #[allow(refining_impl_trait)]
-    fn completion() -> DefaultReplCompletion<C> {
-        DefaultReplCompletion {
-            commands: std::marker::PhantomData::<C>,
-        }
     }
     fn step(&mut self) -> Result<(), super::error::ReplError> {
         self.buf.clear();
