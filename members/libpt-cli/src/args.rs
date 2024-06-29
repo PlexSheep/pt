@@ -94,9 +94,9 @@ Author: {author-with-newline}
 ///
 ///     // Level might be None if the user wants no output at all.
 ///     // for the 'tracing' level:
-///     let level: Option<Level> = opts.verbose.level();
+///     let level: Level = opts.verbose.level();
 ///     // for the 'log' level:
-///     let llevel: Option<log::Level> = opts.verbose.level_for_log_crate();
+///     let llevel: log::Level = opts.verbose.level_for_log_crate();
 /// }
 /// ```
 #[derive(Parser, Clone, PartialEq, Eq, Hash)]
@@ -134,27 +134,20 @@ impl VerbosityLevel {
     }
     #[inline]
     fn value(&self) -> i8 {
-        let v = Self::level_value(Level::INFO) - (self.quiet as i8) + (self.verbose as i8);
-        if v > Self::level_value(Level::TRACE) {
-            Self::level_value(Level::TRACE)
-        } else {
-            v
-        }
+        Self::level_value(Level::INFO) - (self.quiet as i8).min(10) + (self.verbose as i8).min(10)
     }
 
     /// get the [Level] for that VerbosityLevel
-    ///
-    /// [None] means that absolutely no output is wanted (completely quiet)
     #[inline]
-    pub fn level(&self) -> Option<Level> {
-        Some(match self.value() {
+    pub fn level(&self) -> Level {
+        match self.value() {
             0 => Level::ERROR,
             1 => Level::WARN,
             2 => Level::INFO,
             3 => Level::DEBUG,
             4 => Level::TRACE,
-            _ => return None,
-        })
+            _ => Level::ERROR,
+        }
     }
 
     /// get the [log::Level] for that VerbosityLevel
@@ -163,14 +156,14 @@ impl VerbosityLevel {
     ///
     /// [None] means that absolutely no output is wanted (completely quiet)
     #[inline]
-    pub fn level_for_log_crate(&self) -> Option<log::Level> {
-        self.level().map(|ll| match ll {
+    pub fn level_for_log_crate(&self) -> log::Level {
+        match self.level() {
             Level::TRACE => log::Level::Trace,
             Level::DEBUG => log::Level::Debug,
             Level::INFO => log::Level::Info,
             Level::WARN => log::Level::Warn,
             Level::ERROR => log::Level::Error,
-        })
+        }
     }
 
     #[inline]
