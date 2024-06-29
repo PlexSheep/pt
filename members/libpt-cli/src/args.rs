@@ -140,13 +140,21 @@ impl VerbosityLevel {
     /// get the [Level] for that VerbosityLevel
     #[inline]
     pub fn level(&self) -> Level {
-        match self.value() {
+        let v = self.value();
+        match v {
             0 => Level::ERROR,
             1 => Level::WARN,
             2 => Level::INFO,
             3 => Level::DEBUG,
             4 => Level::TRACE,
-            _ => Level::ERROR,
+            _ => {
+                if v > 4 {
+                    Level::TRACE
+                } else {
+                    /* v < 0 */
+                    Level::ERROR
+                }
+            }
         }
     }
 
