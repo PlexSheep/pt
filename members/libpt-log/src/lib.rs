@@ -245,7 +245,7 @@ impl LoggerBuilder {
     ///
     /// Default: true
     #[must_use]
-    pub const fn ansiconst(mut self, ansi: bool) -> Self {
+    pub const fn ansi(mut self, ansi: bool) -> Self {
         self.ansi = ansi;
         self
     }
