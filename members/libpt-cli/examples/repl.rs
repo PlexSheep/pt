@@ -31,17 +31,7 @@ enum ReplCommand {
 fn main() -> anyhow::Result<()> {
     // You would normally make a proper cli interface with clap before entering the repl. This is
     // omitted here for brevity
-    let _logger = {
-        let mut this = {
-            let mut this = Logger::builder();
-            this.show_time = false;
-            this
-        };
-        let max_level = Level::INFO;
-        this.max_level = max_level;
-        this
-    }
-    .build()?;
+    let _logger = Logger::builder().display_time(false).build();
 
     // the compiler can infer that we want to use the ReplCommand enum.
     let mut repl = DefaultRepl::<ReplCommand>::default();
