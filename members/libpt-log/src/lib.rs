@@ -267,6 +267,15 @@ impl LoggerBuilder {
         self
     }
 
+    /// when making a log, display the time of the message
+    ///
+    /// Default: true
+    #[must_use]
+    pub const fn display_time(mut self, show_time: bool) -> Self {
+        self.show_time = show_time;
+        self
+    }
+
     /// when making a log, display the log level of the message
     ///
     /// Default: true
