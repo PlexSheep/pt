@@ -13,6 +13,7 @@
 //! - [`tracing`]: base logging crate
 //! - [`tracing_appender`]: Used to log to files
 //! - [`tracing_subscriber`]: Used to do actual logging, formatting, to stdout
+#![warn(clippy::pedantic, clippy::style, clippy::nursery)]
 
 use std::{
     fmt,
@@ -21,7 +22,7 @@ use std::{
 };
 
 pub mod error;
-use error::*;
+use error::Error;
 
 pub use tracing;
 pub use tracing::{debug, error, info, trace, warn, Level};
@@ -56,6 +57,8 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 ///
 /// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[allow(clippy::struct_excessive_bools)] // it's just true/false values, not states, and I don't
+                                         // need to reinvent the wheel
 pub struct LoggerBuilder {
     /// create and log to logfiles
     log_to_file: bool,
@@ -179,7 +182,7 @@ impl LoggerBuilder {
                 tracing::subscriber::set_global_default(subscriber)?;
             }
             (true, false, false, _) => {
-                let file_appender = tracing_appender::rolling::daily(self.log_dir.clone(), "log");
+                let file_appender = tracing_appender::rolling::daily(self.log_dir, "log");
                 let (file_writer, _guard) = tracing_appender::non_blocking(file_appender);
                 let subscriber = subscriber.with_writer(file_writer).without_time().finish();
                 tracing::subscriber::set_global_default(subscriber)?;
@@ -214,16 +217,18 @@ impl LoggerBuilder {
     }
 
     /// enable or disable logging to and creating of logfiles
-    pub fn log_to_file(mut self, log_to_file: bool) -> Self {
+    #[must_use]
+    pub const fn log_to_file(mut self, log_to_file: bool) -> Self {
         self.log_to_file = log_to_file;
         self
     }
 
     /// set a directory where logfiles would be created in
     ///
-    /// Enable or disable creation and logging to logfiles with [log_to_file](Self::log_to_file).
+    /// Enable or disable creation and logging to logfiles with [`log_to_file`](Self::log_to_file).
     ///
-    /// The default logdir is [DEFAULT_LOG_DIR].
+    /// The default logdir is [`DEFAULT_LOG_DIR`].
+    #[must_use]
     pub fn log_dir(mut self, log_dir: PathBuf) -> Self {
         self.log_dir = log_dir;
         self
@@ -235,67 +240,64 @@ impl LoggerBuilder {
     /// are displayed by a program that does not interpret them.
     ///
     /// Keeping ANSI control sequences enabled has the disadvantage of added colors for the logs.
-    pub fn ansi(mut self, ansi: bool) -> Self {
+    #[must_use]
+    pub const fn ansiconst(mut self, ansi: bool) -> Self {
         self.ansi = ansi;
         self
     }
 
     /// when making a log, display the source file in which a log was crated in
-    pub fn display_filename(mut self, display_filename: bool) -> Self {
+    #[must_use]
+    pub const fn display_filename(mut self, display_filename: bool) -> Self {
         self.display_filename = display_filename;
         self
     }
 
     /// when making a log, display the log level of the message
-    pub fn display_level(mut self, display_level: bool) -> Self {
+    #[must_use]
+    pub const fn display_level(mut self, display_level: bool) -> Self {
         self.display_level = display_level;
         self
     }
 
     /// show target context
-    pub fn display_target(mut self, display_target: bool) -> Self {
+    #[must_use]
+    pub const fn display_target(mut self, display_target: bool) -> Self {
         self.display_target = display_target;
         self
     }
 
-    /// set the maximum verbosity level.
-    pub fn max_level(mut self, max_level: Level) -> Self {
-        self.max_level = max_level;
-        self
-    }
-
     /// show the id of the thread that created this message
-    pub fn display_thread_ids(mut self, display_thread_ids: bool) -> Self {
+    #[must_use]
+    pub const fn display_thread_ids(mut self, display_thread_ids: bool) -> Self {
         self.display_thread_ids = display_thread_ids;
         self
     }
 
     /// show the name of the thread that created this message
-    pub fn display_thread_names(mut self, display_thread_names: bool) -> Self {
+    #[must_use]
+    pub const fn display_thread_names(mut self, display_thread_names: bool) -> Self {
         self.display_thread_names = display_thread_names;
         self
     }
 
     /// show which line in the source file produces a log
-    pub fn display_line_number(mut self, display_line_number: bool) -> Self {
+    #[must_use]
+    pub const fn display_line_number(mut self, display_line_number: bool) -> Self {
         self.display_line_number = display_line_number;
         self
     }
 
     /// splits a log over multiple lines, looks like a python traceback
-    pub fn pretty(mut self, pretty: bool) -> Self {
+    #[must_use]
+    pub const fn pretty(mut self, pretty: bool) -> Self {
         self.pretty = pretty;
         self
     }
 
-    /// show a timestamp describing when the log was created
-    pub fn show_time(mut self, show_time: bool) -> Self {
-        self.show_time = show_time;
-        self
-    }
-
     /// show timestamps as uptime (duration since the logger was initialized)
-    pub fn uptime(mut self, uptime: bool) -> Self {
+    #[must_use]
+    pub const fn uptime(mut self, uptime: bool) -> Self {
         self.uptime = uptime;
         self
     }
@@ -365,7 +367,8 @@ pub struct Logger;
 
 /// ## Main implementation
 impl Logger {
-    /// Get a new [LoggerBuilder]
+    /// Get a new [`LoggerBuilder`]
+    #[must_use]
     pub fn builder() -> LoggerBuilder {
         LoggerBuilder::default()
     }
