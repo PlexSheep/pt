@@ -101,12 +101,12 @@ pub struct VerbosityLevel {
     #[arg(
         long,
         short = 'v',
-        action = clap::ArgAction::Count,
+        action = clap::ArgAction::Count, // NOTE: this forces u8 type for some reason
         global = true,
         // help = L::verbose_help(),
         // long_help = L::verbose_long_help(),
     )]
-    verbose: i8,
+    verbose: u8,
 
     /// make the output less verbose
     ///
@@ -118,7 +118,7 @@ pub struct VerbosityLevel {
         global = true,
         conflicts_with = "verbose",
     )]
-    quiet: i8,
+    quiet: u8,
 }
 
 impl VerbosityLevel {
@@ -131,7 +131,7 @@ impl VerbosityLevel {
     }
     #[inline]
     #[must_use]
-    fn value(&self) -> i8 {
+    fn value(&self) -> u8 {
         Self::level_value(Level::INFO)
             .saturating_sub((self.quiet).min(10))
             .saturating_add((self.verbose).min(10))
@@ -189,7 +189,7 @@ impl VerbosityLevel {
 
     #[inline]
     #[must_use]
-    const fn level_value(level: Level) -> i8 {
+    const fn level_value(level: Level) -> u8 {
         match level {
             Level::TRACE => 4,
             Level::DEBUG => 3,
