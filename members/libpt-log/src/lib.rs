@@ -139,11 +139,11 @@ impl LoggerBuilder {
             .with_line_number(self.display_line_number)
             .with_thread_names(self.display_thread_names)
             .with_span_events(FmtSpan::FULL);
+        // HACK: somehow find a better solution for this
         // I know this is hacky, but I couldn't get it any other way. I couldn't even find a
         // project that could do it any other way. You can't apply one after another, because the
         // type is changed every time. When using `Box<dyn Whatever>`, some methods complain about
         // not being in trait bounds.
-        // TODO: somehow find a better solution for this
         match (self.log_to_file, self.show_time, self.pretty, self.uptime) {
             (true, true, true, true) => {
                 let subscriber = subscriber
@@ -217,6 +217,8 @@ impl LoggerBuilder {
     }
 
     /// enable or disable logging to and creating of logfiles
+    ///
+    /// Default: false
     #[must_use]
     pub const fn log_to_file(mut self, log_to_file: bool) -> Self {
         self.log_to_file = log_to_file;
@@ -227,7 +229,7 @@ impl LoggerBuilder {
     ///
     /// Enable or disable creation and logging to logfiles with [`log_to_file`](Self::log_to_file).
     ///
-    /// The default logdir is [`DEFAULT_LOG_DIR`].
+    /// Default: [`DEFAULT_LOG_DIR`] (/dev/null)
     #[must_use]
     pub fn log_dir(mut self, log_dir: PathBuf) -> Self {
         self.log_dir = log_dir;
@@ -240,6 +242,8 @@ impl LoggerBuilder {
     /// are displayed by a program that does not interpret them.
     ///
     /// Keeping ANSI control sequences enabled has the disadvantage of added colors for the logs.
+    ///
+    /// Default: true
     #[must_use]
     pub const fn ansiconst(mut self, ansi: bool) -> Self {
         self.ansi = ansi;
@@ -247,6 +251,8 @@ impl LoggerBuilder {
     }
 
     /// when making a log, display the source file in which a log was crated in
+    ///
+    /// Default: false
     #[must_use]
     pub const fn display_filename(mut self, display_filename: bool) -> Self {
         self.display_filename = display_filename;
@@ -254,6 +260,8 @@ impl LoggerBuilder {
     }
 
     /// when making a log, display the log level of the message
+    ///
+    /// Default: true
     #[must_use]
     pub const fn display_level(mut self, display_level: bool) -> Self {
         self.display_level = display_level;
@@ -261,6 +269,8 @@ impl LoggerBuilder {
     }
 
     /// show target context
+    ///
+    /// Default: false
     #[must_use]
     pub const fn display_target(mut self, display_target: bool) -> Self {
         self.display_target = display_target;
@@ -268,6 +278,8 @@ impl LoggerBuilder {
     }
 
     /// show the id of the thread that created this message
+    ///
+    /// Default: false
     #[must_use]
     pub const fn display_thread_ids(mut self, display_thread_ids: bool) -> Self {
         self.display_thread_ids = display_thread_ids;
@@ -275,6 +287,8 @@ impl LoggerBuilder {
     }
 
     /// show the name of the thread that created this message
+    ///
+    /// Default: false
     #[must_use]
     pub const fn display_thread_names(mut self, display_thread_names: bool) -> Self {
         self.display_thread_names = display_thread_names;
@@ -282,6 +296,8 @@ impl LoggerBuilder {
     }
 
     /// show which line in the source file produces a log
+    ///
+    /// Default: false
     #[must_use]
     pub const fn display_line_number(mut self, display_line_number: bool) -> Self {
         self.display_line_number = display_line_number;
@@ -289,6 +305,8 @@ impl LoggerBuilder {
     }
 
     /// splits a log over multiple lines, looks like a python traceback
+    ///
+    /// Default: false
     #[must_use]
     pub const fn pretty(mut self, pretty: bool) -> Self {
         self.pretty = pretty;
@@ -296,6 +314,8 @@ impl LoggerBuilder {
     }
 
     /// show timestamps as uptime (duration since the logger was initialized)
+    ///
+    /// Default: false
     #[must_use]
     pub const fn uptime(mut self, uptime: bool) -> Self {
         self.uptime = uptime;
