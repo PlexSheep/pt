@@ -1,7 +1,6 @@
 //! Utilities for parsing options and arguments on the start of a CLI application
 
 use clap::Parser;
-#[cfg(feature = "log")]
 use libpt_log::Level;
 #[cfg(feature = "log")]
 use log;
@@ -100,7 +99,6 @@ Author: {author-with-newline}
 /// }
 /// ```
 #[derive(Parser, Clone, PartialEq, Eq, Hash)]
-#[cfg(feature = "log")]
 pub struct VerbosityLevel {
     /// make the output more verbose
     #[arg(
@@ -135,6 +133,7 @@ impl VerbosityLevel {
         self.verbose != 0 || self.quiet != 0
     }
     #[inline]
+    #[must_use]
     fn value(&self) -> i8 {
         Self::level_value(Level::INFO)
             .saturating_sub((self.quiet).min(10))
@@ -180,6 +179,7 @@ impl VerbosityLevel {
     /// [None] means that absolutely no output is wanted (completely quiet)
     #[inline]
     #[must_use]
+    #[cfg(feature = "log")]
     pub fn level_for_log_crate(&self) -> log::Level {
         match self.level() {
             Level::TRACE => log::Level::Trace,
@@ -191,7 +191,8 @@ impl VerbosityLevel {
     }
 
     #[inline]
-    fn level_value(level: Level) -> i8 {
+    #[must_use]
+    const fn level_value(level: Level) -> i8 {
         match level {
             Level::TRACE => 4,
             Level::DEBUG => 3,
@@ -272,5 +273,11 @@ impl std::fmt::Debug for VerbosityLevel {
     #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.level())
+    }
+}
+
+impl Default for VerbosityLevel {
+    fn default() -> Self {
+        Self::INFO
     }
 }
