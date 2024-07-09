@@ -5,12 +5,13 @@ members = [
   "members/libpt-core",
   "members/libpt-log",
   "members/libpt-py",
+  "members/libpt-cli",
 ]
 default-members = [".", "members/libpt-core"]
 
 [workspace.package]
 publish = true
-version = "0.5.1"
+version = "0.6.0-alpha.0"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "GPL-3.0-or-later"
@@ -31,6 +32,7 @@ thiserror = "1.0.56"
 libpt-core = { version = "0.4.0", path = "members/libpt-core" }
 libpt-bintols = { version = "0.5.1", path = "members/libpt-bintols" }
 libpt-log = { version = "0.4.2", path = "members/libpt-log" }
+libpt-cli = { version = "0.1.0", path = "members/libpt-cli" }
 
 [package]
 name = "libpt"
@@ -52,6 +54,7 @@ core = []
 full = ["default", "core", "log", "bintols"]
 log = ["dep:libpt-log"]
 bintols = ["dep:libpt-bintols", "log"]
+cli = ["dep:libpt-cli", "core", "log"]
 # py = ["dep:libpt-py"]
 
 [lib]
@@ -66,3 +69,4 @@ crate-type = [
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true, optional = true }
 libpt-log = { workspace = true, optional = true }
+libpt-cli = { workspace = true, optional = true }
