@@ -378,35 +378,35 @@ impl Logger {
     where
         T: fmt::Display,
     {
-        error!("{}", printable)
+        error!("{}", printable);
     }
     /// ## logging at [`Level::WARN`]
     pub fn warn<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
-        warn!("{}", printable)
+        warn!("{}", printable);
     }
     /// ## logging at [`Level::INFO`]
     pub fn info<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
-        info!("{}", printable)
+        info!("{}", printable);
     }
     /// ## logging at [`Level::DEBUG`]
     pub fn debug<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
-        debug!("{}", printable)
+        debug!("{}", printable);
     }
     /// ## logging at [`Level::TRACE`]
     pub fn trace<T>(&self, printable: T)
     where
         T: fmt::Display,
     {
-        trace!("{}", printable)
+        trace!("{}", printable);
     }
 }
 
@@ -430,6 +430,6 @@ impl Default for Logger {
 }
 
 fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
-    let file_appender = tracing_appender::rolling::daily(log_dir.clone(), "log");
+    let file_appender = tracing_appender::rolling::daily(log_dir, "log");
     tracing_appender::non_blocking(file_appender).0
 }
