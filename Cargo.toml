@@ -21,7 +21,7 @@ anyhow = "1.0.79"
 thiserror = "1.0.56"
 libpt-core = { version = "0.4.0", path = "members/libpt-core" }
 libpt-bintols = { version = "0.5.1", path = "members/libpt-bintols" }
-libpt-log = { version = "0.4.2", path = "members/libpt-log" }
+libpt-log = { version = "0.5.1", path = "members/libpt-log" }
 libpt-cli = { version = "0.1.0", path = "members/libpt-cli" }
 
 [package]
