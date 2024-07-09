@@ -18,7 +18,7 @@ use log;
 /// # use libpt_cli::args::HELP_TEMPLATE;
 /// use clap::Parser;
 /// #[derive(Parser, Debug, Clone, PartialEq, Eq, Hash)]
-/// #[command(help_template = HELP_TEMPLATE)]
+/// #[command(help_template = HELP_TEMPLATE, author, version)]
 /// pub struct MyArgs {
 ///     /// show more details
 ///     #[arg(short, long)]
