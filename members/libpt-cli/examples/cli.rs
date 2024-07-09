@@ -23,17 +23,7 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
-    let _logger = {
-        let mut this = {
-            let mut this = Logger::builder();
-            let max_level = cli.verbosity.level();
-            this.max_level = max_level;
-            this
-        };
-        this.show_time = false;
-        this
-    }
-    .build();
+    let _logger = Logger::builder().set_level(cli.verbosity.level()).build();
 
     debug!("logger initialized with level: {}", cli.verbosity.level());
 
