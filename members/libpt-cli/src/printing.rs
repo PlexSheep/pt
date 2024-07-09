@@ -45,10 +45,11 @@ use console::{style, Color};
 /// use libpt_cli::console::Color;
 /// use libpt_cli::printing::blockprint;
 /// # fn main() {
-/// blockprint("Hello world!".to_string(), Color::Blue);
+/// blockprint("Hello world!", Color::Blue);
 /// # }
 /// ```
 #[inline]
+#[allow(clippy::needless_pass_by_value)] // we just take an impl, using a &impl is much less ergonomic
 pub fn blockprint(content: impl ToString, color: Color) {
     println!("{}", blockfmt(content, color));
 }
@@ -66,11 +67,12 @@ pub fn blockprint(content: impl ToString, color: Color) {
 /// use libpt_cli::console::Color;
 /// use libpt_cli::printing::blockfmt;
 /// # fn main() {
-/// let formatted_content = blockfmt("Hello world!".to_string(), Color::Blue);
+/// let formatted_content = blockfmt("Hello world!", Color::Blue);
 /// println!("{}", formatted_content);
 /// # }
 /// ```
 #[inline]
+#[allow(clippy::needless_pass_by_value)] // we just take an impl, using a &impl is much less ergonomic
 pub fn blockfmt(content: impl ToString, color: Color) -> String {
     blockfmt_advanced(
         content,
@@ -98,7 +100,7 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
 /// println!(
 ///     "{}",
 ///     blockfmt_advanced(
-///         "Hello world!".to_string(),
+///         "Hello world!",
 ///         Some(Color::Blue),
 ///         presets::UTF8_FULL,
 ///         ContentArrangement::DynamicFullWidth,
@@ -120,6 +122,8 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
 /// - `preset`: The preset style for the border
 /// - `arrangement`: The arrangement of the the border (e.g., stretch to sides, wrap around )
 /// - `alignment`: The alignment of the content within the cells (e.g., left, center, right)
+#[allow(clippy::missing_panics_doc)] // we add a row then unwrap it, no panic should be possible
+#[allow(clippy::needless_pass_by_value)] // we just take an impl, using a &impl is much less ergonomic
 pub fn blockfmt_advanced(
     content: impl ToString,
     color: Option<Color>,

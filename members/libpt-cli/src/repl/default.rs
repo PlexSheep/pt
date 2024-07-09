@@ -56,11 +56,10 @@ use libpt_log::trace;
 #[embed_doc_image("repl_screenshot", "data/media/repl.png")]
 #[derive(Parser)]
 #[command(multicall = true, help_template = REPL_HELP_TEMPLATE)]
+#[allow(clippy::module_name_repetitions)] // we can't just name it `Default`, that's part of std
 pub struct DefaultRepl<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     /// the command you want to execute, along with its arguments
     #[command(subcommand)]
@@ -81,18 +80,14 @@ where
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, PartialOrd, Ord)]
 struct DefaultReplCompletion<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     commands: std::marker::PhantomData<C>,
 }
 
 impl<C> Repl<C> for DefaultRepl<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     fn new() -> Self {
         Self {
@@ -106,7 +101,7 @@ where
     fn command(&self) -> &Option<C> {
         &self.command
     }
-    fn step(&mut self) -> Result<(), super::error::ReplError> {
+    fn step(&mut self) -> Result<(), super::error::Error> {
         self.buf.clear();
 
         // NOTE: display::Input requires some kind of lifetime that would be a bother to store in
@@ -139,9 +134,7 @@ where
 
 impl<C> Default for DefaultRepl<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     fn default() -> Self {
         Self::new()
@@ -150,9 +143,7 @@ where
 
 impl<C> Debug for DefaultRepl<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("DefaultRepl")
@@ -167,16 +158,15 @@ where
 
 impl<C> DefaultReplCompletion<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
-    pub fn new() -> Self {
+    /// Make a new [`DefaultReplCompletion`] for the type `C`
+    pub const fn new() -> Self {
         Self {
             commands: std::marker::PhantomData::<C>,
         }
     }
-    fn commands(&self) -> Vec<String> {
+    fn commands() -> Vec<String> {
         let mut buf = Vec::new();
         // every crate has the help command, but it is not part of the enum
         buf.push("help".to_string());
@@ -199,9 +189,7 @@ where
 
 impl<C> Default for DefaultReplCompletion<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     fn default() -> Self {
         Self::new()
@@ -210,14 +198,11 @@ where
 
 impl<C> Completion for DefaultReplCompletion<C>
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     /// Simple completion implementation based on substring
     fn get(&self, input: &str) -> Option<String> {
-        let matches = self
-            .commands()
+        let matches = Self::commands()
             .into_iter()
             .filter(|option| option.starts_with(input))
             .collect::<Vec<_>>();

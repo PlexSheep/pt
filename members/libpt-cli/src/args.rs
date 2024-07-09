@@ -80,7 +80,6 @@ Author: {author-with-newline}
 /// # use libpt_cli::args::VerbosityLevel;
 /// use libpt_log::Level;
 /// # use clap::Parser;
-/// use log;
 ///
 /// # #[derive(Parser, Debug)]
 /// # pub struct Opts {
@@ -94,8 +93,6 @@ Author: {author-with-newline}
 ///     // Level might be None if the user wants no output at all.
 ///     // for the 'tracing' level:
 ///     let level: Level = opts.verbose.level();
-///     // for the 'log' level:
-///     let llevel: log::Level = opts.verbose.level_for_log_crate();
 /// }
 /// ```
 #[derive(Parser, Clone, PartialEq, Eq, Hash)]

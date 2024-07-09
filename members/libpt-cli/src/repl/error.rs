@@ -3,9 +3,11 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum ReplError {
+pub enum Error {
     #[error(transparent)]
     Parsing(#[from] clap::Error),
     #[error(transparent)]
     Input(#[from] dialoguer::Error),
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
 }

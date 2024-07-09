@@ -14,7 +14,7 @@
 use std::fmt::Debug;
 
 pub mod error;
-use error::ReplError;
+use error::Error;
 mod default;
 pub use default::*;
 
@@ -25,9 +25,7 @@ use clap::{Parser, Subcommand};
 /// Unless you want to implement custom features (not just commands), just use [`DefaultRepl`].
 pub trait Repl<C>: Parser + Debug
 where
-    C: Debug,
-    C: Subcommand,
-    C: strum::IntoEnumIterator,
+    C: Debug + Subcommand + strum::IntoEnumIterator,
 {
     /// create a new repl
     fn new() -> Self;
@@ -40,5 +38,11 @@ where
     /// This should be used at the start of your loop.
     ///
     /// Note that the help menu is an Error: [`clap::error::ErrorKind::DisplayHelp`]
-    fn step(&mut self) -> Result<(), ReplError>;
+    ///
+    /// # Errors
+    ///
+    /// * [`Error::Input`] – [dialoguer] User Input had some kind of I/O Error
+    /// * [`Error::Parsing`] – [clap] could not parse the user input, or user requested help
+    /// * [`Error::Other`] – Any other error with [anyhow], [`DefaultRepl`] does not use this but custom implementations might
+    fn step(&mut self) -> Result<(), Error>;
 }

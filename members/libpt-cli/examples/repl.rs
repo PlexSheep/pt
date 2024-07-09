@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
             Err(e) => {
                 // if the user requested the help, print in blue, otherwise in red as it's just an
                 // error
-                if let libpt_cli::repl::error::ReplError::Parsing(e) = &e {
+                if let libpt_cli::repl::error::Error::Parsing(e) = &e {
                     if e.kind() == clap::error::ErrorKind::DisplayHelp {
                         println!("{}", style(e).cyan());
                         continue;
@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
                 if !fancy {
                     println!("{}", text.join(" "))
                 } else {
-                    printing::blockprint(text.join(" "), console::Color::Cyan)
+                    printing::blockprint(&text.join(" "), console::Color::Cyan)
                 }
             }
         }
