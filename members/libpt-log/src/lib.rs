@@ -6,8 +6,10 @@
 //! For the library version, only the basic [`tracing`] is used, so that it is possible for
 //! the end user to use the [`tracing`] frontend they desire.
 //!
-//! I did however decide to create a [`Logger`] struct. This struct is mainly intended to be used
-//! with the python module of [`pt`](../libpt/index.html), but is still just as usable in other contexts.
+//! I did decide to create a [`Logger`] struct. This struct is mainly intended to be used with the
+//! python module of [`pt`](../libpt/index.html), but is still just as usable in other contexts.
+//! You can use this struct when use of the macros is not possible, but the macros should generally
+//! be preferred.
 //!
 //! ## Technologies used for logging:
 //! - [`tracing`]: base logging crate
@@ -24,6 +26,9 @@ use std::{
 pub mod error;
 use error::Error;
 
+/// This is the magic dependency where the cool stuff happens
+///
+/// I'm just repackaging it a little to make it more ergonomic
 pub use tracing;
 pub use tracing::{debug, error, info, trace, warn, Level};
 use tracing_appender::{self, non_blocking::NonBlocking};
@@ -182,9 +187,10 @@ impl LoggerBuilder {
                 tracing::subscriber::set_global_default(subscriber)?;
             }
             (true, false, false, _) => {
-                let file_appender = tracing_appender::rolling::daily(self.log_dir, "log");
-                let (file_writer, _guard) = tracing_appender::non_blocking(file_appender);
-                let subscriber = subscriber.with_writer(file_writer).without_time().finish();
+                let subscriber = subscriber
+                    .with_writer(new_file_appender(self.log_dir))
+                    .without_time()
+                    .finish();
                 tracing::subscriber::set_global_default(subscriber)?;
             }
             (false, true, true, true) => {
@@ -217,6 +223,8 @@ impl LoggerBuilder {
     }
 
     /// enable or disable logging to and creating of logfiles
+    ///
+    /// If you want to log to a file, don't forget to set [`Self::log_dir`]!
     ///
     /// Default: false
     #[must_use]
@@ -355,19 +363,23 @@ impl Default for LoggerBuilder {
 ///
 /// ## Levels
 ///
-/// TODO: add levels desc and ascii art
+/// * [ERROR](Level::ERROR) – Something broke
+/// * [WARN](Level::WARN) – Something is bad
+/// * [INFO](Level::INFO) – Useful information for users
+/// * [DEBUG](Level::DEBUG) – Useful information for developers
+/// * [TRACE](Level::TRACE) – Very verbose information for developers (often for libraries)
 ///
 /// ## Usage
 ///
 /// You don't need to use the [Logger] struct, it's better to use the macros instead:
 ///
-/// * `error!`
-/// * `warn!`
-/// * `info!`
-/// * `debug!`
-/// * `trace!`
+/// * [`error!`]
+/// * [`warn!`]
+/// * [`info!`]
+/// * [`debug!`]
+/// * [`trace!`]
 ///
-/// You can however use the [Logger] struct in cases where usage of a macro is bad or
+/// You can however use the [Logger] struct in cases where usage of a macro is impossible or
 /// you are somehow working with multiple loggers. The macros offer additional functionalities,
 /// suck as full `format!` support and context, see [`tracing`], which we use as backend.
 ///
@@ -449,7 +461,6 @@ impl Default for Logger {
     }
 }
 
-fn new_file_appender(log_dir: PathBuf) -> NonBlocking {
-    let file_appender = tracing_appender::rolling::daily(log_dir, "log");
-    tracing_appender::non_blocking(file_appender).0
+fn new_file_appender(log_dir: PathBuf) -> tracing_appender::rolling::RollingFileAppender {
+    tracing_appender::rolling::daily(log_dir, format!("{}.log", env!("CARGO_CRATE_NAME")))
 }
