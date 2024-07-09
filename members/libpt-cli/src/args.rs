@@ -46,14 +46,14 @@ use log;
 /// Author: Christoph J. Scherr <software@cscherr.de>
 ///
 /// ```
-pub const HELP_TEMPLATE: &str = r#"{about-section}
+pub const HELP_TEMPLATE: &str = r"{about-section}
 {usage-heading} {usage}
 
 {all-args}{tab}
 
 {name}: {version}
 Author: {author-with-newline}
-"#;
+";
 
 /// Transform -v and -q flags to some kind of loglevel
 ///
@@ -111,7 +111,7 @@ pub struct VerbosityLevel {
         // help = L::verbose_help(),
         // long_help = L::verbose_long_help(),
     )]
-    verbose: u8,
+    verbose: i8,
 
     /// make the output less verbose
     ///
@@ -123,22 +123,37 @@ pub struct VerbosityLevel {
         global = true,
         conflicts_with = "verbose",
     )]
-    quiet: u8,
+    quiet: i8,
 }
 
 impl VerbosityLevel {
     /// true only if no verbose and no quiet was set (user is using defaults)
     #[inline]
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)] // the values of self can change
     pub fn changed(&self) -> bool {
         self.verbose != 0 || self.quiet != 0
     }
     #[inline]
     fn value(&self) -> i8 {
-        Self::level_value(Level::INFO) - (self.quiet as i8).min(10) + (self.verbose as i8).min(10)
+        Self::level_value(Level::INFO)
+            .saturating_sub((self.quiet).min(10))
+            .saturating_add((self.verbose).min(10))
     }
 
-    /// get the [Level] for that VerbosityLevel
+    /// get the [Level] for that [`VerbosityLevel`]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::INFO;
+    /// assert_eq!(verbosity_level.level(), Level::INFO);
+    /// ```
     #[inline]
+    #[must_use]
     pub fn level(&self) -> Level {
         let v = self.value();
         match v {
@@ -164,6 +179,7 @@ impl VerbosityLevel {
     ///
     /// [None] means that absolutely no output is wanted (completely quiet)
     #[inline]
+    #[must_use]
     pub fn level_for_log_crate(&self) -> log::Level {
         match self.level() {
             Level::TRACE => log::Level::Trace,
@@ -184,6 +200,72 @@ impl VerbosityLevel {
             Level::ERROR => 0,
         }
     }
+
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::TRACE;
+    /// assert_eq!(verbosity_level.level(), Level::TRACE);
+    /// ```
+    pub const TRACE: Self = Self {
+        verbose: 2,
+        quiet: 0,
+    };
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::DEBUG;
+    /// assert_eq!(verbosity_level.level(), Level::DEBUG);
+    /// ```
+    pub const DEBUG: Self = Self {
+        verbose: 1,
+        quiet: 0,
+    };
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::INFO;
+    /// assert_eq!(verbosity_level.level(), Level::INFO);
+    /// ```
+    pub const INFO: Self = Self {
+        verbose: 0,
+        quiet: 0,
+    };
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::WARN;
+    /// assert_eq!(verbosity_level.level(), Level::WARN);
+    /// ```
+    pub const WARN: Self = Self {
+        verbose: 0,
+        quiet: 1,
+    };
+    /// # Examples
+    ///
+    /// ```
+    /// use libpt_log::Level; // reexport: tracing
+    /// use libpt_cli::args::VerbosityLevel;
+    ///
+    /// let verbosity_level = VerbosityLevel::ERROR;
+    /// assert_eq!(verbosity_level.level(), Level::ERROR);
+    /// ```
+    pub const ERROR: Self = Self {
+        verbose: 0,
+        quiet: 2,
+    };
 }
 
 impl std::fmt::Debug for VerbosityLevel {
