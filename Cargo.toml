@@ -5,7 +5,7 @@ default-members = [".", "members/libpt-core"]
 
 [workspace.package]
 publish = true
-version = "0.6.0-alpha.0"
+version = "0.6.0"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "GPL-3.0-or-later"
