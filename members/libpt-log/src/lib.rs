@@ -31,7 +31,7 @@ use error::Error;
 /// I'm just repackaging it a little to make it more ergonomic
 pub use tracing;
 pub use tracing::{debug, error, info, trace, warn, Level};
-use tracing_appender::{self, non_blocking::NonBlocking};
+use tracing_appender::{self};
 use tracing_subscriber::fmt::{format::FmtSpan, time};
 
 use anyhow::{bail, Result};
