@@ -329,6 +329,15 @@ impl LoggerBuilder {
         self.uptime = uptime;
         self
     }
+
+    /// set the lowest loglevel to be displayed
+    ///
+    /// Default: [`Level::INFO`]
+    #[must_use]
+    pub const fn set_level(mut self, max_level: Level) -> Self {
+        self.max_level = max_level;
+        self
+    }
 }
 
 impl Default for LoggerBuilder {
