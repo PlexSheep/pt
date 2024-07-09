@@ -9,10 +9,10 @@ use super::Repl;
 use embed_doc_image::embed_doc_image;
 
 /// [clap] help template with only usage and commands/options
-pub const REPL_HELP_TEMPLATE: &str = r#"{usage-heading} {usage}
+pub const REPL_HELP_TEMPLATE: &str = r"{usage-heading} {usage}
 
 {all-args}{tab}
-"#;
+";
 
 use clap::{Parser, Subcommand};
 use dialoguer::{BasicHistory, Completion};
@@ -186,11 +186,11 @@ where
             buf.push(
                 format!("{c:?}")
                     .split_whitespace()
-                    .map(|e| e.to_lowercase())
+                    .map(str::to_lowercase)
                     .next()
                     .unwrap()
                     .to_string(),
-            )
+            );
         }
         trace!("commands: {buf:?}");
         buf

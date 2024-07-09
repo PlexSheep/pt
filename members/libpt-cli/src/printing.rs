@@ -5,7 +5,7 @@
 //! output for CLI applications.
 //!
 //! Note that most of the utilities in this module are focused on communication with humans, not
-//! with machines. Consider evaluating [std::io::IsTerminal] before using colorful, dynamic and bordered
+//! with machines. Consider evaluating [`std::io::IsTerminal`] before using colorful, dynamic and bordered
 //! printing. If you are talking to a machine, it might be useful to not add extra space, add a
 //! newline per output or even output JSON. An example that does this well is `ls`:
 //!
@@ -50,12 +50,12 @@ use console::{style, Color};
 /// ```
 #[inline]
 pub fn blockprint(content: impl ToString, color: Color) {
-    println!("{}", blockfmt(content, color))
+    println!("{}", blockfmt(content, color));
 }
 
 /// Formats content with a simple border around it
 ///
-/// This function is a convenience wrapper around [blockfmt_advanced] with preset values for
+/// This function is a convenience wrapper around [`blockfmt_advanced`] with preset values for
 /// border style, content arrangement, and cell alignment. It automatically formats the content
 /// with a border as large as possible and centers the content. The resulting cell is colored in
 /// the specified color.

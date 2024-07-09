@@ -172,7 +172,7 @@ impl VerbosityLevel {
         }
     }
 
-    /// get the [log::Level] for that VerbosityLevel
+    /// get the [`log::Level`] for that `VerbosityLevel`
     ///
     /// This is the method for the [log] crate, which I use less often.
     ///

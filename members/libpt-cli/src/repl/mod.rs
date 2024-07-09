@@ -22,7 +22,7 @@ use clap::{Parser, Subcommand};
 
 /// Common Trait for repl objects
 ///
-/// Unless you want to implement custom features (not just commands), just use [DefaultRepl].
+/// Unless you want to implement custom features (not just commands), just use [`DefaultRepl`].
 pub trait Repl<C>: Parser + Debug
 where
     C: Debug,
@@ -39,6 +39,6 @@ where
     ///
     /// This should be used at the start of your loop.
     ///
-    /// Note that the help menu is an Error: [clap::error::ErrorKind::DisplayHelp]
+    /// Note that the help menu is an Error: [`clap::error::ErrorKind::DisplayHelp`]
     fn step(&mut self) -> Result<(), ReplError>;
 }
