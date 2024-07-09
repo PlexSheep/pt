@@ -1,7 +1,7 @@
 use console::style;
 use libpt_cli::repl::{DefaultRepl, Repl};
 use libpt_cli::{clap, printing, strum};
-use libpt_log::{debug, Level, Logger};
+use libpt_log::{debug, Logger};
 
 use clap::Subcommand;
 use strum::EnumIter;
