@@ -73,7 +73,7 @@ fn main() -> anyhow::Result<()> {
                 if !fancy {
                     println!("{}", text.join(" "))
                 } else {
-                    printing::blockprint(&text.join(" "), console::Color::Cyan)
+                    printing::blockprint(text.join(" "), console::Color::Cyan)
                 }
             }
         }
