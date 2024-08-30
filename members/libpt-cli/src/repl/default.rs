@@ -27,8 +27,8 @@ use libpt_log::trace;
 ///
 /// ```no_run
 /// use libpt_cli::repl::{DefaultRepl, Repl};
-/// use libpt_cli::clap::Subcommand;
-/// use libpt_cli::strum::EnumIter;
+/// use clap::Subcommand;
+/// use strum::EnumIter;
 ///
 /// #[derive(Subcommand, Debug, EnumIter, Clone)]
 /// enum ReplCommand {

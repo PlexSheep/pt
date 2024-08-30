@@ -1,6 +1,6 @@
 use console::style;
+use libpt_cli::printing;
 use libpt_cli::repl::{DefaultRepl, Repl};
-use libpt_cli::{clap, printing, strum};
 use libpt_log::{debug, Logger};
 
 use clap::Subcommand;

@@ -77,9 +77,9 @@ Author: {author-with-newline}
 /// Get the loglevel like this:
 ///
 /// ```no_run
-/// # use libpt_cli::args::VerbosityLevel;
+/// use libpt_cli::args::VerbosityLevel;
 /// use libpt_log::Level;
-/// # use clap::Parser;
+/// use clap::Parser;
 ///
 /// # #[derive(Parser, Debug)]
 /// # pub struct Opts {
