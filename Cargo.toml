@@ -41,7 +41,7 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-full = ["default", "core", "log", "bintols"]
+full = ["default", "core", "log", "bintols", "libpt-cli/full"]
 log = ["dep:libpt-log"]
 log-crate = ["libpt-cli/log"]
 bintols = ["dep:libpt-bintols", "log"]

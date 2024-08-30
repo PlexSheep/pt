@@ -17,6 +17,7 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [features]
 default = []
+full = ["log"]
 log = ["dep:log"]
 
 [dependencies]
