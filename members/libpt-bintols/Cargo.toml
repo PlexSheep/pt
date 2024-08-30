@@ -20,3 +20,7 @@ libpt-core = { workspace = true }
 libpt-log = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -16,3 +16,7 @@ categories.workspace = true
 anyhow = "1.0.79"
 
 [dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

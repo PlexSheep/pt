@@ -60,3 +60,7 @@ libpt-core = { workspace = true }
 libpt-bintols = { workspace = true, optional = true }
 libpt-log = { workspace = true, optional = true }
 libpt-cli = { workspace = true, optional = true, features = ["log"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
