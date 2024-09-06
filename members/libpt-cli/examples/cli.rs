@@ -1,6 +1,6 @@
 use clap::Parser;
 use libpt_cli::args::VerbosityLevel;
-use libpt_cli::{clap, printing};
+use libpt_cli::printing;
 use libpt_log::{debug, Logger};
 
 /// This is the help

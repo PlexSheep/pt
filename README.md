@@ -40,11 +40,18 @@ If you want to use the python variant too, you need to compile with maturing.
 
 ## Installing from [pypi](https://pypi.org)
 
-`libpt` has been packaged for [pypi.org](https://pypi.org/project/libpt/).
+The Python interface of `libpt` is currently not implemented, but it is planned
+to eventually re add it. Meanwhile, you can use a much older version if you
+really want.
 
-You can install it with `pip install libpt`
+> :warning: **This will install a very old version**
+>
+> `libpt` has been packaged for [pypi.org](https://pypi.org/project/libpt/).
+>
+> You can install it with `pip install libpt`
 
 ## Installing from [crates.io](https://crates.io)
+
 
 `libpt` has been packaged for [crates.io](https://crates.io/crates/libpt).
 

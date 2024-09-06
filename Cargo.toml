@@ -5,7 +5,7 @@ default-members = [".", "members/libpt-core"]
 
 [workspace.package]
 publish = true
-version = "0.6.0"
+version = "0.7.1"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "GPL-3.0-or-later"
@@ -19,10 +19,10 @@ categories = ["command-line-utilities", "development-tools"]
 [workspace.dependencies]
 anyhow = "1.0.79"
 thiserror = "1.0.56"
-libpt-core = { version = "0.4.0", path = "members/libpt-core" }
+libpt-core = { version = "0.5.0", path = "members/libpt-core" }
 libpt-bintols = { version = "0.5.1", path = "members/libpt-bintols" }
-libpt-log = { version = "0.5.1", path = "members/libpt-log" }
-libpt-cli = { version = "0.1.2", path = "members/libpt-cli" }
+libpt-log = { version = "0.6.0", path = "members/libpt-log" }
+libpt-cli = { version = "0.2.1", path = "members/libpt-cli" }
 
 [package]
 name = "libpt"
@@ -41,8 +41,9 @@ categories.workspace = true
 [features]
 default = ["log", "core"]
 core = []
-full = ["default", "core", "log", "bintols"]
+full = ["default", "core", "log", "bintols", "libpt-cli/full"]
 log = ["dep:libpt-log"]
+log-crate = ["libpt-cli/log"]
 bintols = ["dep:libpt-bintols", "log"]
 cli = ["dep:libpt-cli", "core", "log"]
 
@@ -58,4 +59,8 @@ crate-type = [
 libpt-core = { workspace = true }
 libpt-bintols = { workspace = true, optional = true }
 libpt-log = { workspace = true, optional = true }
-libpt-cli = { workspace = true, optional = true }
+libpt-cli = { workspace = true, optional = true, features = ["log"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -480,5 +480,11 @@ impl Default for Logger {
 }
 
 fn new_file_appender(log_dir: PathBuf) -> tracing_appender::rolling::RollingFileAppender {
-    tracing_appender::rolling::daily(log_dir, format!("{}.log", env!("CARGO_CRATE_NAME")))
+    tracing_appender::rolling::daily(
+        log_dir,
+        format!(
+            "{}.log",
+            libpt_core::get_crate_name().unwrap_or_else(|| "logfile".to_string())
+        ),
+    )
 }

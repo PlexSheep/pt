@@ -42,7 +42,7 @@ use console::{style, Color};
 /// # Example
 ///
 /// ```
-/// use libpt_cli::console::Color;
+/// use console::Color;
 /// use libpt_cli::printing::blockprint;
 /// # fn main() {
 /// blockprint("Hello world!", Color::Blue);
@@ -64,7 +64,7 @@ pub fn blockprint(content: impl ToString, color: Color) {
 /// # Example
 ///
 /// ```
-/// use libpt_cli::console::Color;
+/// use console::Color;
 /// use libpt_cli::printing::blockfmt;
 /// # fn main() {
 /// let formatted_content = blockfmt("Hello world!", Color::Blue);
@@ -93,8 +93,8 @@ pub fn blockfmt(content: impl ToString, color: Color) -> String {
 ///
 /// # Example
 /// ```
-/// use libpt_cli::comfy_table::{presets, CellAlignment, ContentArrangement};
-/// use libpt_cli::console::Color;
+/// use comfy_table::{presets, CellAlignment, ContentArrangement};
+/// use console::Color;
 /// use libpt_cli::printing::blockfmt_advanced;
 /// # fn main() {
 /// println!(
