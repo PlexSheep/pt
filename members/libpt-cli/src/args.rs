@@ -4,6 +4,7 @@ use clap::Parser;
 use libpt_log::Level;
 #[cfg(feature = "log")]
 use log;
+use serde::{Deserialize, Serialize};
 
 /// Custom help template for displaying command-line usage information
 ///
@@ -95,7 +96,7 @@ Author: {author-with-newline}
 ///     let level: Level = opts.verbose.level();
 /// }
 /// ```
-#[derive(Parser, Clone, PartialEq, Eq, Hash)]
+#[derive(Parser, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct VerbosityLevel {
     /// make the output more verbose
     #[arg(
