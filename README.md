@@ -77,7 +77,3 @@ Testing needs to be done separately for the rust and python parts:
 The documentation can be automatically generated with `cargo doc --open`.
 
 An up to date version of the Documentation can be found [here](https://docs.rs/libpt/)
-
-## License
-
-**Pt is MIT Licensed**
