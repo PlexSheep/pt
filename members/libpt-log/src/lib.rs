@@ -61,7 +61,7 @@ static INITIALIZED: AtomicBool = AtomicBool::new(false);
 /// # }
 ///
 /// ```
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[allow(clippy::struct_excessive_bools)] // it's just true/false values, not states, and I don't
                                          // need to reinvent the wheel
 pub struct LoggerBuilder {
@@ -94,6 +94,8 @@ pub struct LoggerBuilder {
     show_time: bool,
     /// show timestamps as uptime (duration since the logger was initialized)
     uptime: bool,
+    /// log when span things happen
+    span_events: FmtSpan,
 }
 
 impl LoggerBuilder {
@@ -143,7 +145,7 @@ impl LoggerBuilder {
             .with_thread_ids(self.display_thread_ids)
             .with_line_number(self.display_line_number)
             .with_thread_names(self.display_thread_names)
-            .with_span_events(FmtSpan::FULL);
+            .with_span_events(self.span_events);
         // HACK: somehow find a better solution for this
         // I know this is hacky, but I couldn't get it any other way. I couldn't even find a
         // project that could do it any other way. You can't apply one after another, because the
@@ -347,6 +349,15 @@ impl LoggerBuilder {
         self.max_level = max_level;
         self
     }
+
+    /// set how span events are handled
+    ///
+    /// Default: [`FmtSpan::NONE`]
+    #[must_use]
+    pub const fn span_events(mut self, span_events: FmtSpan) -> Self {
+        self.span_events = span_events;
+        self
+    }
 }
 
 impl Default for LoggerBuilder {
@@ -365,11 +376,12 @@ impl Default for LoggerBuilder {
             pretty: false,
             show_time: true,
             uptime: false,
+            span_events: FmtSpan::NONE,
         }
     }
 }
 
-/// ## Logger for [`pt`](libpt)
+/// ## Logger for `libpt`
 ///
 /// A logger is generally a functionality that let's you write information from your library or
 /// application in a more structured manner than if you just wrote all information to `stdout` or

@@ -17,7 +17,7 @@ pub enum Error {
     /// Could not assign logger as the global default
     #[error("Could not assign logger as global default")]
     SetGlobalDefaultFail(#[from] SetGlobalDefaultError),
-    /// any other error type, wrapped in [anyhow::Error](anyhow::Error)
+    /// any other error type, wrapped in [anyhow::Error]
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
