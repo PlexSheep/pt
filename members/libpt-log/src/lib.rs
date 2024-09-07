@@ -151,14 +151,23 @@ impl LoggerBuilder {
             ));
         if self.log_to_file {
             tracing_subscriber::registry()
-                .with(
-                    layer.and_then(
-                        tracing_subscriber::fmt::layer().with_writer(
+                .with(layer.and_then({
+                    tracing_subscriber::fmt::layer()
+                        .with_writer(
                             self.logfile()?
                                 .expect("logging to file is requested but logfile returned None"),
-                        ),
-                    ),
-                )
+                        )
+                        .with_ansi(self.ansi)
+                        .with_target(self.display_target)
+                        .with_file(self.display_filename)
+                        .with_thread_ids(self.display_thread_ids)
+                        .with_line_number(self.display_line_number)
+                        .with_thread_names(self.display_thread_names)
+                        .with_span_events(self.span_events.clone())
+                        .with_filter(tracing::level_filters::LevelFilter::from_level(
+                            self.max_level,
+                        ))
+                }))
                 .init();
         } else {
             tracing_subscriber::registry().with(layer).init();
