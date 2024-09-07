@@ -18,7 +18,7 @@
 #![warn(clippy::pedantic, clippy::style, clippy::nursery)]
 
 use std::{
-    fmt,
+    fmt::{self, Debug},
     path::PathBuf,
     sync::atomic::{AtomicBool, Ordering},
 };
@@ -31,8 +31,9 @@ use error::Error;
 /// I'm just repackaging it a little to make it more ergonomic
 pub use tracing;
 pub use tracing::{debug, error, info, trace, warn, Level};
-use tracing_appender::{self};
-use tracing_subscriber::fmt::{format::FmtSpan, time};
+use tracing_subscriber::{
+    fmt::format::FmtSpan, layer::SubscriberExt as _, util::SubscriberInitExt, Layer,
+};
 
 use anyhow::{bail, Result};
 /// The log level used when none is specified
@@ -130,98 +131,57 @@ impl LoggerBuilder {
     /// This function will return an error if a global Logger was aready initialized. This module
     /// uses the [tracing] crate for logging, so if a [tracing] logger is initialized elsewhere,
     /// this method will error.
+    #[allow(clippy::missing_panics_doc)]
     pub fn build(self) -> Result<Logger> {
         // only init if no init has been performed yet
         if INITIALIZED.load(Ordering::Relaxed) {
             warn!("trying to reinitialize the logger, ignoring");
             bail!(Error::Usage("logging is already initialized".to_string()));
         }
-        let subscriber = tracing_subscriber::fmt::Subscriber::builder()
-            .with_level(self.display_level)
-            .with_max_level(self.max_level)
+        let layer = tracing_subscriber::fmt::layer()
             .with_ansi(self.ansi)
             .with_target(self.display_target)
             .with_file(self.display_filename)
             .with_thread_ids(self.display_thread_ids)
             .with_line_number(self.display_line_number)
             .with_thread_names(self.display_thread_names)
-            .with_span_events(self.span_events);
-        // HACK: somehow find a better solution for this
-        // I know this is hacky, but I couldn't get it any other way. I couldn't even find a
-        // project that could do it any other way. You can't apply one after another, because the
-        // type is changed every time. When using `Box<dyn Whatever>`, some methods complain about
-        // not being in trait bounds.
-        match (self.log_to_file, self.show_time, self.pretty, self.uptime) {
-            (true, true, true, true) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .with_timer(time::uptime())
-                    .pretty()
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (true, true, true, false) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .pretty()
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (true, false, true, _) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .without_time()
-                    .pretty()
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (true, true, false, true) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .with_timer(time::uptime())
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (true, true, false, false) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (true, false, false, _) => {
-                let subscriber = subscriber
-                    .with_writer(new_file_appender(self.log_dir))
-                    .without_time()
-                    .finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, true, true, true) => {
-                let subscriber = subscriber.pretty().with_timer(time::uptime()).finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, true, true, false) => {
-                let subscriber = subscriber.pretty().with_timer(time::uptime()).finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, false, true, _) => {
-                let subscriber = subscriber.without_time().pretty().finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, true, false, true) => {
-                let subscriber = subscriber.with_timer(time::uptime()).finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, true, false, false) => {
-                let subscriber = subscriber.finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
-            (false, false, false, _) => {
-                let subscriber = subscriber.without_time().finish();
-                tracing::subscriber::set_global_default(subscriber)?;
-            }
+            .with_span_events(self.span_events.clone())
+            .with_filter(tracing::level_filters::LevelFilter::from_level(
+                self.max_level,
+            ));
+        if self.log_to_file {
+            tracing_subscriber::registry()
+                .with(layer.and_then(
+                    tracing_subscriber::fmt::layer().with_writer(self.logfile().unwrap()),
+                ))
+                .init();
+        } else {
+            tracing_subscriber::registry().with(layer).init();
         }
+
         INITIALIZED.store(true, Ordering::Relaxed);
         Ok(Logger {})
+    }
+
+    fn logfile(&self) -> Option<std::fs::File> {
+        if !self.log_to_file {
+            return None;
+        }
+        let mut path = self.log_dir.clone();
+        path.push(format!(
+            "{}.{}.log",
+            libpt_core::get_crate_name().unwrap_or_else(|| "logfile".to_string()),
+            chrono::Local::now().date_naive()
+        ));
+        let file = match std::fs::File::create(path) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("libpt: could not start logging to file: {e}");
+                return None;
+            }
+        };
+
+        Some(file)
     }
 
     /// enable or disable logging to and creating of logfiles
@@ -489,14 +449,4 @@ impl Default for Logger {
             .build()
             .expect("building a Logger failed")
     }
-}
-
-fn new_file_appender(log_dir: PathBuf) -> tracing_appender::rolling::RollingFileAppender {
-    tracing_appender::rolling::daily(
-        log_dir,
-        format!(
-            "{}.log",
-            libpt_core::get_crate_name().unwrap_or_else(|| "logfile".to_string())
-        ),
-    )
 }
