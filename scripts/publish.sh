@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
-cargo check --all-features
-echo ">>>>>>>> SELECT A NEW VERSION"
-cargo ws version
-NEW_VERSION=$(cat Cargo.toml | rg '^\s*version\s*=\s*"([^"]*)"\s*$' -or '$1')
+cargo check --all-features --workspace
 echo ">>>>>>>> PUBLISHING RELEASE FOR REPO"
 bash scripts/release.sh
 echo ">>>>>>>> PUBLISHING TO CRATES.IO NEXT"
