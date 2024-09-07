@@ -151,9 +151,14 @@ impl LoggerBuilder {
             ));
         if self.log_to_file {
             tracing_subscriber::registry()
-                .with(layer.and_then(
-                    tracing_subscriber::fmt::layer().with_writer(self.logfile().unwrap()),
-                ))
+                .with(
+                    layer.and_then(
+                        tracing_subscriber::fmt::layer().with_writer(
+                            self.logfile()?
+                                .expect("logging to file is requested but logfile returned None"),
+                        ),
+                    ),
+                )
                 .init();
         } else {
             tracing_subscriber::registry().with(layer).init();
@@ -163,25 +168,24 @@ impl LoggerBuilder {
         Ok(Logger {})
     }
 
-    fn logfile(&self) -> Option<std::fs::File> {
+    /// Opens a new file for logging to.
+    ///
+    /// Format: `{log_dir}/{consumer_name}_2024-09-01.log`
+    ///
+    /// Will be none if [`Self::log_to_file`] is [false].
+    fn logfile(&self) -> Result<Option<std::fs::File>> {
         if !self.log_to_file {
-            return None;
+            return Err(Error::LogfileButNoFilelog.into());
         }
         let mut path = self.log_dir.clone();
+        std::fs::create_dir_all(&path)?;
         path.push(format!(
-            "{}.{}.log",
+            "{}_{}.log",
             libpt_core::get_crate_name().unwrap_or_else(|| "logfile".to_string()),
             chrono::Local::now().date_naive()
         ));
-        let file = match std::fs::File::create(path) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("libpt: could not start logging to file: {e}");
-                return None;
-            }
-        };
-
-        Some(file)
+        let file = std::fs::File::create(path)?;
+        Ok(Some(file))
     }
 
     /// enable or disable logging to and creating of logfiles

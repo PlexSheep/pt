@@ -20,4 +20,6 @@ pub enum Error {
     /// any other error type, wrapped in [`anyhow::Error`]
     #[error(transparent)]
     Other(#[from] anyhow::Error),
+    #[error("Tried to open the logfile, but logging to file was not requested")]
+    LogfileButNoFilelog,
 }
