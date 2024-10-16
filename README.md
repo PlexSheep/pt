@@ -8,12 +8,17 @@
 
 ![pt-logo](data/media/pt-logo.svg)
 
-`pt` stands for either one of "personal tool", "plex tool", "pete" or something among those lines.
+> `pt` stands for either one of "personal tool", "plex tool", "pete" or something among those lines.
 It is a collection of tools that i might or might not use. The intended purpose of this repo is that
 I program whatever i feel is worth having in a personal thing into it, then use it as either a lib,
 crate, python module or executable.
 
-Let's see if I make it a bloated mess or stop committing after 30 hello worlds.
+That was the original idea. `pt` has since become a sort of collection to make 
+other libraries easier to use. Rust can sometimes be quite complicated to 
+especially the newer developers, so maybe this project can help with that a bit.
+
+I'm also deciding that `pt` means "plex tool", as this is created by "PlexSheep", 
+and it's a sort of multiplexer for software.
 
 * [GitHub](https://github.com/PlexSheep/pt)
 * [crates.io](https://crates.io/crates/pt)
