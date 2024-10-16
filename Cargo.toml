@@ -5,7 +5,7 @@ default-members = [".", "members/libpt-core"]
 
 [workspace.package]
 publish = true
-version = "0.7.3-alpha.3"
+version = "0.7.4"
 edition = "2021"
 authors = ["Christoph J. Scherr <software@cscherr.de>"]
 license = "GPL-3.0-or-later"
@@ -50,9 +50,9 @@ cli = ["dep:libpt-cli", "core", "log"]
 [lib]
 name = "libpt"
 crate-type = [
-  "dylib",     # .dll, .so, .dynlib
-  "staticlib", # .lib, .a
-  "rlib",
+	"dylib",     # .dll, .so, .dynlib
+	"staticlib", # .lib, .a
+	"rlib",
 ]
 
 [dependencies]
