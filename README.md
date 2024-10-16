@@ -1,10 +1,10 @@
 # pt / libpt
 
 ![Project badge](https://img.shields.io/badge/language-Rust-blue.svg)
-![Crates.io License](https://img.shields.io/crates/l/pt)
-![GitHub Release](https://img.shields.io/github/v/release/PlexSheep/pt)
-![GitHub language count](https://img.shields.io/github/languages/count/PlexSheep/pt)
-[![Rust CI](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml)
+![Crates.io License](https://img.shields.io/crates/l/libpt)
+![GitHub Release](https://img.shields.io/github/v/release/PlexSheep/libpt)
+![GitHub language count](https://img.shields.io/github/languages/count/PlexSheep/libpt)
+[![Rust CI](https://github.com/PlexSheep/libpt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/libpt/actions/workflows/cargo.yaml)
 
 ![pt-logo](data/media/pt-logo.svg)
 
@@ -20,9 +20,9 @@ especially the newer developers, so maybe this project can help with that a bit.
 I'm also deciding that `pt` means "plex tool", as this is created by "PlexSheep", 
 and it's a sort of multiplexer for software.
 
-* [GitHub](https://github.com/PlexSheep/pt)
-* [crates.io](https://crates.io/crates/pt)
-* [docs.rs](https://docs.rs/pt/latest/pt/)
+* [GitHub](https://github.com/PlexSheep/libpt)
+* [crates.io](https://crates.io/crates/libpt)
+* [docs.rs](https://docs.rs/libpt/latest/libpt/)
 
 ## Dependencies
 
