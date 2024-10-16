@@ -1,10 +1,10 @@
 # pt / libpt
 
 ![Project badge](https://img.shields.io/badge/language-Rust-blue.svg)
-![Crates.io License](https://img.shields.io/crates/l/libpt)
-![Gitea Release](https://img.shields.io/gitea/v/release/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
-![Gitea language count](https://img.shields.io/gitea/languages/count/PlexSheep/pt?gitea_url=https%3A%2F%2Fgit.cscherr.de)
-[![cargo checks and tests](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml)
+![Crates.io License](https://img.shields.io/crates/l/pt)
+![GitHub Release](https://img.shields.io/github/v/release/PlexSheep/pt)
+![GitHub language count](https://img.shields.io/github/languages/count/PlexSheep/pt)
+[![Rust CI](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml/badge.svg)](https://github.com/PlexSheep/pt/actions/workflows/cargo.yaml)
 
 ![pt-logo](data/media/pt-logo.svg)
 
@@ -15,11 +15,9 @@ crate, python module or executable.
 
 Let's see if I make it a bloated mess or stop committing after 30 hello worlds.
 
-* [Original Repository](https://git.cscherr.de/PlexSheep/pt)
-* [GitHub Mirror](https://github.com/PlexSheep/pt)
-* [Codeberg Mirror](https://codeberg.org/PlexSheep/pt)
-* [crates.io](https://crates.io/crates/libpt)
-* [docs.rs](https://docs.rs/crate/libpt/)
+* [GitHub](https://github.com/PlexSheep/pt)
+* [crates.io](https://crates.io/crates/pt)
+* [docs.rs](https://docs.rs/pt/latest/pt/)
 
 ## Dependencies
 
